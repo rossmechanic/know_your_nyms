@@ -1,0 +1,33 @@
+import json
+
+
+def get_data_from_rels(rels):
+	# hardcoding this for now. Will need to change this when we deploy (but also won't have a json we access when we
+	# deploy)
+	data = json.load(open('/Users/rossmechanic/workspace/NLP4CCB_Django_App/NLP4CCB/static/data/result_ltw.json'))
+
+	mer_pairs = data.keys()
+
+	filtered_data = []
+
+	for i, rel in enumerate(rels):
+		dic = {}
+		if '\t'.join(rel) in mer_pairs:
+			dic["word1"] = rel[0]
+			dic["word2"] = rel[1]
+			rel_data = data['\t'.join(rel)]
+			dic["S"] = rel_data["S"]
+			dic["POS"] = rel_data["POS"]
+
+		elif '\t'.join(tuple(reversed(rel))) in mer_pairs:
+			dic["word1"] = rel[1]
+			dic["word2"] = rel[0]
+			rel_data = data['\t'.join(tuple(reversed(rel)))]
+			dic["S"] = rel_data["S"]
+			dic["POS"] = rel_data["POS"]
+		else:
+			#pair of words has no common sentences
+			print "No words returned for the pair: ", rel
+			continue
+		filtered_data.append(dic)
+	return filtered_data

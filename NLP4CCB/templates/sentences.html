@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+
+{% block content %}
+{% for rel in data %}
+    <div class="panel panel-default">
+        <!-- Default panel contents -->
+        <div class="panel-heading">{{ rel.word1 }} {{ rel.word2 }}</div>
+
+        <!-- List group -->
+        <ul class="list-group">
+            {% for sentence in rel.S %}
+                <li class="list-group-item">{{ sentence }}</li>
+            {% endfor %}
+
+
+      </ul>
+    </div>
+{% endfor %}
+{% endblock %}
