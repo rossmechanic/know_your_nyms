@@ -5,7 +5,7 @@
 {% block stylesheets %}
     <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
 {% block scripts %}
-    <script src={% static "javascripts/jquery.formset.js" %}></script>
+    <script src={% static "javascripts/input_words.js" %}></script>
 {% endblock %}
 {% endblock %}
 
@@ -15,8 +15,12 @@
     {{  formset.management_form }}
     {% for form in formset %}
         <div class="form-group word-rel-formset">
+            <span class="label label-default">{{ forloop.counter }}</span>
             {{ form.word1 }}
             {{ form.word2 }}
+            <span class="glyphicon glyphicon-plus hidden" aria-hidden="true"></span>
+            <span class="glyphicon glyphicon-remove hidden" aria-hidden="true"></span>
+
         </div>
 
     {% endfor %}
@@ -24,6 +28,3 @@
 </form>
 {% endblock %}
 
-<script>
-    $(".word-rel-formset").formset();
-</script>

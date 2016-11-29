@@ -8,18 +8,20 @@
 
 {% block content %}
 {% for rel in data %}
-    <div class="panel panel-default">
+    <div class="panel panel-primary">
         <!-- Default panel contents -->
-        <div class="panel-heading">{{ rel.word1 }} {{ rel.word2 }}</div>
+        <div class="panel-heading panel-title">{{ rel.word1 }} {{ rel.word2 }}</div>
 
         <!-- List group -->
         <ul class="list-group">
             {% for sentence in rel.S %}
+
                 <li class="list-group-item">{{ sentence }}</li>
             {% endfor %}
 
 
-      </ul>
+        </ul>
     </div>
+
 {% endfor %}
 {% endblock %}
