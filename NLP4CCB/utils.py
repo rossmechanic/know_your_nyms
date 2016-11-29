@@ -1,10 +1,12 @@
 import json
+import os
+from NLP4CCB_Django_App import settings
 
 
 def get_data_from_rels(rels):
 	# hardcoding this for now. Will need to change this when we deploy (but also won't have a json we access when we
 	# deploy)
-	data = json.load(open('/Users/rossmechanic/workspace/NLP4CCB_Django_App/NLP4CCB/static/data/result_ltw.json'))
+	data = json.load(open(os.path.join(settings.STATIC_ROOT, 'data/result_ltw.json')))
 
 	mer_pairs = data.keys()
 
