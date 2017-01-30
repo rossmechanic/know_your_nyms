@@ -27,7 +27,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [u'dev-env.epm23bxp2i.us-west-2.elasticbeanstalk.com', 'localhost',
                  u'django-env.epm23bxp2i.us-west-2.elasticbeanstalk.com',
-                 u'django-env-2.epm23bxp2i.us-west-2.elasticbeanstalk.com']
+                 u'django-env-2.epm23bxp2i.us-west-2.elasticbeanstalk.com',
+                 u'127.0.0.1']
 
 
 # Application definition

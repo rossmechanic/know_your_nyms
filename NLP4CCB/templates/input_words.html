@@ -12,14 +12,12 @@
 {% block content%}
 <form method="POST" action="./sentences/">
     {% csrf_token %}
+    <h1>What are the parts of a car?</h1>
     {{  formset.management_form }}
     {% for form in formset %}
         <div class="form-group word-rel-formset">
             <span class="label label-default">{{ forloop.counter }}</span>
             {{ form.word1 }}
-            {{ form.word2 }}
-            <span class="glyphicon glyphicon-plus hidden" aria-hidden="true"></span>
-            <span class="glyphicon glyphicon-remove hidden" aria-hidden="true"></span>
 
         </div>
 
