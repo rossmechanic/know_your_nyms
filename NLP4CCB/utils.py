@@ -18,15 +18,19 @@ def get_data_from_rels(rels):
 			dic["word1"] = rel[0]
 			dic["word2"] = rel[1]
 			rel_data = data['\t'.join(rel)]
-			dic["S"] = rel_data["S"]
-			dic["POS"] = rel_data["POS"]
+			l = []
+			for i, sentence in enumerate(rel_data['S']):
+				l.append((sentence, rel_data['POS'][i]))
+			dic["S"] = l
 
 		elif '\t'.join(tuple(reversed(rel))) in mer_pairs:
 			dic["word1"] = rel[1]
 			dic["word2"] = rel[0]
 			rel_data = data['\t'.join(tuple(reversed(rel)))]
-			dic["S"] = rel_data["S"]
-			dic["POS"] = rel_data["POS"]
+			l = []
+			for i, sentence in enumerate(rel_data['S']):
+				l.append((sentence, rel_data['POS'][i]))
+			dic["S"] = l
 		else:
 			#pair of words has no common sentences
 			print "No words returned for the pair: ", rel
