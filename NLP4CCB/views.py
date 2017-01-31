@@ -6,9 +6,7 @@ import utils
 
 # Create your views here.
 def index(request):
-
-
-	word_relationship_formset = formset_factory(WordRelationshipForm, extra=5)
+	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	context = {
 		"title": "NLP4CCB",
 		"formset": word_relationship_formset
@@ -18,17 +16,8 @@ def index(request):
 def sentences(request):
 	# if this is a POST request, we need to process the form data
 	if request.method == 'POST':
-		num_forms_returned = int(request.POST['form-TOTAL_FORMS'])
-		rels = []
-		for i in range(num_forms_returned):
-			word1 = request.POST["form-%s-word1" % i]
-			word2 = request.POST["form-%s-word2" % i]
-			rels.append((word1, word2))
-
+		print request.POST
 		context = {}
-
-		# Using absolute path for demo. Will fix this later
-		context['data'] = utils.get_data_from_rels(rels)
 
 		print context
 		return render(request, 'sentences.html', context)

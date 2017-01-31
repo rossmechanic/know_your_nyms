@@ -17,4 +17,32 @@ $(document).ready(function(){
             window.clearInterval(timerDOMUpdater);
         }
     },500);
+
+    var submitWords = function() {
+
+    }
+
+    $(document).on('keydown','.word-rel-formset', function(event){
+        if (event.which === 9 && $(this).is(':last-child')) {
+            event.stopImmediatePropagation();
+            var newIndex = String(parseInt(this.getAttribute("index")) + 1);
+            $(this).after(
+                "<div class='form-group word-rel-formset' index = " + newIndex +
+                ">" +
+                "<input " +
+                "id='id_form-" + newIndex + "-word'" +
+                "maxlength='100'" +
+                "name='form-" + newIndex + "-word'" +
+                "type='text'" +
+                ">" +
+                "</div>"
+            );
+
+            var numForms = parseInt($('#id_form-TOTAL_FORMS').val()) + 1;
+            $('#id_form-TOTAL_FORMS').val(String(numForms));
+        }
+
+    });
+
+
 });

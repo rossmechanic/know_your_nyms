@@ -16,23 +16,21 @@
                 <h1 class="game-question">What are the parts of a car?</h1>
             </div>
             <div class="col-md-4">
-                <h1>Timer: <span class="timer">10</span></h1>
+                <h1>Timer: <span class="timer">30</span></h1>
             </div>
         </div>
         <div class="row">
             <div class="col-md-6 col-md-offset-2">
-                <form method="POST" action="">
+                <form method="POST" action="./sentences/">
                     {% csrf_token %}
-                    {{  formset.management_form }}
+                    {{ formset.management_form }}
                     {% for form in formset %}
-                        <div class="form-group word-rel-formset">
-                            <span class="label label-default">{{ forloop.counter }}</span>
-                            {{ form.word1 }}
+                        <div class="form-group word-rel-formset" index="0">
+                            {{ form.word }}
 
                         </div>
 
                     {% endfor %}
-                    <input type="submit" class="button">
                 </form>
             </div>
         </div>
