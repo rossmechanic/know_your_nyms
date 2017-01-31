@@ -8,6 +8,7 @@ $(document).ready(function(){
         time -= 1;
         if (time === 0){
             window.clearInterval(timeUpdater);
+            submitWords();
         }
     },1000);
 
@@ -19,7 +20,7 @@ $(document).ready(function(){
     },500);
 
     var submitWords = function() {
-
+        $('.word-rel-formset > input').prop("disabled", true);
     }
 
     $(document).on('keydown','.word-rel-formset', function(event){
