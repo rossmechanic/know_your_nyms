@@ -10,9 +10,9 @@
 {% endblock %}
 
 {% block content%}
-<form method="POST" action="./sentences/">
+<form method="POST" action="./scoring/">
     {% csrf_token %}
-    <h1>What are the parts of a car?</h1>
+    <h1>What are the parts of a person? A person has a/an ... </h1>
     {{  formset.management_form }}
     {% for form in formset %}
         <div class="form-group word-rel-formset">

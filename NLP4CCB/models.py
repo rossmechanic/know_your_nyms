@@ -11,8 +11,3 @@ class WordRelationshipForm(forms.Form):
 		max_length=100,
 		widget=forms.TextInput(attrs={'placeholder': 'Word 1'})
 	)
-	word2 = forms.CharField(
-		max_length=100,
-		widget=forms.TextInput(
-			attrs={'placeholder': 'Word 2'})
-	)
