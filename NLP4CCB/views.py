@@ -6,11 +6,10 @@ import utils
 
 # Create your views here.
 def index(request):
-	words_formset = formset_factory(WordRelationshipForm, extra=1)
-    word_forms = words_formset()
+	word_relationship_formset = formset_factory(WordRelationshipForm, extra=5)
 	context = {
 		"title": "NLP4CCB",
-		"formset": word_forms
+		"formset": word_relationship_formset
 	}
 	return render(request, 'input_words.html', context)
 
