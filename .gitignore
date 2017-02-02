@@ -9,5 +9,5 @@
 !.elasticbeanstalk/*.global.yml
 
 *.pyc
-
+*.DS_Store
 

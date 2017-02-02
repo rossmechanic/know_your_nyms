@@ -11,6 +11,7 @@
 
 
 {% block content%}
+<<<<<<< HEAD
     <div class="container">
         <div class="row">
             <div class="col-md-6 col-md-offset-2">
@@ -29,6 +30,16 @@
                     <div class="form-group word-rel-formset" index="0">
                             {{ form.word }}
                     </div>
+=======
+<form method="POST" action="./scoring/">
+    {% csrf_token %}
+    <h1>What are the parts of a person? A person has a/an ... </h1>
+    {{  formset.management_form }}
+    {% for form in formset %}
+        <div class="form-group word-rel-formset">
+            <span class="label label-default">{{ forloop.counter }}</span>
+            {{ form.word1 }}
+>>>>>>> origin/b1
 
                     {% endfor %}
                 </form>

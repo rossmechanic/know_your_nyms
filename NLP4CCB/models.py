@@ -11,4 +11,3 @@ class WordRelationshipForm(forms.Form):
 		max_length=100,
 		widget=forms.TextInput()
 	)
-

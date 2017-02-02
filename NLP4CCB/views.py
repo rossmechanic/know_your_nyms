@@ -13,12 +13,19 @@ def index(request):
 	}
 	return render(request, 'input_words.html', context)
 
-def sentences(request):
+def scoring(request):
 	# if this is a POST request, we need to process the form data
 	if request.method == 'POST':
-		print request.POST
-		context = {}
+		num_forms_returned = int(request.POST['form-TOTAL_FORMS'])
+		words = []
+		for i in range(num_forms_returned):
+			word1 = request.POST["form-%s-word1" % i]
+			words.append(word1)
 
-		return render(request, 'sentences.html', context)
+		context = {}
+		context['words_and_scores'] = utils.get_matched_pairs_scores(words)
+
+		print context
+		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
