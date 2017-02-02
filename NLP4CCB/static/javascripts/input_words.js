@@ -22,7 +22,7 @@ $(document).ready(function(){
     },500);
 
     var submitWords = function() {
-        $.post('./sentences/',$('#input-form, .word-rel-formset :input').serialize(), function(data) {
+        $.post('./scoring/',$('#input-form, .word-rel-formset :input').serialize(), function(data) {
             console.log(data);
         });
         $('.word-rel-formset > input').prop("disabled", true);
