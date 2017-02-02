@@ -33,7 +33,10 @@ def scoring(request):
 		context = {}
 		# Creates scores based on the words and the semantic relationship
 		context['base_word'] = base_word
-		context['words_and_scores'] = utils.get_matched_pairs_scores(base_word, input_words, sem_rel)
+		words_and_scores = utils.get_matched_pairs_scores(base_word, input_words, sem_rel)
+		score_total = sum(words_and_scores.values())
+		context['words_and_scores'] = words_and_scores
+		context['score_total'] = score_total
 		print context
 		return render(request, 'scoring.html', context)
 	else:
