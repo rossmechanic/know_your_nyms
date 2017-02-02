@@ -21,6 +21,9 @@ $(document).ready(function(){
 
     var submitWords = function() {
         $('.word-rel-formset > input').prop("disabled", true);
+        $.post('./sentences/',$('#input-form').serialize(), function(data) {
+            console.log(data);
+        });
     }
 
     $(document).on('keydown','.word-rel-formset', function(event){

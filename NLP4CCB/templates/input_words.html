@@ -16,12 +16,12 @@
                 <h1 class="game-question">What are the parts of a car?</h1>
             </div>
             <div class="col-md-4">
-                <h1>Timer: <span class="timer">30</span></h1>
+                <h1>Timer: <span class="timer">5</span></h1>
             </div>
         </div>
         <div class="row">
             <div class="col-md-6 col-md-offset-2">
-                <form method="POST" action="./sentences/">
+                <form id="input-form" method="POST" action="./sentences/">
                     {% csrf_token %}
                     {{ formset.management_form }}
                     {% for form in formset %}
