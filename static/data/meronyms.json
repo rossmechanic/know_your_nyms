@@ -1,0 +1,19 @@
+{
+  "person": [
+    "arm",
+    "leg",
+    "face"
+  ],
+  "dog": [
+    "paw",
+    "tooth",
+    "face"
+  ],
+  "cat": [
+    "whiskers",
+    "fur",
+    "face"
+  ]
+}
+
+

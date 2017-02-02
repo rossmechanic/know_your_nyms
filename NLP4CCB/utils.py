@@ -3,37 +3,16 @@ import os
 from NLP4CCB_Django_App import settings
 
 
-def get_data_from_rels(rels):
-	# hardcoding this for now. Will need to change this when we deploy (but also won't have a json we access when we
-	# deploy)
-	data = json.load(open(os.path.join(settings.STATIC_ROOT, 'data/result_ltw.json')))
+def get_matched_pairs_scores(words):
+	# Now will get json data of known meronym pairs.
+	known_meronym_pairs = json.load(open(os.path.join(settings.STATIC_ROOT, 'data/meronyms.json')))
+	# Pairs for "person". Hardcoded for now. Should access the appropriate base word in the future.
+	current_pairs = known_meronym_pairs['person']
+	matched_words = [word for word in words if word in current_pairs]
+	pairs_and_scores = {word: score(word) for word in matched_words}
+	return pairs_and_scores
 
-	mer_pairs = data.keys()
+# Actual scoring to be figured out later.
+def score(word):
+	return 1
 
-	filtered_data = []
-
-	for i, rel in enumerate(rels):
-		dic = {}
-		if '\t'.join(rel) in mer_pairs:
-			dic["word1"] = rel[0]
-			dic["word2"] = rel[1]
-			rel_data = data['\t'.join(rel)]
-			l = []
-			for i, sentence in enumerate(rel_data['S']):
-				l.append((sentence, rel_data['POS'][i]))
-			dic["S"] = l
-
-		elif '\t'.join(tuple(reversed(rel))) in mer_pairs:
-			dic["word1"] = rel[1]
-			dic["word2"] = rel[0]
-			rel_data = data['\t'.join(tuple(reversed(rel)))]
-			l = []
-			for i, sentence in enumerate(rel_data['S']):
-				l.append((sentence, rel_data['POS'][i]))
-			dic["S"] = l
-		else:
-			#pair of words has no common sentences
-			print "No words returned for the pair: ", rel
-			continue
-		filtered_data.append(dic)
-	return filtered_data
