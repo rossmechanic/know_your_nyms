@@ -19,7 +19,6 @@ def sentences(request):
 		print request.POST
 		context = {}
 
-		print context
 		return render(request, 'sentences.html', context)
 	else:
 		return redirect('/models/')

@@ -2,12 +2,14 @@
  * Created by rossmechanic on 11/29/16.
  */
 $(document).ready(function(){
+    console.log("READY");
     var $timer = $(".timer");
     var time = parseInt($timer.text())
     var timeUpdater = window.setInterval(function(){
         time -= 1;
         if (time === 0){
             window.clearInterval(timeUpdater);
+            console.log("SUBMIT");
             submitWords();
         }
     },1000);
@@ -20,15 +22,14 @@ $(document).ready(function(){
     },500);
 
     var submitWords = function() {
-        $('.word-rel-formset > input').prop("disabled", true);
-        $.post('./sentences/',$('#input-form').serialize(), function(data) {
+        $.post('./sentences/',$('#input-form, .word-rel-formset :input').serialize(), function(data) {
             console.log(data);
         });
+        $('.word-rel-formset > input').prop("disabled", true);
     }
 
     $(document).on('keydown','.word-rel-formset', function(event){
         if (event.which === 9 && $(this).is(':last-child')) {
-            event.stopImmediatePropagation();
             var newIndex = String(parseInt(this.getAttribute("index")) + 1);
             $(this).after(
                 "<div class='form-group word-rel-formset' index = " + newIndex +

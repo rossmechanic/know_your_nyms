@@ -4,10 +4,11 @@
 
 {% block stylesheets %}
     <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
 {% block scripts %}
     <script src={% static "javascripts/input_words.js" %}></script>
 {% endblock %}
-{% endblock %}
+
 
 {% block content%}
     <div class="container">
@@ -25,10 +26,9 @@
                     {% csrf_token %}
                     {{ formset.management_form }}
                     {% for form in formset %}
-                        <div class="form-group word-rel-formset" index="0">
+                    <div class="form-group word-rel-formset" index="0">
                             {{ form.word }}
-
-                        </div>
+                    </div>
 
                     {% endfor %}
                 </form>
