@@ -7,76 +7,30 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
-            <div class="col-md-7 col-md-offset-1">
-                <h1>Matched words for '{{ base_word }}'</h1>
-            </div>
-            <div class="col-md-4">
-                <h1>Score (Match=1, Else 0)</h1>
+            <h1 class="score-report-header">Score Report</h1>
+        </div>
+        <div class="row">
+            <div class=" col-md-4 col-md-offset-4">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <th>Matched words for '{{ base_word }}'</th>
+                        <th>Score (Match=1, Else 0)</th>
+                    </thead>
+                    {% for word, score in words_and_scores.items %}
+                        {% if score %}
+                            <tr class="success">
+                        {% else %}
+                            <tr class="danger">
+                        {% endif %}
+                            <td>{{ word }}</td> <td> {{ score }}</td>
+                        </tr>
+
+                    {%  endfor %}
+                </table>
             </div>
         </div>
-        {% for word, score in words_and_scores.items  %}
-        <div class="row">
-            <div class="col-md-6">
-                <h2 class="matched-word">{{ word }}</h2>
-            </div>
-            <div class="col-md-6">
-                <h2 class="word-score"\>{{ score }}</h2>
-            </div>
-        </div>
-        {%  endfor %}
     </div>
 {% endblock %}
 
-
-{#{% for rel in data %}#}
-{#    <div class="panel panel-primary">#}
-{#        <!-- Default panel contents -->#}
-{#        <div class="panel-heading panel-title">{{ rel.word1 }}</div>#}
-{##}
-{#        <!-- List group -->#}
-{#        <ul class="list-group">#}
-{#            {% for sentence, POS in rel.S %}#}
-{##}
-{#                <li class="list-group-item">#}
-{##}
-{#                    {{ sentence }}#}
-{##}
-{#                    {% for w, pos_tag in POS %}#}
-{#                       <span title="{{ pos_tag }}">{{ w }}</span>#}
-{#                    {% endfor %}#}
-{##}
-{#                </li>#}
-{#            {% endfor %}#}
-{##}
-{##}
-{#        </ul>#}
-{##}
-{#    </div>#}
-{##}
-{#{% endfor %}#}
-
-{#{% for rel in data %}#}
-{#    <div class="panel panel-success">#}
-{#        <!-- Default panel contents -->#}
-{#        <div class="panel-heading panel-title">{{ rel.word1 }} {{ rel.word2 }}</div>#}
-{##}
-{#        <!-- List group -->#}
-{#        <ul class="list-group">#}
-{#            {% for tups in rel.POS %}#}
-{##}
-{#                <li class="list-group-item">#}
-{##}
-{#                    {% for word, POS in tups %}#}
-{#                        {{ POS }}#}
-{#                    {% endfor %}#}
-{##}
-{#                </li>#}
-{#            {% endfor %}#}
-{##}
-{##}
-{#        </ul>#}
-{#    </div>#}
-{##}
-{#{% endfor %}#}
