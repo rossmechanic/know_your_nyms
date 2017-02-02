@@ -14,10 +14,10 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7 col-md-offset-1">
-                <h1 class="game-question">What are the parts of a {{ base_word }}?</h1>
+                <h1 class="game-question">{{ question }} {{ base_word }}?</h1>
             </div>
             <div class="col-md-4">
-                <h1>Timer: <span class="timer">5</span></h1>
+                <h1>Timer: <span class="timer">10</span></h1>
             </div>
         </div>
         <div class="row">
@@ -26,6 +26,7 @@
                     {% csrf_token %}
                     {{ formset.management_form }}
                     <input id="id_form-BASE_WORD" name="base_word" type="hidden" value={{ base_word }}>
+                    <input id="id_form-SEM_REL" name="sem_rel" type="hidden" value={{ sem_rel }}>
                     {% for form in formset %}
                         <div class="form-group word-rel-formset" index="0">
                             {{ form.word }}
