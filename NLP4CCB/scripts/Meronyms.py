@@ -8,7 +8,7 @@ from nltk.corpus import wordnet as wn
 from collections import defaultdict
 import json
 
-def synonyms(n=10000000, antonyms=False):
+def synonyms(n=10000000):
     synsets = list(wn.all_synsets('a'))[:n] # All noun synsets
     all_adjectives = defaultdict(set)
     for synset in synsets:
