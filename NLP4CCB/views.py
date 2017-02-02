@@ -16,6 +16,7 @@ def index(request):
 def scoring(request):
 	# if this is a POST request, we need to process the form data
 	if request.method == 'POST':
+		print request.POST
 		num_forms_returned = int(request.POST['form-TOTAL_FORMS'])
 		words = []
 		for i in range(num_forms_returned):

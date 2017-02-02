@@ -22,9 +22,10 @@ $(document).ready(function(){
     },500);
 
     var submitWords = function() {
-        $.post('./scoring/',$('#input-form, .word-rel-formset :input').serialize(), function(data) {
-            console.log(data);
-        });
+        // $.post('./scoring/',$('#input-form, .word-rel-formset :input').serialize(), function(data) {
+        //     document.html(data);
+        // });
+        $('#input-form').submit();
         $('.word-rel-formset > input').prop("disabled", true);
     }
 
