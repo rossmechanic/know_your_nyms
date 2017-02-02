@@ -7,7 +7,7 @@ from django.db import models
 
 
 class WordRelationshipForm(forms.Form):
-	word1 = forms.CharField(
+	word = forms.CharField(
 		max_length=100,
-		widget=forms.TextInput(attrs={'placeholder': 'Word 1'})
+		widget=forms.TextInput()
 	)

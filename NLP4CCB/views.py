@@ -6,7 +6,7 @@ import utils
 
 # Create your views here.
 def index(request):
-	word_relationship_formset = formset_factory(WordRelationshipForm, extra=5)
+	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	context = {
 		"title": "NLP4CCB",
 		"formset": word_relationship_formset
@@ -19,7 +19,7 @@ def scoring(request):
 		num_forms_returned = int(request.POST['form-TOTAL_FORMS'])
 		words = []
 		for i in range(num_forms_returned):
-			word1 = request.POST["form-%s-word1" % i]
+			word1 = request.POST["form-%s-word" % i]
 			words.append(word1)
 
 		context = {}
