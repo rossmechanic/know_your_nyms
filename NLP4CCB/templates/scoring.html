@@ -7,13 +7,27 @@
 {% endblock %}
 
 {% block content %}
-
-
-{% for word, score in words_and_scores.items  %}
-    <ul class="list-group">
-        Word: {{ word }}, Score: {{ score }}
-    </ul>
-{%  endfor %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7 col-md-offset-1">
+                <h1>Matched words for '{{ base_word }}'</h1>
+            </div>
+            <div class="col-md-4">
+                <h1>Score (Match=1, Else 0)</h1>
+            </div>
+        </div>
+        {% for word, score in words_and_scores.items  %}
+        <div class="row">
+            <div class="col-md-6">
+                <h2 class="matched-word">{{ word }}</h2>
+            </div>
+            <div class="col-md-6">
+                <h2 class="word-score"\>{{ score }}</h2>
+            </div>
+        </div>
+        {%  endfor %}
+    </div>
+{% endblock %}
 
 
 {#{% for rel in data %}#}
@@ -66,4 +80,3 @@
 {#    </div>#}
 {##}
 {#{% endfor %}#}
-{% endblock %}

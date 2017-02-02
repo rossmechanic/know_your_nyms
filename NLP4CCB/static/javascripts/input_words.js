@@ -9,7 +9,6 @@ $(document).ready(function(){
         time -= 1;
         if (time === 0){
             window.clearInterval(timeUpdater);
-            console.log("SUBMIT");
             submitWords();
         }
     },1000);
@@ -22,9 +21,7 @@ $(document).ready(function(){
     },500);
 
     var submitWords = function() {
-        $.post('./scoring/',$('#input-form, .word-rel-formset :input').serialize(), function(data) {
-            console.log(data);
-        });
+        $("#input-form").submit();
         $('.word-rel-formset > input').prop("disabled", true);
     }
 

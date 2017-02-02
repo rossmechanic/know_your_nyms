@@ -13,8 +13,8 @@
 {% block content%}
     <div class="container">
         <div class="row">
-            <div class="col-md-6 col-md-offset-2">
-                <h1 class="game-question">What are the parts of a car?</h1>
+            <div class="col-md-7 col-md-offset-1">
+                <h1 class="game-question">What are the parts of a {{ base_word }}?</h1>
             </div>
             <div class="col-md-4">
                 <h1>Timer: <span class="timer">5</span></h1>
@@ -25,11 +25,11 @@
                 <form id="input-form" method="POST" action="./scoring/">
                     {% csrf_token %}
                     {{ formset.management_form }}
+                    <input id="id_form-BASE_WORD" name="base_word" type="hidden" value={{ base_word }}>
                     {% for form in formset %}
-                    <div class="form-group word-rel-formset" index="0">
+                        <div class="form-group word-rel-formset" index="0">
                             {{ form.word }}
-                    </div>
-
+                        </div>
                     {% endfor %}
                 </form>
             </div>
