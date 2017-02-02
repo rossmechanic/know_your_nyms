@@ -2,9 +2,11 @@ from django.shortcuts import *
 from models import WordRelationshipForm
 from django.forms import formset_factory
 import utils
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
+@login_required(login_url='/login')
 def index(request):
 
 
