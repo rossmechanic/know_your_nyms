@@ -6,6 +6,7 @@ import random
 
 
 # Create your views here.
+@login_required(login_url='/login')
 def index(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	word_list = ['computer','fish','face','hand','person','dog']
