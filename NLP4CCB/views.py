@@ -15,7 +15,7 @@ def index(request):
 		question = 'Name kinds of a '
 	base_word = random.choice(['computer','fish','face','hand','person','dog'])
 	context = {
-		"title": "NLP4CCB",
+		"title": "Know Your Nyms?",
 		"formset": word_relationship_formset,
 		"base_word": base_word,
 		"sem_rel": sem_rel,

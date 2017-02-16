@@ -18,3 +18,5 @@
 *.pyc
 
 *.pyc
+
+db.config.json
