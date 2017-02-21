@@ -2,10 +2,12 @@ from django.shortcuts import *
 from models import WordRelationshipForm
 from django.forms import formset_factory
 import utils
+from django.contrib.auth.decorators import login_required
 import random
 
 
 # Create your views here.
+@login_required(login_url='/login')
 def index(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	sem_rel = random.choice(['meronyms','hyponyms'])
