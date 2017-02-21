@@ -3,5 +3,11 @@ body {
     padding-bottom: 30px;
 }
 
+.game-question {
+    text-align: center;
+}
 
+.score-report-header {
+    text-align: center;
+}
 

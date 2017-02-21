@@ -1,13 +1,22 @@
 # Created by .ignore support plugin (hsz.mobi)
 
 .idea/
-
+*.pyc
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
+
+
+<<<<<<< HEAD
+=======
+*.pyc
+>>>>>>> 3ae677fd49321c9841791693ac677834d9918b60
+
 *.pyc
 
+*.pyc
 
+db.config.json

@@ -4,25 +4,38 @@
 
 {% block stylesheets %}
     <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
 {% block scripts %}
     <script src={% static "javascripts/input_words.js" %}></script>
 {% endblock %}
-{% endblock %}
+
 
 {% block content%}
-<form method="POST" action="./sentences/">
-    {% csrf_token %}
-    <h1>What are the parts of a car?</h1>
-    {{  formset.management_form }}
-    {% for form in formset %}
-        <div class="form-group word-rel-formset">
-            <span class="label label-default">{{ forloop.counter }}</span>
-            {{ form.word1 }}
-
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7 col-md-offset-1">
+                <h1 class="game-question">{{ question }} {{ base_word }}?</h1>
+            </div>
+            <div class="col-md-4">
+                <h1>Timer: <span class="timer">20</span></h1>
+            </div>
         </div>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-2">
+                <form id="input-form" method="POST" action="./scoring/">
+                    {% csrf_token %}
+                    {{ formset.management_form }}
+                    <input id="id_form-BASE_WORD" name="base_word" type="hidden" value={{ base_word }}>
+                    <input id="id_form-SEM_REL" name="sem_rel" type="hidden" value={{ sem_rel }}>
+                    {% for form in formset %}
+                        <div class="form-group word-rel-formset" index="0">
+                            {{ form.word }}
+                        </div>
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+    </div>
 
-    {% endfor %}
-    <input type="submit" class="button">
-</form>
 {% endblock %}
 

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <h1 class="score-report-header">Score Report</h1>
+        </div>
+        <div class="row">
+            <div class=" col-md-4 col-md-offset-4">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <th>Matched words for '{{ base_word }}'</th>
+                        <th>Score (Match=1, Else 0)</th>
+                    </thead>
+                    {% for word, score in words_and_scores.items %}
+                        {% if score %}
+                            <tr class="success">
+                        {% else %}
+                            <tr class="danger">
+                        {% endif %}
+                            <td>{{ word }}</td> <td> {{ score }}</td>
+                        </tr>
+
+                    {%  endfor %}
+                    <tr>
+                        <td> <strong> Total Score </strong> </td> <td> {{ score_total }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
