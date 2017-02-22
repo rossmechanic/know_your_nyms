@@ -1,1 +1,1 @@
-# NLP4CCB_Django_App
+# Know Your Nyms

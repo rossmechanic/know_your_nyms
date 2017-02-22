@@ -72,6 +72,7 @@ WSGI_APPLICATION = 'NLP4CCB_Django_App.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+USE_DEV = True
 if 'RDS_HOSTNAME' in os.environ:
 	DATABASES = {
 		'default': {
@@ -83,8 +84,15 @@ if 'RDS_HOSTNAME' in os.environ:
 			'PORT': os.environ['RDS_PORT']
 		}
 	}
+elif USE_DEV:
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+		}
+	}
 else:
-	credentials = json.load(open(os.path.join(BASE_DIR, 'db.config.json'), 'r'))
+	credentials = json.load(open(os.path.join(BASE_DIR, '../../db.config.json'), 'r'))
 	DATABASES = {
 		'default': {
 			'ENGINE': 'django.db.backends.oracle',
