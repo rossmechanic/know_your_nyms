@@ -72,8 +72,19 @@ WSGI_APPLICATION = 'NLP4CCB_Django_App.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-USE_DEV = False
-if USE_DEV:
+USE_DEV = True
+if 'RDS_HOSTNAME' in os.environ:
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.oracle',
+			'NAME': os.environ['RDS_DB_NAME'],
+			'USER': os.environ['RDS_USERNAME'],
+			'PASSWORD': os.environ['RDS_PASSWORD'],
+			'HOST': os.environ['RDS_HOSTNAME'],
+			'PORT': os.environ['RDS_PORT']
+		}
+	}
+elif USE_DEV:
 	DATABASES = {
 		'default': {
 			'ENGINE': 'django.db.backends.sqlite3',
@@ -81,29 +92,17 @@ if USE_DEV:
 		}
 	}
 else:
-	if 'RDS_HOSTNAME' in os.environ:
-		DATABASES = {
-			'default': {
-				'ENGINE': 'django.db.backends.oracle',
-				'NAME': os.environ['RDS_DB_NAME'],
-				'USER': os.environ['RDS_USERNAME'],
-				'PASSWORD': os.environ['RDS_PASSWORD'],
-				'HOST': os.environ['RDS_HOSTNAME'],
-				'PORT': os.environ['RDS_PORT']
-			}
+	credentials = json.load(open(os.path.join(BASE_DIR, '../../db.config.json'), 'r'))
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.oracle',
+			'NAME': credentials['RDS_DB_NAME'],
+			'USER': credentials['RDS_USERNAME'],
+			'PASSWORD': credentials['RDS_PASSWORD'],
+			'HOST': credentials['RDS_HOSTNAME'],
+			'PORT': credentials['RDS_PORT']
 		}
-	else:
-		credentials = json.load(open(os.path.join(BASE_DIR, 'db.config.json'), 'r'))
-		DATABASES = {
-			'default': {
-				'ENGINE': 'django.db.backends.oracle',
-				'NAME': credentials['RDS_DB_NAME'],
-				'USER': credentials['RDS_USERNAME'],
-				'PASSWORD': credentials['RDS_PASSWORD'],
-				'HOST': credentials['RDS_HOSTNAME'],
-				'PORT': credentials['RDS_PORT']
-			}
-		}
+	}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
