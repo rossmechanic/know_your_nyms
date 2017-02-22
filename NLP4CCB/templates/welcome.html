@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+
+{% block scripts %}
+    <script src={% static "javascripts/welcome.js" %}></script>
+{% endblock %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+    <br>
+    <br>
+
+    <div class="container">
+       <div class="row">
+            <div class="col-md-12">
+                <img class="logo" src="{% static "images/dark_logo_transparent_background.png" %}">
+            </div>
+       </div>
+    </div>
+
+    <br>
+  <h2> Welcome!  Please select an option from the menu below:</h2>
+    <br>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#howToModal">How to Play</button>
+            &nbsp;&nbsp;
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#teamModal">About the Team</button>
+            &nbsp;&nbsp;
+            <a type="button" class="btn btn-info btn-lg" href='/models' id="start-button">Start</a>
+
+            <!-- How to Modal content-->
+            <div id="howToModal" class="modal fade" role="dialog">
+              <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">About this game</h4>
+                  </div>
+                  <div class="modal-body">
+                    <p>WELCOME!<br>
+                        This game is designed to solve the problem of <b>semantic relationship discovery</b>.<br>
+                        Create an account if you don't have one already.<br>
+                        Once you signup/login, you will be prompted to choose a type of word relation.<br>
+                        You can also choose the number of rounds you'd like to play<br>
+                        Then, click <b>Start playing</b> to begin the timer.<br>
+                        For each round, you'll have 10, 15, or 20 seconds to identify as many relations as you can.<br><br>
+                        <div class="example">
+                            <i>For example,</i><br><br>
+                            If the relationship is <b>meronym</b>, you may be asked<br><br>
+
+                           "What are <i>parts of</i> a <b>face</b>?"<br><br>
+                            to which you might answer...<br><br>
+                      <b>eyes</b><br>
+                      <b>nose</b><br>
+                      <b>mouth</b><br>
+                      <b>eyebrows</b><br>
+                      etc...<br>
+                        </div>
+                        <br>
+                        Once the timer runs out, the round is finished.<br>
+                        After your last round, you'll see a performance summary<br>
+                        <br>
+
+                    </p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+
+            <!-- Team Modal content-->
+            <div id="teamModal" class="modal fade" role="dialog">
+              <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">About the team</h4>
+                  </div>
+                  <div class="modal-body">
+                     <div class="row">
+                         <div class="col-md-4">
+                             <img class="team" src="{% static "images/hannah_cutler.jpg" %}"><br>
+                             <b>Hannah Cutler</b><br> is a Senior in CIS</div>
+                         <div class="col-md-4">
+                             <img class="team" src="{% static "images/dean_fulgoni.jpg" %}"><br>
+                             <b>Dean Fulgoni</b><br> is a Senior in CIS</div>
+                         <div class="col-md-4">
+                              <img class="team" src="{% static "images/ross_mechanic.jpg" %}"><br>
+                             <b>Ross Mechanic</b><br> is a Senior in CIS</div>
+                     </div>
+                      <br>
+                     <div class="row">
+                         <div class="col-md-12">Advisor: <br><b><a href="http://www.cis.upenn.edu/~ccb/">Dr. Chris Callison-Burch</a></b></div>
+                     </div>
+
+                  </div>
+
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Start Modal content-->
+{#            <div id="startModal" class="modal fade" role="dialog">#}
+{#              <div class="modal-dialog">#}
+{##}
+{#                <!-- Modal content-->#}
+{#                <div class="modal-content">#}
+{#                  <div class="modal-header">#}
+{#                    <button type="button" class="close" data-dismiss="modal">&times;</button>#}
+{#                    <h4 class="modal-title">You're almost ready to play</h4>#}
+{#                  </div>#}
+{#                  <div class="modal-body">#}
+{#                      <div class="dropdown">#}
+{#                          Select a word relation type and press <b>Start</b> below<br>#}
+{#                          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">#}
+{#                            Select one...#}
+{#                            <span class="caret"></span>#}
+{#                          </button>#}
+{#                          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">#}
+{#                            <li><a href="#">Meronym</a></li>#}
+{#                            <li><a href="#">Hypernym</a></li>#}
+{#                            <li><a href="#">Antonym</a></li>#}
+{#                            <li role="separator" class="divider"></li>#}
+{#                            <li><a href="#">Surprise me!</a></li>#}
+{#                          </ul>#}
+{#                        </div>#}
+{#                  </div>#}
+{##}
+{#                  <div class="modal-footer">#}
+{#                    <button type="button" class="btn btn-default" data-dismiss="modal">Start</button>#}
+{#                  </div>#}
+{#                </div>#}
+{##}
+{#              </div>#}
+{#            </div>#}
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
