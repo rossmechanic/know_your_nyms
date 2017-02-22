@@ -6,7 +6,7 @@ import random
 
 
 # Create your views here.
-def index(request):
+def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	sem_rel = random.choice(['meronyms','hyponyms'])
 	if sem_rel == 'meronyms':
@@ -22,6 +22,7 @@ def index(request):
 		"question": question
 	}
 	return render(request, 'input_words.html', context)
+
 
 def scoring(request):
 	# if this is a POST request, we need to process the form data
@@ -41,3 +42,7 @@ def scoring(request):
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
+
+
+def index(request):
+	return render(request, 'welcome.html');

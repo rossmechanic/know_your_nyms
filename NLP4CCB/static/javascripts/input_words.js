@@ -2,7 +2,6 @@
  * Created by rossmechanic on 11/29/16.
  */
 $(document).ready(function(){
-    console.log("READY");
     var $timer = $(".timer");
     var time = parseInt($timer.text())
     var timeUpdater = window.setInterval(function(){
