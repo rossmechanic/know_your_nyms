@@ -8,7 +8,8 @@ import random
 # Create your views here.
 def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
-	sem_rel = random.choice(['meronyms','hyponyms'])
+	# sem_rel = random.choice(['meronyms','hyponyms'])
+	sem_rel = 'meronyms'
 	if sem_rel == 'meronyms':
 		question = 'Name parts of a '
 	elif sem_rel == 'hyponyms':
