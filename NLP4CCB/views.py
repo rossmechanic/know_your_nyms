@@ -3,7 +3,12 @@ from models import WordRelationshipForm
 from django.forms import formset_factory
 import utils
 import random
+from django.contrib.auth.decorators import login_required
 
+@login_required()
+
+def index(request):
+	return render(request, 'welcome.html');
 
 # Create your views here.
 def models(request):
@@ -42,7 +47,3 @@ def scoring(request):
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
-
-
-def index(request):
-	return render(request, 'welcome.html');
