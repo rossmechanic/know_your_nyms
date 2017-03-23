@@ -12,7 +12,7 @@ with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
     lines = f.readlines()
 vocab = [word.lower().strip() for word in lines]
 
-@login_required
+@login_required()
 def index(request):
 	return render(request, 'welcome.html')
 
@@ -51,7 +51,7 @@ def scoring(request):
 		score_total = sum(words_and_scores.values())
 		context['words_and_scores'] = words_and_scores
 		context['score_total'] = score_total
-		print context
+
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
