@@ -11,23 +11,8 @@ body {
     text-align: center;
 }
 
-h2 {
+.welcome-col {
     text-align: center;
-}
-
-h3 {
-    padding-left: 40%;
-}
-
-.col-sm-8 {
-    padding-left: 35%;
-}
-
-.col-sm-12 {
-    position:center;
-}
-.col-md-12 {
-    padding-left: 35%;
 }
 
 img.logo {
