@@ -52,7 +52,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'NLP4CCB_Django_App.urls'
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/signin/'
 
 TEMPLATES = [
 	{

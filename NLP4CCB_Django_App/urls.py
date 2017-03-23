@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^models/', include('NLP4CCB.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^signin/', views.signin),
-    url(r'^signup/', views.signup),
+    url(r'^signout/', views.signout),
+    url(r'^signup/', views.signup)
 ]

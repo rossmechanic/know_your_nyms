@@ -25,12 +25,14 @@
     </div>
 
     <br>
-  <h2> Welcome!  Please select an option from the menu below:</h2>
+  <h2> Welcome {{ request.user.username }}!  </h2>
     <br>
 
 <div class="container">
     <div class="row">
         <div class="col-md-12">
+
+            <a type="button" class="btn btn-info btn-lg" href='/signout' id="logout-button">Logout</a>
 
             <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#howToModal">How to Play</button>
             &nbsp;&nbsp;
