@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/signin.css" %}>
+{% endblock %}
+
+{% block content %}
+    <form class= "form-signin" id="user_form" method="post" action="/signup/" enctype="multipart/form-data">
+        <h2 class="form-signin-heading">Register for KnowYourNyms</h2>
+        {% csrf_token %}
+        {% if signup_failed %}
+            <div class="alert alert-danger" role="alert" style="padding: 8px">
+                {{ error }}
+            </div>
+        {% endif %}
+        {% for field in user_form %}
+            <label for={{ field.id_for_label }} class="sr-only">{{ field.label }}</label>
+            {{ field }}
+        {% endfor %}
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Signup</button>
+    </form>
+
+{% endblock %}

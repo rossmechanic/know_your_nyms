@@ -18,19 +18,21 @@
 
     <div class="container">
        <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 welcome-col">
                 <img class="logo" src="{% static "images/dark_logo_transparent_background.png" %}">
             </div>
        </div>
     </div>
 
     <br>
-  <h2> Welcome!  Please select an option from the menu below:</h2>
+        <h2 class="welcome-col"> Welcome {{ request.user.username }}!  </h2>
     <br>
 
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-12 welcome-col">
+
+{#            <a type="button" class="btn btn-info btn-lg" href='/signout' id="logout-button">Logout</a>#}
 
             <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#howToModal">How to Play</button>
             &nbsp;&nbsp;
@@ -101,7 +103,7 @@
                              <b>Hannah Cutler</b><br> is a Senior in CIS</div>
                          <div class="col-md-4">
                              <img class="team" src="{% static "images/dean_fulgoni.jpg" %}"><br>
-                             <b>Dean Fulgoni</b><br> is a Senior in CIS</div>
+                             <b>Dean Fulgoni</b><br> is a Senior in NETS</div>
                          <div class="col-md-4">
                               <img class="team" src="{% static "images/ross_mechanic.jpg" %}"><br>
                              <b>Ross Mechanic</b><br> is a Senior in CIS</div>

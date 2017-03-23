@@ -37,31 +37,33 @@
 
     </head>
     <body>
-        <!-- Fixed navbar -->
-        <nav class="navbar navbar-inverse navbar-fixed-top">
-          <div class="container">
-            <div class="navbar-header">
-              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-              </button>
-              <a class="navbar-brand" href="/">
-                  <img alt="know-your-nyms-logo"
-                       height="100%"
-                       src={% static "images/white_logo_transparent_background_cropped.png" %}>
-              </a>
-            </div>
-            <div id="navbar" class="navbar-collapse collapse">
-{#              <ul class="nav navbar-nav">#}
-{#                <li class="active"><a href="#">Home</a></li>#}
-{#                </li>#}
-{#              </ul>#}
-            </div><!--/.nav-collapse -->
-          </div>
-        </nav>
-        <div class="container-fluid">
+        {% if user.is_authenticated %}
+            <!-- Fixed navbar -->
+            <nav class="navbar navbar-inverse navbar-fixed-top">
+              <div class="container">
+                <div class="navbar-header">
+                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="/">
+                      <img alt="know-your-nyms-logo"
+                           height="100%"
+                           src={% static "images/white_logo_transparent_background_cropped.png" %}>
+                  </a>
+                </div>
+                <div id="navbar" class="navbar-collapse collapse">
+                  <ul class="nav navbar-nav navbar-right navbar-">
+                    <li><a href="/signout">Logout</a></li>
+                    </li>
+                  </ul>
+                </div><!--/.nav-collapse -->
+              </div>
+            </nav>
+            <div class="container-fluid">
+        {% endif %}
         {% block content %}
         {% endblock %}
         </div>

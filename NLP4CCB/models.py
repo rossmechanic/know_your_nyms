@@ -5,7 +5,6 @@ from django.db import models
 
 # Create your models here.
 
-
 class WordRelationshipForm(forms.Form):
 	word = forms.CharField(
 		max_length=100,

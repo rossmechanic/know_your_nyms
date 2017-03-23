@@ -1,11 +1,23 @@
+from django.conf import settings
 from django.shortcuts import *
 from models import WordRelationshipForm
 from django.forms import formset_factory
 import utils
 import random
+import os
+from django.contrib.auth.decorators import login_required
+
+vocab_file = 'data/vocab.txt'
+with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
+    lines = f.readlines()
+vocab = [word.lower().strip() for word in lines]
+
+@login_required
+def index(request):
+	return render(request, 'welcome.html')
 
 
-# Create your views here.
+@login_required
 def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	# sem_rel = random.choice(['meronyms','hyponyms'])
@@ -14,7 +26,8 @@ def models(request):
 		question = 'Name parts of a '
 	elif sem_rel == 'hyponyms':
 		question = 'Name kinds of a '
-	base_word = random.choice(['computer','fish','face','hand','person','dog'])
+	# Choose a random word from our vocabulary
+	base_word = random.choice(vocab)
 	context = {
 		"title": "Know Your Nyms?",
 		"formset": word_relationship_formset,
@@ -24,7 +37,7 @@ def models(request):
 	}
 	return render(request, 'input_words.html', context)
 
-
+@login_required
 def scoring(request):
 	# if this is a POST request, we need to process the form data
 	if request.method == 'POST':
@@ -39,11 +52,7 @@ def scoring(request):
 		score_total = sum(words_and_scores.values())
 		context['words_and_scores'] = words_and_scores
 		context['score_total'] = score_total
-		print context
+
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
-
-
-def index(request):
-	return render(request, 'welcome.html');
