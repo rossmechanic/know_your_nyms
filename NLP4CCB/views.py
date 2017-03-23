@@ -12,7 +12,7 @@ with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
     lines = f.readlines()
 vocab = [word.lower().strip() for word in lines]
 
-@login_required
+@login_required()
 def index(request):
 	return render(request, 'welcome.html')
 
