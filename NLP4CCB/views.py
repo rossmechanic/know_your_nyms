@@ -53,6 +53,8 @@ def scoring(request):
 		context['words_and_scores'] = words_and_scores
 		context['score_total'] = score_total
 
+		utils.store_round(sem_rel, base_word, words_and_scores, request.user)
+
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
