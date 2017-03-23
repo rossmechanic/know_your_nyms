@@ -29,8 +29,10 @@ def signout(request):
 
 
 def signup(request):
+    context = {'signup_failed': False,
+               'user_form': UserForm()}
     if request.method == 'GET':
-        return render(request, 'signup.html', context={'user_form': UserForm()})
+        return render(request, 'signup.html', context=context)
     if request.method == 'POST':
         user_form = UserForm(data=request.POST)
 
@@ -43,12 +45,13 @@ def signup(request):
             # Once hashed, we can update the user object.
             user.set_password(user.password)
             user.save()
-
+            login(request, user)
             return redirect('/')
 
         # Invalid form or forms - mistakes or something else?
         # Print problems to the terminal.
         # They'll also be shown to the user.
         else:
-            print user_form.errors
-            return redirect('/')
+            context['signup_failed'] = True
+            context['error'] = user_form.errors
+            return render(request, 'signup.html', context)
