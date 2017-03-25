@@ -3,6 +3,8 @@ import os
 from NLP4CCB_Django_App import settings
 from models import User, UserInput, UserStat, Relation
 from django.core.exceptions import ObjectDoesNotExist
+from nltk.stem.porter import PorterStemmer
+stemmer = PorterStemmer()
 
 
 def get_matched_pairs_scores(base_word, input_words, sem_rel):
@@ -11,9 +13,10 @@ def get_matched_pairs_scores(base_word, input_words, sem_rel):
 	known_pairs = json.load(open(os.path.join(settings.STATIC_ROOT, json_f)))
 	# Accesses word pairs in WordNet. If none exist, gives an empty list.
 	base_word_pairs = known_pairs.get(base_word,[])
-	print(base_word_pairs)
-	pairs_and_scores = {word: 1 if str(word).lower() in map(str.lower, map(str, base_word_pairs)) else 0
-															for word in input_words if word}
+	base_word_pairs = [stemmer.stem(str(word).lower()) for word in base_word_pairs]
+	input_words = [str(word).lower() for word in input_words]
+	# Don't return the stemmed word
+	pairs_and_scores = {word: 1 if stemmer.stem(word) in base_word_pairs else 0 for word in input_words if word}
 	return pairs_and_scores
 
 
