@@ -66,6 +66,7 @@ def scoring(request):
 		context['score_total'] = score_total
 
 		utils.store_round(sem_rel, base_word, words_and_scores, request.user)
+		others_input = utils. get_others_input(sem_rel, base_word)
 
 		return render(request, 'scoring.html', context)
 	else:

@@ -1,7 +1,7 @@
 import json
 import os
 from NLP4CCB_Django_App import settings
-from models import User, UserInput, UserStat, Relation
+from models import UserInput, UserStat, Relation
 from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 stemmer = PorterStemmer()
@@ -15,8 +15,16 @@ def get_matched_pairs_scores(base_word, input_words, sem_rel):
 	base_word_pairs = known_pairs.get(base_word,[])
 	base_word_pairs = [stemmer.stem(str(word).lower()) for word in base_word_pairs]
 	input_words = [str(word).lower() for word in input_words]
+	input_words_stemmed = set()
+	final_input_words = [] # The actual input word list to traverse
+	# Remove duplicates, according to the stemming
+	for word in input_words:
+		if stemmer.stem(word) not in input_words_stemmed:
+			final_input_words.append(word)
+			input_words_stemmed.add(stemmer.stem(word))
+
 	# Don't return the stemmed word
-	pairs_and_scores = {word: 1 if stemmer.stem(word) in base_word_pairs else 0 for word in input_words if word}
+	pairs_and_scores = {word: 1 if stemmer.stem(word) in base_word_pairs else 0 for word in final_input_words if word}
 	return pairs_and_scores
 
 
@@ -48,3 +56,7 @@ def store_round(sem_rel, base_word, words_and_scores, user):
 
 	user_stat.total_score += round_score
 	user_stat.save()
+
+def get_others_input(sem_rel, base_word):
+	relations = Relation.objects.filter(type=sem_rel, base_word=base_word)
+	print relations
