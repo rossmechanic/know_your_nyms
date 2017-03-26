@@ -57,6 +57,23 @@ def store_round(sem_rel, base_word, words_and_scores, user):
 	user_stat.total_score += round_score
 	user_stat.save()
 
-def get_others_input(sem_rel, base_word):
-	relations = Relation.objects.filter(type=sem_rel, base_word=base_word)
-	print relations
+def get_relations_percentages(sem_rel, base_word):
+	user_inputs = UserInput.objects.filter(relation__type=sem_rel, relation__base_word=base_word)
+	input_words = [u.relation.input_word for u in user_inputs]
+	stem_dict = {} # Maps a stem to an actual word
+	input_word_dict = {}
+	for w in input_words:
+		# If we haven't seen this word stem, make a new entry
+		if stemmer.stem(w) not in stem_dict:
+			stem_dict[stemmer.stem(w)] = w
+			input_word_dict[w] = 1
+		# If we have, add one to the associated word for that existing stem
+		else:
+			input_word_dict[stem_dict[stemmer.stem(w)]] += 1
+
+	# The number of people that have played this word
+	times_played = user_inputs.values('user').distinct().count()
+	# Percentage of players that said a relation
+	percentages = [(word, float(input_word_dict[word]) / times_played) for word in input_word_dict]
+	percentages.sort(key=lambda x: x[1])
+	return percentages[::-1]

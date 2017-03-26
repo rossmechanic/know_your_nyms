@@ -64,10 +64,11 @@ def scoring(request):
 		score_total = sum(words_and_scores.values())
 		context['words_and_scores'] = words_and_scores
 		context['score_total'] = score_total
-
+		# Be sure to do this BEFORE we store this round to the DB
+		percentages = utils.get_relations_percentages(sem_rel, base_word)
+		print percentages # Works!
+		context['percentages'] = percentages
 		utils.store_round(sem_rel, base_word, words_and_scores, request.user)
-		others_input = utils. get_others_input(sem_rel, base_word)
-
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
