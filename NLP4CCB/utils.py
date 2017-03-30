@@ -33,7 +33,7 @@ def store_round(sem_rel, base_word, words_and_scores, user):
 	try:
 		user_stat = UserStat.objects.get(user=user)
 	except ObjectDoesNotExist:
-		user_stat = UserStat.objects.create(user=user, rounds_played=0, total_score=0.0)
+		user_stat = UserStat.objects.create(user=user)
 		user_stat.save()
 	user_stat.rounds_played += 1
 
@@ -42,15 +42,12 @@ def store_round(sem_rel, base_word, words_and_scores, user):
 		try:
 			relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
 		except ObjectDoesNotExist:
-			relation = Relation.objects.create(type=sem_rel, base_word=base_word, input_word=word, word_net_score=score,
-											   model_score=0.0)
+			relation = Relation.objects.create(type=sem_rel, base_word=base_word, input_word=word, word_net_score=score)
 			relation.save()
 		user_input = UserInput.objects.create(user=user,
 											  round_number=user_stat.rounds_played,
-											  round_time=20,
 											  relation=relation,
-											  word_score=score,
-											  challenge=False)
+											  word_score=score)
 
 		user_input.save()
 
