@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from models import UserStat
 from django.core.exceptions import ObjectDoesNotExist
 
+# Read in the vocabulary to traverse
 vocab_file = 'data/vocab.txt'
 with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
     lines = f.readlines()
@@ -60,15 +61,15 @@ def scoring(request):
 		context = {}
 		# Creates scores based on the words and the semantic relationship
 		context['base_word'] = base_word
-		words_and_scores = utils.get_matched_pairs_scores(base_word, input_words, sem_rel)
-		score_total = sum(words_and_scores.values())
-		context['words_and_scores'] = words_and_scores
-		context['score_total'] = score_total
-		# Be sure to do this BEFORE we store this round to the DB
-		percentages = utils.get_relations_percentages(sem_rel, base_word)
-		print percentages # Works!
-		context['percentages'] = percentages
-		utils.store_round(sem_rel, base_word, words_and_scores, request.user)
+
+		relations_percentages = utils.get_relations_percentages(sem_rel, base_word)
+		context['percentages'] = relations_percentages
+		word_scores = utils.score_words(base_word, input_words, sem_rel, relations_percentages)
+		context['word_scores'] = word_scores
+		round_total = sum([word_scores[word]['total_score'] for word in word_scores])
+		context['round_total'] = round_total
+
+		utils.store_round(sem_rel, base_word, word_scores, request.user)
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
