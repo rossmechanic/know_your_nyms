@@ -20,3 +20,5 @@
 *.pyc
 
 db.config.json
+
+*.DS_Store

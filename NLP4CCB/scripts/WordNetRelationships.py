@@ -39,7 +39,7 @@ def get_meronyms(n=10000000, holonyms=False):
                     # Add them to the meronym set for the lemma
                     all_meronyms[original_lemma] = all_meronyms[original_lemma].union(set(meronym_lemmas))   
     # Make the sets lists, so it can be turned into JSON
-    all_meronyms = {k:list(v) for k,v in all_meronyms.items() if list(v)}
+    all_meronyms = {str(k).lower():list([str(m).lower() for m in v]) for k,v in all_meronyms.items() if list(v)}
     return all_meronyms
 
 def get_hyponyms(n=10000000, hypernyms=False):
@@ -96,6 +96,5 @@ def create_meronym_json(string, filepath):
 
     json.dump(tree, open(filepath, 'w'))
 
-#d = get_hyponyms(hypernyms=True)
-#create_json(d, 'wordnet_hyperyms.json')
-
+#d = get_meronyms()
+#create_json(d, 'wordnet_meronyms.json')

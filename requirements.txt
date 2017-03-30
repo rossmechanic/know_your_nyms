@@ -1,2 +1,4 @@
 cx-Oracle==5.2.1
 Django==1.10.3
+nltk==3.2.2
+six==1.10.0

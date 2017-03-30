@@ -12,27 +12,29 @@
             <h1 class="score-report-header">Score Report</h1>
         </div>
         <div class="row">
-            <div class=" col-md-4 col-md-offset-4">
+            <div class=" col-md-4 col-md-offset-4" style="text-align: center">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <th>Matched words for '{{ base_word }}'</th>
-                        <th>Score (Match=1, Else 0)</th>
+                        <th>Word Score</th>
                     </thead>
-                    {% for word, score in words_and_scores.items %}
-                        {% if score %}
+                    {% for word, scores in word_scores.items %}
+                        {% if scores.total_score %}
                             <tr class="success">
                         {% else %}
                             <tr class="danger">
                         {% endif %}
-                            <td>{{ word }}</td> <td> {{ score }}</td>
+                            <td>{{ word }}</td> <td> {{ scores.total_score }}</td>
                         </tr>
 
                     {%  endfor %}
                     <tr>
-                        <td> <strong> Total Score </strong> </td> <td> {{ score_total }}</td>
+                        <td> <strong> Total Score </strong> </td> <td> {{ round_total }}</td>
                     </tr>
                 </table>
+                <a type="button" class="btn btn-success btn-lg" href="models/">Next Round</a>
             </div>
+
         </div>
     </div>
 {% endblock %}

@@ -14,15 +14,16 @@ class WordRelationshipForm(forms.Form):
 
 class UserStat(models.Model):
 	user = models.OneToOneField(User)
-	rounds_played = models.IntegerField()
-	total_score = models.FloatField()
+	rounds_played = models.IntegerField(default=0)
+	total_score = models.FloatField(default=0.0)
+	index = models.IntegerField(default=0)
 
 class Relation(models.Model):
 	type = models.CharField(max_length=50)
 	base_word = models.CharField(max_length=50)
 	input_word = models.CharField(max_length=50)
-	word_net_score = models.FloatField()
-	model_score = models.FloatField()
+	in_word_net = models.BooleanField(default=False)
+	challenge_accepted = models.BooleanField(default=False)
 
 	def __str__(self):
 		return ', '.join([self.type, self.base_word, self.input_word])
@@ -30,7 +31,11 @@ class Relation(models.Model):
 class UserInput(models.Model):
 	user = models.ForeignKey(User)
 	round_number = models.IntegerField()
-	round_time = models.IntegerField()
 	relation = models.ForeignKey(Relation)
 	word_score = models.FloatField()
-	challenge = models.BooleanField()
+
+class Challenge(models.Model):
+	user = models.ForeignKey(User)
+	relation = models.ForeignKey(Relation)
+	sentence = models.CharField(max_length=140)
+	is_pending = models.BooleanField()
