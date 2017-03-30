@@ -8,17 +8,19 @@ stemmer = PorterStemmer()
 
 # Bonus for word appearing in WordNet
 word_net_bonus = 50.0
-challenge_accepted_bonus = 75.0
+challenge_bonus = 75.0
 
 def score_words(base_word, input_words, sem_rel, relations_percentages):
 	input_words = clean_input_words(input_words)
 	words_to_word_net = in_word_net(base_word, input_words, sem_rel)
 	words_to_wn_bonuses = {k: word_net_bonus if v else 0.0 for k, v in words_to_word_net.items()}
+	words_to_ch_bonuses = confirmed_relations(base_word, input_words, sem_rel)
 	relations_percentages = dict(relations_percentages) # Need to DICT THAT
 	words_to_esp_scores = get_esp_scores(input_words, relations_percentages)
 	return {word: {'esp_score': words_to_esp_scores[word],
 				   'word_net_bonus': words_to_wn_bonuses[word],
-				   'total_score': words_to_esp_scores[word] + words_to_wn_bonuses[word]
+				   'challenge_bonus': words_to_ch_bonuses[word],
+				   'total_score': words_to_esp_scores[word] + words_to_wn_bonuses[word] + words_to_ch_bonuses[word]
 				   } for word in input_words}
 
 
@@ -44,6 +46,20 @@ def in_word_net(base_word, input_words, sem_rel):
 	# Don't return the stemmed word
 	words_to_word_net = {word: True if stemmer.stem(word) in base_word_pairs else False for word in input_words}
 	return words_to_word_net
+
+
+def confirmed_relations(base_word, input_words, sem_rel):
+	challenge_bonuses = {}
+	for word in input_words:
+		try:
+			relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
+			if relation.challenge_accepted:
+				challenge_bonuses[word] = challenge_bonus
+			else:
+				challenge_bonuses[word] = 0.0
+		except ObjectDoesNotExist:
+			challenge_bonuses[word] = 0.0
+	return challenge_bonuses
 
 
 def get_relations_percentages(sem_rel, base_word):

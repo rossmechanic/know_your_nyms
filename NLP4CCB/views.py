@@ -33,7 +33,7 @@ def models(request):
 	try:
 		user_stat = UserStat.objects.get(user=request.user)
 	except ObjectDoesNotExist:
-		user_stat = UserStat.objects.create(user=request.user, rounds_played=0, total_score=0.0)
+		user_stat = UserStat.objects.create(user=request.user)
 		user_stat.save()
 	rounds_played = user_stat.rounds_played
 	# Go in a set order for the vocabulary for each user.
