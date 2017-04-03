@@ -119,3 +119,7 @@ def store_round(sem_rel, base_word, word_scores, user):
 
 	user_stat.total_score += round_score
 	user_stat.save()
+
+def starts_with_vowel(word):
+	vowels = ['A','E','I','O','U','a','e','i','o','u']
+	return word[0] in vowels

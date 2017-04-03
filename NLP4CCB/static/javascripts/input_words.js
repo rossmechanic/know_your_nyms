@@ -25,7 +25,8 @@ $(document).ready(function(){
     }
 
     $(document).on('keydown','.word-rel-formset', function(event){
-        if (event.which === 9 && $(this).is(':last-child')) {
+        if ((event.which === 9 || event.which === 13) && $(this).is(':last-child')) {
+            event.preventDefault();
             var newIndex = String(parseInt(this.getAttribute("index")) + 1);
             $(this).after(
                 "<div class='form-group word-rel-formset' index = " + newIndex +
@@ -38,7 +39,7 @@ $(document).ready(function(){
                 ">" +
                 "</div>"
             );
-
+            $(this).next().find('input').focus();
             var numForms = parseInt($('#id_form-TOTAL_FORMS').val()) + 1;
             $('#id_form-TOTAL_FORMS').val(String(numForms));
         }
