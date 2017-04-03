@@ -12,8 +12,7 @@ challenge_bonus = 75.0
 
 def score_words(base_word, input_words, sem_rel, relations_percentages):
 	input_words = clean_input_words(input_words)
-	words_to_word_net = in_word_net(base_word, input_words, sem_rel)
-	words_to_wn_bonuses = {k: word_net_bonus if v else 0.0 for k, v in words_to_word_net.items()}
+	words_to_wn_bonuses = word_net(base_word, input_words, sem_rel)
 	words_to_ch_bonuses = confirmed_relations(base_word, input_words, sem_rel)
 	relations_percentages = dict(relations_percentages) # Need to DICT THAT
 	words_to_esp_scores = get_esp_scores(input_words, relations_percentages)
@@ -36,7 +35,7 @@ def clean_input_words(input_words):
 	return cleaned_input_words
 
 
-def in_word_net(base_word, input_words, sem_rel):
+def word_net(base_word, input_words, sem_rel):
 	json_f = 'data/wordnet_' + sem_rel + '.json'
 	# Now will get json data of known meronym pairs.
 	known_pairs = json.load(open(os.path.join(settings.STATIC_ROOT, json_f)))
@@ -45,7 +44,8 @@ def in_word_net(base_word, input_words, sem_rel):
 	base_word_pairs = [stemmer.stem(str(word).lower()) for word in base_word_pairs]
 	# Don't return the stemmed word
 	words_to_word_net = {word: True if stemmer.stem(word) in base_word_pairs else False for word in input_words}
-	return words_to_word_net
+	words_to_wn_bonuses = {k: word_net_bonus if v else 0.0 for k, v in words_to_word_net.items()}
+	return words_to_wn_bonuses
 
 
 def confirmed_relations(base_word, input_words, sem_rel):
@@ -79,7 +79,7 @@ def get_relations_percentages(sem_rel, base_word):
 	# The number of people that have played this word
 	times_played = user_inputs.values('user').distinct().count()
 	# Percentage of players that said a relation
-	percentages = [(word, float(input_word_dict[word]) / times_played) for word in input_word_dict]
+	percentages = [(word, round((float(input_word_dict[word]) / times_played),3)) for word in input_word_dict]
 	percentages.sort(key=lambda x: x[1])
 	return percentages[::-1]
 
@@ -100,6 +100,7 @@ def store_round(sem_rel, base_word, word_scores, user):
 		user_stat = UserStat.objects.create(user=user)
 		user_stat.save()
 	user_stat.rounds_played += 1
+	user_stat.index += 1
 
 	for word in word_scores:
 		word_score = word_scores[word]['total_score']

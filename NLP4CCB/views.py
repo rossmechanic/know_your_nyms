@@ -35,10 +35,10 @@ def models(request):
 	except ObjectDoesNotExist:
 		user_stat = UserStat.objects.create(user=request.user)
 		user_stat.save()
-	rounds_played = user_stat.rounds_played
+	user_index = user_stat.index
 	# Go in a set order for the vocabulary for each user.
-	if rounds_played < len_vocab:
-		base_word = vocab[rounds_played]
+	if user_index < len_vocab:
+		base_word = vocab[user_index]
 	else:
 		base_word = random.choice(vocab)
 	context = {
