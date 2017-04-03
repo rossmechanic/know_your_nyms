@@ -17,7 +17,15 @@ vocab = [word.lower().strip() for word in lines]
 len_vocab = len(vocab)
 
 def index(request):
-	return render(request, 'welcome.html')
+	try:
+		user_stat = UserStat.objects.get(user=request.user)
+	except ObjectDoesNotExist:
+		user_stat = UserStat.objects.create(user=request.user)
+		user_stat.save()
+	context = {}
+	context['rounds_played'] = user_stat.rounds_played
+	context['average_score'] = round(user_stat.total_score / user_stat.rounds_played,2)
+	return render(request, 'welcome.html', context)
 
 
 @login_required
@@ -26,27 +34,34 @@ def models(request):
 	# sem_rel = random.choice(['meronyms','hyponyms'])
 	sem_rel = 'meronyms'
 	if sem_rel == 'meronyms':
-		question = 'Name parts of a '
+		question = 'Name parts of '
 	elif sem_rel == 'hyponyms':
-		question = 'Name kinds of a '
+		question = 'Name kinds of '
 	# Get the user's UserStat model. Create it if it doesn't exist.
 	try:
 		user_stat = UserStat.objects.get(user=request.user)
 	except ObjectDoesNotExist:
 		user_stat = UserStat.objects.create(user=request.user)
 		user_stat.save()
-	rounds_played = user_stat.rounds_played
+	user_index = user_stat.index
 	# Go in a set order for the vocabulary for each user.
-	if rounds_played < len_vocab:
-		base_word = vocab[rounds_played]
+	if user_index < len_vocab:
+		base_word = vocab[user_index]
 	else:
 		base_word = random.choice(vocab)
+	# Handle word starting with a vowel
+	starts_vowel = utils.starts_with_vowel(base_word)
+	if starts_vowel:
+		question += 'an '
+	else:
+		question += 'a '
 	context = {
 		"title": "Know Your Nyms?",
 		"formset": word_relationship_formset,
 		"base_word": base_word,
 		"sem_rel": sem_rel,
-		"question": question
+		"question": question,
+		"starts_vowel": starts_vowel
 	}
 	return render(request, 'input_words.html', context)
 

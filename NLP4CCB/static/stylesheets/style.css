@@ -12,7 +12,7 @@ body {
 }
 
 .welcome-col {
-    text-align: center;
+    text-align: center !important;
 }
 
 img.logo {
@@ -27,4 +27,8 @@ img.team {
 
 .example {
     color: royalblue;
+}
+
+.instructions-modal {
+    text-align: left;
 }
