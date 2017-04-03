@@ -24,6 +24,7 @@ def index(request):
 		user_stat.save()
 	context = {}
 	context['rounds_played'] = user_stat.rounds_played
+	context['average_score'] = round(user_stat.total_score / user_stat.rounds_played,2)
 	return render(request, 'welcome.html', context)
 
 
