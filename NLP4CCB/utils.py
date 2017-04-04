@@ -77,7 +77,7 @@ def get_relations_percentages(sem_rel, base_word):
 			input_word_dict[stem_dict[stemmer.stem(w)]] += 1
 
 	# The number of people that have played this word
-	times_played = user_inputs.values('user').distinct().count()
+	times_played = user_inputs.values('user').count()
 	# Percentage of players that said a relation
 	percentages = [(word, round((float(input_word_dict[word]) / times_played),3)) for word in input_word_dict]
 	percentages.sort(key=lambda x: x[1])
