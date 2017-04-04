@@ -17,14 +17,13 @@ vocab = [word.lower().strip() for word in lines]
 len_vocab = len(vocab)
 
 def index(request):
+	context = {}
 	try:
 		user_stat = UserStat.objects.get(user=request.user)
-	except ObjectDoesNotExist:
-		user_stat = UserStat.objects.create(user=request.user)
-		user_stat.save()
-	context = {}
-	context['rounds_played'] = user_stat.rounds_played
-	context['average_score'] = round(user_stat.total_score / user_stat.rounds_played,2)
+		context['rounds_played'] = user_stat.rounds_played
+		context['average_score'] = round(user_stat.total_score / user_stat.rounds_played,2)
+	except TypeError:
+		pass
 	return render(request, 'welcome.html', context)
 
 
