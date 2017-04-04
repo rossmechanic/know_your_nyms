@@ -24,6 +24,8 @@ def index(request):
 		context['average_score'] = round(user_stat.total_score / user_stat.rounds_played,2)
 	except TypeError:
 		pass
+	except ObjectDoesNotExist:
+		pass
 	return render(request, 'welcome.html', context)
 
 
