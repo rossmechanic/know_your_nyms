@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '*4(1v)*ar#gjx*l-_7!h1ke21_*x^5l8jr17lr6nxc(&u^*72o'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [u'know-your-nyms-prod.sveppriec2.us-west-2.elasticbeanstalk.com', 'localhost',
 				 u'127.0.0.1', u'www.know-your-nyms.com']
