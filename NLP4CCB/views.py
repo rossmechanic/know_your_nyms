@@ -26,6 +26,9 @@ def index(request):
 		pass
 	except ObjectDoesNotExist:
 		pass
+	except ZeroDivisionError:
+		context['rounds_played'] = 0
+		context['average_score'] = 0
 	return render(request, 'welcome.html', context)
 
 
