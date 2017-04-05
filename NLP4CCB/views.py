@@ -12,16 +12,17 @@ from django.core.exceptions import ObjectDoesNotExist
 # Read in the vocabulary to traverse
 vocab_file = 'data/vocab.txt'
 with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
-    lines = f.readlines()
+	lines = f.readlines()
 vocab = [word.lower().strip() for word in lines]
 len_vocab = len(vocab)
+
 
 def index(request):
 	context = {}
 	try:
 		user_stat = UserStat.objects.get(user=request.user)
 		context['rounds_played'] = user_stat.rounds_played
-		context['average_score'] = round(user_stat.total_score / user_stat.rounds_played,2)
+		context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
 	except TypeError:
 		pass
 	except ObjectDoesNotExist:
@@ -69,6 +70,7 @@ def models(request):
 	}
 	return render(request, 'input_words.html', context)
 
+
 @login_required
 def scoring(request):
 	# if this is a POST request, we need to process the form data
@@ -82,7 +84,8 @@ def scoring(request):
 		context['base_word'] = base_word
 
 		relations_percentages = utils.get_relations_percentages(sem_rel, base_word)
-		context['percentages'] = relations_percentages
+		context['percentages'] = {'data': [{'word': str(word), 'percentage': pct} for word, pct in relations_percentages[:10]]}
+		print context['percentages']
 		word_scores = utils.score_words(base_word, input_words, sem_rel, relations_percentages)
 		context['word_scores'] = word_scores
 		round_total = sum([word_scores[word]['total_score'] for word in word_scores])

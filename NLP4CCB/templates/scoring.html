@@ -2,9 +2,21 @@
 
 {% load static %}
 
+{% block scripts %}
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            window.wordData = {{ word_scores|safe }};
+            window.percentages = {{ percentages|safe }};
+        })();
+    </script>
+    <script src={% static  "javascripts/scoring.js"%}></script>
+{% endblock %}
+
 {% block stylesheets %}
     <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
 {% endblock %}
+
 
 {% block content %}
     <div class="container-fluid">
@@ -12,7 +24,7 @@
             <h1 class="score-report-header">Score Report</h1>
         </div>
         <div class="row">
-            <div class=" col-md-4 col-md-offset-4" style="text-align: center">
+            <div class="col-md-offset-2 col-md-4" style="text-align: center">
                 <table class="table table-bordered table-hover">
                     <thead>
                         <th>Matched words for '{{ base_word }}'</th>
@@ -32,9 +44,14 @@
                         <td> <strong> Total Score </strong> </td> <td> {{ round_total }}</td>
                     </tr>
                 </table>
-                <a type="button" class="btn btn-success btn-lg" href="models/">Next Round</a>
-            </div>
 
+            </div>
+            <div class="col-md-6">
+                <svg width="700" height="500"></svg>
+            </div>
+        </div>
+        <div class="row" style="text-align: center">
+            <a type="button" class="btn btn-success btn-lg" href="models/">Next Round</a>
         </div>
     </div>
 {% endblock %}
