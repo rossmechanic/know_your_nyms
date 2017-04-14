@@ -67,5 +67,8 @@ $(document).ready(function () {
             $('svg').empty();
             draw(data);
         });
+    } else {
+        $('#score-report-div').removeClass('col-md-5 col-md-offset-1')
+            .addClass('col-md-6 col-md-offset-3')
     }
 });

@@ -85,7 +85,6 @@ def scoring(request):
 
 		relations_percentages = utils.get_relations_percentages(sem_rel, base_word)
 		context['percentages'] = {'data': [{'word': str(word), 'percentage': pct} for word, pct in relations_percentages[:5]]}
-		print context['percentages']
 		word_scores = utils.score_words(base_word, input_words, sem_rel, relations_percentages)
 		context['word_scores'] = word_scores
 		round_total = sum([word_scores[word]['total_score'] for word in word_scores])
