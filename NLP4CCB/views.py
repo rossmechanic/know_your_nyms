@@ -10,11 +10,20 @@ from models import UserStat
 from django.core.exceptions import ObjectDoesNotExist
 
 # Read in the vocabulary to traverse
-vocab_file = 'data/vocab.txt'
-with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
-    lines = f.readlines()
-vocab = [word.lower().strip() for word in lines]
-len_vocab = len(vocab)
+relationships = ['synonyms','antonyms','hyponyms','meronyms']
+vocabs = {}
+for rel in relationships:
+	vocab_file = 'data/' + rel + '_vocab.txt'
+	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
+		lines = f.readlines()
+	vocabs[rel] = [word.lower().strip() for word in lines]
+
+# Dictionary for sem_rel to question
+rel_q_map = {'synonyms': 'What is another word for ',
+			 'antonyms': 'What is the opposite of ',
+			 'hyponyms': 'What are kinds of ',
+			 'meronyms': 'What are parts of '
+			 }
 
 def index(request):
 	try:
@@ -22,9 +31,9 @@ def index(request):
 	except ObjectDoesNotExist:
 		user_stat = UserStat.objects.create(user=request.user)
 		user_stat.save()
-	context = {}
+	context = dict()
 	context['rounds_played'] = user_stat.rounds_played
-	context['average_score'] = round(user_stat.total_score / user_stat.rounds_played,2)
+	context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
 	return render(request, 'welcome.html', context)
 
 
@@ -33,20 +42,14 @@ def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	# sem_rel = random.choice(['meronyms','hyponyms'])
 	sem_rel = 'meronyms'
-	if sem_rel == 'meronyms':
-		question = 'Name parts of '
-	elif sem_rel == 'hyponyms':
-		question = 'Name kinds of '
-	# Get the user's UserStat model. Create it if it doesn't exist.
-	try:
-		user_stat = UserStat.objects.get(user=request.user)
-	except ObjectDoesNotExist:
-		user_stat = UserStat.objects.create(user=request.user)
-		user_stat.save()
-	user_index = user_stat.index
+	# The question and list of base words are specific to the selected relationship type
+	question = rel_q_map[sem_rel]
+	vocab = vocabs[sem_rel]
+	user_stat = utils.get_or_create_user_stat(request)
+	vocab_index = utils.rel_index(sem_rel, user_stat)
 	# Go in a set order for the vocabulary for each user.
-	if user_index < len_vocab:
-		base_word = vocab[user_index]
+	if vocab_index < len(vocab):
+		base_word = vocab[index]
 	else:
 		base_word = random.choice(vocab)
 	# Handle word starting with a vowel
@@ -64,6 +67,7 @@ def models(request):
 		"starts_vowel": starts_vowel
 	}
 	return render(request, 'input_words.html', context)
+
 
 @login_required
 def scoring(request):

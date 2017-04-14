@@ -123,3 +123,21 @@ def store_round(sem_rel, base_word, word_scores, user):
 def starts_with_vowel(word):
 	vowels = ['A','E','I','O','U','a','e','i','o','u']
 	return word[0] in vowels
+
+def get_or_create_user_stat(request):
+	try:
+		user_stat = UserStat.objects.get(user=request.user)
+	except ObjectDoesNotExist:
+		user_stat = UserStat.objects.create(user=request.user)
+		user_stat.save()
+	return user_stat
+
+def rel_index(sem_rel, user_stat):
+	if sem_rel == 'synonyms':
+		return user_stat.synonyms_index
+	elif sem_rel == 'antonyms':
+		return user_stat.antonyms_index
+	elif sem_rel == 'hyponyms':
+		return user_stat.hyponyms_index
+	elif sem_rel == 'meronyms':
+		return user_stat.meronyms_index
