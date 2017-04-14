@@ -15,7 +15,9 @@
             <div class=" col-md-4 col-md-offset-4" style="text-align: center">
                 <table class="table table-bordered table-hover">
                     <thead>
-                        <th>Matched words for '{{ base_word }}'</th>
+                        <th>{{ answer }}</th>
+                        <th>Percentage Score</th>
+                        <th>WordNet Bonus</th>
                         <th>Word Score</th>
                     </thead>
                     {% for word, scores in word_scores.items %}
@@ -24,13 +26,19 @@
                         {% else %}
                             <tr class="danger">
                         {% endif %}
-                            <td>{{ word }}</td> <td> {{ scores.total_score }}</td>
+                            <td>{{ word }}</td>
+                            <td>{{ scores.esp_score }}</td>
+                            <td>{{ scores.word_net_bonus }}</td>
+                            <td>{{ scores.total_score }}</td>
                         </tr>
 
                     {%  endfor %}
-                    <tr>
-                        <td> <strong> Total Score </strong> </td> <td> {{ round_total }}</td>
-                    </tr>
+                </table>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <th>Round Score</th>
+                        <th>{{ round_total }}</th>
+                    </thead>
                 </table>
                 <a type="button" class="btn btn-success btn-lg" href="models/">Next Round</a>
             </div>

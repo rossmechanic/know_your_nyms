@@ -25,6 +25,12 @@ rel_q_map = {'synonyms': 'What is another word for ',
 			 'meronyms': 'What are parts of '
 			 }
 
+rel_a_map = {'synonyms': 'Another word for ',
+			 'antonyms': 'The opposite of ',
+			 'hyponyms': 'Kinds of ',
+			 'meronyms': 'Parts of '
+			 }
+
 def index(request):
 	try:
 		user_stat = UserStat.objects.get(user=request.user)
@@ -46,10 +52,11 @@ def models(request):
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
 	user_stat = utils.get_or_create_user_stat(request)
-	vocab_index = utils.rel_index(sem_rel, user_stat)
+	vocab_index = user_stat.index
+		# utils.rel_index(sem_rel, user_stat)
 	# Go in a set order for the vocabulary for each user.
 	if vocab_index < len(vocab):
-		base_word = vocab[index]
+		base_word = vocab[vocab_index]
 	else:
 		base_word = random.choice(vocab)
 	# Handle word starting with a vowel
@@ -87,7 +94,15 @@ def scoring(request):
 		context['word_scores'] = word_scores
 		round_total = sum([word_scores[word]['total_score'] for word in word_scores])
 		context['round_total'] = round_total
-
+		answer = rel_a_map[sem_rel]
+		if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
+			starts_vowel = utils.starts_with_vowel(base_word)
+			if starts_vowel:
+				answer += 'an '
+			else:
+				answer += 'a '
+		answer += base_word
+		context['answer'] = answer
 		utils.store_round(sem_rel, base_word, word_scores, request.user)
 		return render(request, 'scoring.html', context)
 	else:
