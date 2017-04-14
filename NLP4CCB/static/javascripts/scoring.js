@@ -5,7 +5,7 @@ $(document).ready(function () {
     function draw(data) {
         var $parent = $('svg').parent();
         var parent_width = $parent.width();
-        var parent_height = $parent.siblings().first().height() > 400 ? $parent.height() : 400;
+        var parent_height = $parent.siblings().first().height() > 400 ? $parent.siblings().first().height() : 400;
 
         var svg = d3.select("svg")
                 .attr('width', parent_width)
