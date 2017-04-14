@@ -11,6 +11,10 @@ body {
     text-align: center;
 }
 
+.top-words-header {
+    text-align: center;
+}
+
 .welcome-col {
     text-align: center !important;
 }
@@ -32,3 +36,17 @@ img.team {
 .instructions-modal {
     text-align: left;
 }
+
+/* CSS for d3 bar chart*/
+.bar {
+    fill: steelblue;
+}
+
+.bar:hover {
+    fill: brown;
+}
+
+.axis--x path {
+    display: none;
+}
+
