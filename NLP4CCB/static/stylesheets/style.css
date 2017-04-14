@@ -11,6 +11,10 @@ body {
     text-align: center;
 }
 
+.top-words-header {
+    text-align: center;
+}
+
 .welcome-col {
     text-align: center !important;
 }

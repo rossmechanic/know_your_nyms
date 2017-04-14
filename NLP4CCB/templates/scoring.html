@@ -21,10 +21,8 @@
 {% block content %}
     <div class="container-fluid">
         <div class="row">
-            <h1 class="score-report-header">Score Report</h1>
-        </div>
-        <div class="row">
-            <div class="col-md-offset-2 col-md-4" style="text-align: center">
+            <div class="col-md-offset-1 col-md-5" style="text-align: center">
+                <h1 class="score-report-header">Score Report</h1>
                 <table class="table table-bordered table-hover">
                     <thead>
                         <th>Matched words for '{{ base_word }}'</th>
@@ -46,9 +44,12 @@
                 </table>
 
             </div>
-            <div class="col-md-6">
-                <svg width="700" height="500"></svg>
-            </div>
+            {% if percentages.data %}
+                <h1 class="top-words-header">Top Answers</h1>
+                <div class="col-md-5 #bar-chart">
+                    <svg width="580" height="400"></svg>
+                </div>
+            {% endif %}
         </div>
         <div class="row" style="text-align: center">
             <a type="button" class="btn btn-success btn-lg" href="models/">Next Round</a>
