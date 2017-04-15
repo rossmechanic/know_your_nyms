@@ -10,7 +10,6 @@ def signin(request):
     if request.method == 'GET':
         return render(request, 'signin.html', context)
     elif request.method == 'POST':
-        print request.POST
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)

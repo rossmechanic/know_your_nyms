@@ -37,7 +37,10 @@ def index(request):
 		user_stat = utils.get_or_create_user_stat(request.user)
 		context['rounds_played'] = user_stat.rounds_played
 		context['total_score'] = user_stat.total_score
-		context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
+		if context['rounds_played'] <= 0:
+			context['average_score'] = 0
+		else:
+			context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
 	return render(request, 'welcome.html', context)
 
 
@@ -89,7 +92,7 @@ def scoring(request):
 		context['base_word'] = base_word
 
 		relations_percentages = utils.get_relations_percentages(sem_rel, base_word)
-		context['percentages'] = relations_percentages
+		context['percentages'] = {'data': [{'word': str(word), 'percentage': pct} for word, pct in relations_percentages[:5]]}
 		word_scores = utils.score_words(base_word, input_words, sem_rel, relations_percentages)
 		context['word_scores'] = word_scores
 		round_total = sum([word_scores[word]['total_score'] for word in word_scores])

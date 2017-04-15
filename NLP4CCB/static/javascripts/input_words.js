@@ -25,7 +25,7 @@ $(document).ready(function(){
     }
 
     $(document).on('keydown','.word-rel-formset', function(event){
-        if ((event.which === 9 || event.which === 13) && $(this).is(':last-child')) {
+        if ((event.which === 9 || event.which === 13 || event.which === 51) && $(this).is(':last-child')) {
             event.preventDefault();
             var newIndex = String(parseInt(this.getAttribute("index")) + 1);
             $(this).after(

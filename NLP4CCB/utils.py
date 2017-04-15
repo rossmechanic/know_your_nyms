@@ -10,6 +10,7 @@ stemmer = PorterStemmer()
 word_net_bonus = 50.0
 challenge_bonus = 0.0
 
+
 def score_words(base_word, input_words, sem_rel, relations_percentages):
 	input_words = clean_input_words(input_words)
 	words_to_wn_bonuses = word_net(base_word, input_words, sem_rel)
@@ -81,15 +82,16 @@ def get_relations_percentages(sem_rel, base_word):
 			input_word_dict[stem_dict[stemmer.stem(w)]] += 1
 
 	# The number of people that have played this word
-	times_played = user_inputs.values('user').distinct().count()
+	times_played = user_inputs.values('user', 'round_number').distinct().count()
 	# Percentage of players that said a relation
-	percentages = [(word, round((float(input_word_dict[word]) / times_played),3)) for word in input_word_dict]
+	percentages = [(word, round((float(input_word_dict[word]) / times_played), 3)) for word in input_word_dict]
 	percentages.sort(key=lambda x: x[1])
 	return percentages[::-1]
 
+
 def get_esp_scores(input_words, relations_percentages):
 	# Maps word stems to their words in the relations_percentages
-	stem_dict = {stemmer.stem(word):word for word in relations_percentages.keys()}
+	stem_dict = {stemmer.stem(word): word for word in relations_percentages.keys()}
 	# For each input_word, if its stem appears in the stems of the words seen, map the word
 	# to the percentage of the word already seen with that stem
 	return {word:float(relations_percentages[stem_dict[stemmer.stem(word)]]*100) if stemmer.stem(word) in stem_dict else 0
