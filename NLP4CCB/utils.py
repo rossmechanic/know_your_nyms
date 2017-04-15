@@ -7,8 +7,8 @@ from nltk.stem.porter import PorterStemmer
 stemmer = PorterStemmer()
 
 # Bonus for word appearing in WordNet
-word_net_bonus = 10.0
-challenge_bonus = 5.0
+word_net_bonus = 50.0
+challenge_bonus = 0.0
 
 def score_words(base_word, input_words, sem_rel, relations_percentages):
 	input_words = clean_input_words(input_words)
@@ -16,10 +16,14 @@ def score_words(base_word, input_words, sem_rel, relations_percentages):
 	words_to_ch_bonuses = confirmed_relations(base_word, input_words, sem_rel)
 	relations_percentages = dict(relations_percentages) # Need to DICT THAT
 	words_to_esp_scores = get_esp_scores(input_words, relations_percentages)
+	words_to_total_scores_tuples = [(word, words_to_esp_scores[word] + words_to_wn_bonuses[word] +
+									words_to_ch_bonuses[word]) for word in input_words]
+	words_to_total_scores_tuples.sort(key=lambda x: x[1])
+	words_to_total_scores = dict(words_to_total_scores_tuples)
 	return {word: {'esp_score': words_to_esp_scores[word],
 				   'word_net_bonus': words_to_wn_bonuses[word],
 				   'challenge_bonus': words_to_ch_bonuses[word],
-				   'total_score': words_to_esp_scores[word] + words_to_wn_bonuses[word] + words_to_ch_bonuses[word]
+				   'total_score': words_to_total_scores[word]
 				   } for word in input_words}
 
 
@@ -94,13 +98,14 @@ def get_esp_scores(input_words, relations_percentages):
 
 def store_round(sem_rel, base_word, word_scores, user):
 	round_score = 0
+	user_stat = get_or_create_user_stat(user)
 	try:
 		user_stat = UserStat.objects.get(user=user)
 	except ObjectDoesNotExist:
 		user_stat = UserStat.objects.create(user=user)
 		user_stat.save()
 	user_stat.rounds_played += 1
-	user_stat.index += 1
+	inc_index(sem_rel, user_stat)
 
 	for word in word_scores:
 		word_score = word_scores[word]['total_score']
@@ -124,11 +129,11 @@ def starts_with_vowel(word):
 	vowels = ['A','E','I','O','U','a','e','i','o','u']
 	return word[0] in vowels
 
-def get_or_create_user_stat(request):
+def get_or_create_user_stat(user):
 	try:
-		user_stat = UserStat.objects.get(user=request.user)
+		user_stat = UserStat.objects.get(user=user)
 	except ObjectDoesNotExist:
-		user_stat = UserStat.objects.create(user=request.user)
+		user_stat = UserStat.objects.create(user=user)
 		user_stat.save()
 	return user_stat
 
@@ -141,3 +146,13 @@ def rel_index(sem_rel, user_stat):
 		return user_stat.hyponyms_index
 	elif sem_rel == 'meronyms':
 		return user_stat.meronyms_index
+
+def inc_index(sem_rel, user_stat):
+	if sem_rel == 'synonyms':
+		user_stat.synonyms_index += 1
+	elif sem_rel == 'antonyms':
+		user_stat.antonyms_index += 1
+	elif sem_rel == 'hyponyms':
+		user_stat.hyponyms_index += 1
+	elif sem_rel == 'meronyms':
+		user_stat.meronyms_index += 1

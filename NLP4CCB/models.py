@@ -16,11 +16,10 @@ class UserStat(models.Model):
 	user = models.OneToOneField(User)
 	rounds_played = models.IntegerField(default=0)
 	total_score = models.FloatField(default=0.0)
-	#synonyms_index = models.IntegerField(default=0)
-	#antonyms_index = models.IntegerField(default=0)
-	#hyponyms_index = models.IntegerField(default=0)
-	index = models.IntegerField(default=0)
-	#meronyms_index = models.IntegerField(default=0)
+	synonyms_index = models.IntegerField(default=0)
+	antonyms_index = models.IntegerField(default=0)
+	hyponyms_index = models.IntegerField(default=0)
+	meronyms_index = models.IntegerField(default=0)
 
 class Relation(models.Model):
 	type = models.CharField(max_length=50)

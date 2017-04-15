@@ -25,9 +25,12 @@
     </div>
 
     <br>
+    {% if request.user.is_authenticated %}
     <h1 class="welcome-col"> Welcome {{ request.user.username }}!  </h1>
     <h4 class="welcome-col"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
+    <h4 class="welcome-col"> Total Score: <b> {{ total_score }} </b></h4>
     <h4 class="welcome-col"> Average Score Per Round: <b> {{ average_score }} </b> </h4>
+    {% endif %}
     <br>
 
 <div class="container">

@@ -32,14 +32,12 @@ rel_a_map = {'synonyms': 'Another word for ',
 			 }
 
 def index(request):
-	try:
-		user_stat = UserStat.objects.get(user=request.user)
-	except ObjectDoesNotExist:
-		user_stat = UserStat.objects.create(user=request.user)
-		user_stat.save()
 	context = dict()
-	context['rounds_played'] = user_stat.rounds_played
-	context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
+	if request.user.is_authenticated():
+		user_stat = utils.get_or_create_user_stat(request.user)
+		context['rounds_played'] = user_stat.rounds_played
+		context['total_score'] = user_stat.total_score
+		context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
 	return render(request, 'welcome.html', context)
 
 
@@ -51,9 +49,8 @@ def models(request):
 	# The question and list of base words are specific to the selected relationship type
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
-	user_stat = utils.get_or_create_user_stat(request)
-	vocab_index = user_stat.index
-		# utils.rel_index(sem_rel, user_stat)
+	user_stat = utils.get_or_create_user_stat(request.user)
+	vocab_index = utils.rel_index(sem_rel, user_stat)
 	# Go in a set order for the vocabulary for each user.
 	if vocab_index < len(vocab):
 		base_word = vocab[vocab_index]
