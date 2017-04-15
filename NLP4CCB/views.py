@@ -44,6 +44,9 @@ def index(request):
 @login_required
 def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
+	print request.POST
+	# We should select a relationship randomly from the set of selected ones. If none were selected,
+	# just choose randomly for all (unless we want some javascript solution)
 	# sem_rel = random.choice(['meronyms','hyponyms'])
 	sem_rel = 'meronyms'
 	# The question and list of base words are specific to the selected relationship type
