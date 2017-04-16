@@ -17,15 +17,18 @@ def score_words(base_word, input_words, sem_rel, relations_percentages):
 	words_to_ch_bonuses = confirmed_relations(base_word, input_words, sem_rel)
 	relations_percentages = dict(relations_percentages) # Need to DICT THAT
 	words_to_esp_scores = get_esp_scores(input_words, relations_percentages)
-	words_to_total_scores_tuples = [(word, words_to_esp_scores[word] + words_to_wn_bonuses[word] +
-									words_to_ch_bonuses[word]) for word in input_words]
-	words_to_total_scores_tuples.sort(key=lambda x: x[1])
-	words_to_total_scores = dict(words_to_total_scores_tuples)
-	return {word: {'esp_score': words_to_esp_scores[word],
+	words_to_total_scores = {word: words_to_esp_scores[word] + words_to_wn_bonuses[word] + words_to_ch_bonuses[word]
+							 for word in input_words}
+
+	input_words_scores = words_to_total_scores.items()
+	input_words_scores.sort(key=lambda x: x[1], reverse=True)
+	input_words = [a for (a,b) in input_words_scores]
+	print input_words
+	return [(word, {'esp_score': words_to_esp_scores[word],
 				   'word_net_bonus': words_to_wn_bonuses[word],
 				   'challenge_bonus': words_to_ch_bonuses[word],
 				   'total_score': words_to_total_scores[word]
-				   } for word in input_words}
+					} ) for word in input_words]
 
 
 def clean_input_words(input_words):
@@ -109,8 +112,8 @@ def store_round(sem_rel, base_word, word_scores, user):
 	user_stat.rounds_played += 1
 	inc_index(sem_rel, user_stat)
 
-	for word in word_scores:
-		word_score = word_scores[word]['total_score']
+	for word,scores in word_scores:
+		word_score = scores['total_score']
 		round_score += word_score
 		try:
 			relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)

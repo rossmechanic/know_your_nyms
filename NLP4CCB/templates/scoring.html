@@ -37,7 +37,7 @@
                         <th>WordNet Bonus</th>
                         <th>Word Score</th>
                     </thead>
-                    {% for word, scores in word_scores.items %}
+                    {% for word, scores in word_scores %}
                         {% if scores.total_score %}
                             <tr class="success">
                         {% else %}
