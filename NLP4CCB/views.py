@@ -51,7 +51,7 @@ def models(request):
 	# We should select a relationship randomly from the set of selected ones. If none were selected,
 	# just choose randomly for all (unless we want some javascript solution)
 	# sem_rel = random.choice(['meronyms','hyponyms'])
-	sem_rel = 'meronyms'
+	sem_rel = 'antonyms'
 	# The question and list of base words are specific to the selected relationship type
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
@@ -63,18 +63,18 @@ def models(request):
 	else:
 		base_word = random.choice(vocab)
 	# Handle word starting with a vowel
-	starts_vowel = utils.starts_with_vowel(base_word)
-	if starts_vowel:
-		question += 'an '
-	else:
-		question += 'a '
+	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
+		starts_vowel = utils.starts_with_vowel(base_word)
+		if starts_vowel:
+			question += 'an '
+		else:
+			question += 'a '
 	context = {
 		"title": "Know Your Nyms?",
 		"formset": word_relationship_formset,
 		"base_word": base_word,
 		"sem_rel": sem_rel,
-		"question": question,
-		"starts_vowel": starts_vowel
+		"question": question
 	}
 	return render(request, 'input_words.html', context)
 
