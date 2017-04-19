@@ -23,7 +23,6 @@ def score_words(base_word, input_words, sem_rel, relations_percentages):
 	input_words_scores = words_to_total_scores.items()
 	input_words_scores.sort(key=lambda x: x[1], reverse=True)
 	input_words = [a for (a,b) in input_words_scores]
-	print input_words
 	return [(word, {'esp_score': words_to_esp_scores[word],
 				   'word_net_bonus': words_to_wn_bonuses[word],
 				   'challenge_bonus': words_to_ch_bonuses[word],

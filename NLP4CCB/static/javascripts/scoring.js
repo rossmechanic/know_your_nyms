@@ -61,7 +61,9 @@ $(document).ready(function () {
     }
 
     var data = window.percentages['data'];
-    if (data.length > 0) {
+    var timesPlayed = window.timesPlayed;
+    console.log(timesPlayed);
+    if (data.length > 0 && timesPlayed >= 5) {
         draw(data);
         $(window).resize(function () {
             $('svg').empty();

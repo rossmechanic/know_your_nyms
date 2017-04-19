@@ -8,6 +8,7 @@
         (function () {
             window.wordData = {{ word_scores|safe }};
             window.percentages = {{ percentages|safe }};
+            window.timesPlayed = {{ times_played|safe }};
         })();
     </script>
     <script src={% static  "javascripts/scoring.js"%}></script>
@@ -59,7 +60,7 @@
                 </table>
 
             </div>
-            {% if percentages.data %}
+            {% if percentages.data and times_played > 0 %}
                 <div class="col-md-5 #bar-chart">
                     <h1 class="top-words-header">Top Answers</h1>
                     <svg width="580" height="400"></svg>

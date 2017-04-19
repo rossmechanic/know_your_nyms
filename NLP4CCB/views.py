@@ -8,6 +8,7 @@ from django.forms import formset_factory
 from django.shortcuts import *
 
 import utils
+from models import UserInput
 from models import WordRelationshipForm
 
 # Read in the vocabulary to traverse
@@ -103,6 +104,8 @@ def scoring(request):
 		context['word_scores'] = word_scores
 		round_total = sum([scores['total_score'] for word,scores in word_scores])
 		context['round_total'] = round_total
+		user_inputs = UserInput.objects.filter(relation__type=sem_rel, relation__base_word=base_word)
+		context['times_played'] = user_inputs.values('user', 'round_number').distinct().count()
 		answer = rel_a_map[sem_rel]
 		if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
 			starts_vowel = utils.starts_with_vowel(base_word)
