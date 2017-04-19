@@ -1,72 +1,86 @@
-from django.conf import settings
-from django.shortcuts import *
-from models import WordRelationshipForm
-from django.forms import formset_factory
-import utils
-import random
+import json
 import os
+import random
+
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from models import UserStat
-from django.core.exceptions import ObjectDoesNotExist
+from django.forms import formset_factory
+from django.shortcuts import *
+
+import utils
+from models import UserInput
+from models import WordRelationshipForm
 
 # Read in the vocabulary to traverse
-vocab_file = 'data/vocab.txt'
-with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
-	lines = f.readlines()
-vocab = [word.lower().strip() for word in lines]
-len_vocab = len(vocab)
+relationships = ['synonyms','antonyms','hyponyms','meronyms']
+vocabs = {}
+for rel in relationships:
+	vocab_file = 'data/' + rel + '_vocab.txt'
+	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
+		lines = f.readlines()
+	vocabs[rel] = [word.lower().strip() for word in lines]
 
+# Dictionary for sem_rel to question
+rel_q_map = {'synonyms': 'What is another word for ',
+			 'antonyms': 'What is the opposite of ',
+			 'hyponyms': 'What are kinds of ',
+			 'meronyms': 'What are parts of '
+			 }
+
+rel_a_map = {'synonyms': 'Another word for ',
+			 'antonyms': 'The opposite of ',
+			 'hyponyms': 'Kinds of ',
+			 'meronyms': 'Parts of '
+			 }
 
 def index(request):
-	context = {}
-	try:
-		user_stat = UserStat.objects.get(user=request.user)
+	context = dict()
+	if request.user.is_authenticated():
+		user_stat = utils.get_or_create_user_stat(request.user)
 		context['rounds_played'] = user_stat.rounds_played
-		context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
-	except TypeError:
-		pass
-	except ObjectDoesNotExist:
-		pass
-	except ZeroDivisionError:
-		context['rounds_played'] = 0
-		context['average_score'] = 0
+		context['total_score'] = user_stat.total_score
+		if context['rounds_played'] <= 0:
+			context['average_score'] = 0
+		else:
+			context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
 	return render(request, 'welcome.html', context)
 
 
 @login_required
 def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
-	# sem_rel = random.choice(['meronyms','hyponyms'])
-	sem_rel = 'meronyms'
-	if sem_rel == 'meronyms':
-		question = 'Name parts of '
-	elif sem_rel == 'hyponyms':
-		question = 'Name kinds of '
-	# Get the user's UserStat model. Create it if it doesn't exist.
-	try:
-		user_stat = UserStat.objects.get(user=request.user)
-	except ObjectDoesNotExist:
-		user_stat = UserStat.objects.create(user=request.user)
-		user_stat.save()
-	user_index = user_stat.index
+	# We should select a relationship randomly from the set of selected ones. If none were selected,
+	# just choose randomly for all (unless we want some javascript solution)
+	if request.method == 'POST':
+		new_rels = request.POST.getlist('checks')
+		request.session['relationships'] = new_rels
+
+	rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms', 'hyponyms', 'synonyms']
+
+	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
+	# The question and list of base words are specific to the selected relationship type
+	question = rel_q_map[sem_rel]
+	vocab = vocabs[sem_rel]
+	user_stat = utils.get_or_create_user_stat(request.user)
+	vocab_index = utils.rel_index(sem_rel, user_stat)
 	# Go in a set order for the vocabulary for each user.
-	if user_index < len_vocab:
-		base_word = vocab[user_index]
+	if vocab_index < len(vocab):
+		base_word = vocab[vocab_index]
 	else:
 		base_word = random.choice(vocab)
 	# Handle word starting with a vowel
-	starts_vowel = utils.starts_with_vowel(base_word)
-	if starts_vowel:
-		question += 'an '
-	else:
-		question += 'a '
+	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
+		starts_vowel = utils.starts_with_vowel(base_word)
+		if starts_vowel:
+			question += 'an '
+		else:
+			question += 'a '
 	context = {
 		"title": "Know Your Nyms?",
 		"formset": word_relationship_formset,
 		"base_word": base_word,
 		"sem_rel": sem_rel,
-		"question": question,
-		"starts_vowel": starts_vowel
+		"question": question
 	}
 	return render(request, 'input_words.html', context)
 
@@ -85,11 +99,22 @@ def scoring(request):
 
 		relations_percentages = utils.get_relations_percentages(sem_rel, base_word)
 		context['percentages'] = {'data': [{'word': str(word), 'percentage': pct} for word, pct in relations_percentages[:5]]}
+		# Now a list of tuples (word,dict), not a dictionary itself
 		word_scores = utils.score_words(base_word, input_words, sem_rel, relations_percentages)
 		context['word_scores'] = word_scores
-		round_total = sum([word_scores[word]['total_score'] for word in word_scores])
+		round_total = sum([scores['total_score'] for word,scores in word_scores])
 		context['round_total'] = round_total
-
+		user_inputs = UserInput.objects.filter(relation__type=sem_rel, relation__base_word=base_word)
+		context['times_played'] = user_inputs.values('user', 'round_number').distinct().count()
+		answer = rel_a_map[sem_rel]
+		if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
+			starts_vowel = utils.starts_with_vowel(base_word)
+			if starts_vowel:
+				answer += 'an '
+			else:
+				answer += 'a '
+		answer += base_word
+		context['answer'] = answer
 		utils.store_round(sem_rel, base_word, word_scores, request.user)
 		return render(request, 'scoring.html', context)
 	else:

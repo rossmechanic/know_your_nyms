@@ -23,11 +23,13 @@
             </div>
        </div>
     </div>
-    {% if request.user.username %}
-        <br>
-        <h1 class="welcome-col"> Welcome {{ request.user.username }}!  </h1>
-        <h4 class="welcome-col"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
-        <h4 class="welcome-col"> Average Score Per Round: <b> {{ average_score }} </b> </h4>
+
+    <br>
+    {% if request.user.is_authenticated %}
+    <h1 class="welcome-col"> Welcome {{ request.user.username }}!  </h1>
+    <h4 class="welcome-col"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
+    <h4 class="welcome-col"> Total Score: <b> {{ total_score }} </b></h4>
+    <h4 class="welcome-col"> Average Score Per Round: <b> {{ average_score }} </b> </h4>
     {% endif %}
     <br>
 
@@ -41,8 +43,18 @@
             &nbsp;&nbsp;
             <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#teamModal">About the Team</button>
             &nbsp;&nbsp;
-            <a type="button" class="btn btn-info btn-lg" href='/models' id="start-button">Start Round</a>
+            <a type="button" class="btn btn-info btn-lg" id="start-button">Start Round</a>
 
+            <br> <br>
+            {% if request.user.is_authenticated %}
+                <form id='rel-type-form' action="/models/" method="POST">
+                    {% csrf_token %}
+                    <label class="checkbox-inline"><input type="checkbox" name='checks' value="synonyms" checked>Synonyms</label>
+                    <label class="checkbox-inline"><input type="checkbox" name='checks' value="antonyms" checked>Antonyms</label>
+                    <label class="checkbox-inline"><input type="checkbox" name='checks' value="hyponyms" checked>Hyponyms</label>
+                    <label class="checkbox-inline"><input type="checkbox" name='checks' value="meronyms" checked>Meronyms</label>
+                </form>
+            {% endif %}
             <!-- How to Modal content-->
             <div id="howToModal" class="modal fade" role="dialog">
               <div class="modal-dialog">
@@ -120,42 +132,6 @@
 
               </div>
             </div>
-
-            <!-- Start Modal content-->
-{#            <div id="startModal" class="modal fade" role="dialog">#}
-{#              <div class="modal-dialog">#}
-{##}
-{#                <!-- Modal content-->#}
-{#                <div class="modal-content">#}
-{#                  <div class="modal-header">#}
-{#                    <button type="button" class="close" data-dismiss="modal">&times;</button>#}
-{#                    <h4 class="modal-title">You're almost ready to play</h4>#}
-{#                  </div>#}
-{#                  <div class="modal-body">#}
-{#                      <div class="dropdown">#}
-{#                          Select a word relation type and press <b>Start</b> below<br>#}
-{#                          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">#}
-{#                            Select one...#}
-{#                            <span class="caret"></span>#}
-{#                          </button>#}
-{#                          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">#}
-{#                            <li><a href="#">Meronym</a></li>#}
-{#                            <li><a href="#">Hypernym</a></li>#}
-{#                            <li><a href="#">Antonym</a></li>#}
-{#                            <li role="separator" class="divider"></li>#}
-{#                            <li><a href="#">Surprise me!</a></li>#}
-{#                          </ul>#}
-{#                        </div>#}
-{#                  </div>#}
-{##}
-{#                  <div class="modal-footer">#}
-{#                    <button type="button" class="btn btn-default" data-dismiss="modal">Start</button>#}
-{#                  </div>#}
-{#                </div>#}
-{##}
-{#              </div>#}
-{#            </div>#}
-
         </div>
     </div>
 </div>

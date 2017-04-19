@@ -26,7 +26,7 @@ deny_challenge.short_description = "Deny selected challenges"
 
 # Register your models here.
 class UserStatAdmin(admin.ModelAdmin):
-	list_display = ['user', 'rounds_played', 'total_score', 'index']
+	list_display = ['user', 'rounds_played', 'total_score', 'synonyms_index', 'antonyms_index', 'hyponyms_index', 'meronyms_index']
 
 
 class RelationAdmin(admin.ModelAdmin):
