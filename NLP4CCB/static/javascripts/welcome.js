@@ -3,6 +3,12 @@
  */
 $(document).ready(function(){
     $('#start-button').on('click', function() {
-        $('#rel-type-form').submit();
+        var $form = $('#rel-type-form');
+        if ($form.length){
+            $form.submit();
+        }
+        else {
+            $(this).attr("href", "/models/");
+        }
     });
 });
