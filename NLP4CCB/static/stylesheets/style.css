@@ -1,7 +1,15 @@
 body {
     padding-top: 70px;
     padding-bottom: 30px;
+
+/*    background-image: url('{% static "images/background.png" %}');*/
+    background-image: url("images/background.png");
+
 }
+
+/*h1 {
+  font-family: 'Roboto Mono', sans-serif;
+}*/
 
 .game-question {
     text-align: center;
@@ -29,8 +37,9 @@ img.team {
    height:80px;
 }
 
-.example {
-    color: royalblue;
+.boxed {
+  border: 1px;
+  border-color: gray;
 }
 
 .instructions-modal {
@@ -49,4 +58,5 @@ img.team {
 .axis--x path {
     display: none;
 }
+
 
