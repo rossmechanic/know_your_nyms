@@ -19,6 +19,8 @@ $(document).ready(function(){
         }
     },500);
 
+    $('#id_form-0-word').focus();
+    
     var submitWords = function() {
         $("#input-form").submit();
         $('.word-rel-formset > input').prop("disabled", true);
