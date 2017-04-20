@@ -8,6 +8,7 @@
         (function () {
             window.wordData = {{ word_scores|safe }};
             window.percentages = {{ percentages|safe }};
+            window.timesPlayed = {{ times_played|safe }};
         })();
     </script>
     <script src={% static  "javascripts/scoring.js"%}></script>
@@ -25,26 +26,41 @@
                 <h1 class="score-report-header" style="font-family: Schoolbell">Score Report</h1>
                 <table class="table table-bordered table-hover">
                     <thead>
-                        <th>Matched words for '{{ base_word }}'</th>
+                        <th>{{ answer }}</th>
+                        <!--
+                        When hovering over Percentage Score, we want it to say:
+                        Percentage of how many other players named this relation.
+
+                        When hovering over WordNet Bonus, we want it to say:
+                        Bonus points if this relation is in WordNet. All or nothing.
+                        -->
+                        <th>Percentage Score</th>
+                        <th>WordNet Bonus</th>
                         <th>Word Score</th>
                     </thead>
-                    {% for word, scores in word_scores.items %}
+                    {% for word, scores in word_scores %}
                         {% if scores.total_score %}
                             <tr class="success">
                         {% else %}
                             <tr class="danger">
                         {% endif %}
-                            <td>{{ word }}</td> <td> {{ scores.total_score }}</td>
+                            <td>{{ word }}</td>
+                            <td>{{ scores.esp_score }}</td>
+                            <td>{{ scores.word_net_bonus }}</td>
+                            <td>{{ scores.total_score }}</td>
                         </tr>
 
                     {%  endfor %}
-                    <tr>
-                        <td> <strong> Total Score </strong> </td> <td> {{ round_total }}</td>
-                    </tr>
+                </table>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <th>Round Score</th>
+                        <th>{{ round_total }}</th>
+                    </thead>
                 </table>
 
             </div>
-            {% if percentages.data %}
+            {% if percentages.data and times_played > 0 %}
                 <div class="col-md-5 #bar-chart">
                     <h1 class="top-words-header" style="font-family: Schoolbell">Top Answers</h1>
                     <svg width="580" height="400"></svg>

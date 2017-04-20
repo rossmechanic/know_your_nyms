@@ -8,15 +8,31 @@ from collections import defaultdict
 import json
 
 def get_synonyms(n=10000000):
-    synsets = list(wn.all_synsets('a'))[:n] # All noun synsets
-    all_adjectives = defaultdict(set)
+    # All nouns, adjectives, and verbs
+    synsets = list(wn.all_synsets('n'))[:n] + list(wn.all_synsets('a'))[:n] + list(wn.all_synsets('v'))[:n]
+    all_synonyms = defaultdict(set)
     for synset in synsets:
         original_lemmas = [str(lemma.name()).replace('_',' ') for lemma in synset.lemmas()]
         for original_lemma in original_lemmas:
-            all_adjectives[original_lemma] = all_adjectives[original_lemma].union(set(original_lemmas))   
+            all_synonyms[original_lemma] = all_synonyms[original_lemma].union(set(original_lemmas))
     # Make the sets lists, so it can be turned into JSON
-    all_adjectives = {k:list(v) for k,v in all_adjectives.items() if list(v)}
-    return all_adjectives
+    all_synonyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in all_synonyms.items() if list(v)}
+    return all_synonyms
+
+def get_antonyms(n=10000000):
+    # All nouns, adjectives, and verbs
+    synsets = list(wn.all_synsets('n'))[:n] + list(wn.all_synsets('a'))[:n] + list(wn.all_synsets('v'))[:n]
+    all_antonyms = defaultdict(set)
+    for synset in synsets:
+        original_lemmas = synset.lemmas()
+        for original_lemma in original_lemmas:
+            original_word = str(original_lemma.name()).replace('_',' ')
+            antonym_lemmas = original_lemma.antonyms()
+            antonym_words = [str(lemma.name()).replace('_',' ') for lemma in antonym_lemmas]
+            all_antonyms[original_word] = all_antonyms[original_word].union(set(antonym_words))
+    # Make the sets lists, so it can be turned into JSON
+    all_antonyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in all_antonyms.items() if list(v)}
+    return all_antonyms
     
 # Returns a dictionary that maps all words to a list of their meronyms.
 def get_meronyms(n=10000000, holonyms=False):
@@ -55,14 +71,14 @@ def get_hyponyms(n=10000000, hypernyms=False):
             # Go through all lemmas from the original synset
             original_lemmas = [str(lemma.name()).replace('_',' ') for lemma in synset.lemmas()]
             for original_lemma in original_lemmas:
-                # Go through all meronym synsets for that original synset
+                # Go through all hyponym synsets for that original synset
                 for hyponym_synset in hyponym_synsets:
                     # Gather all lemmas for the meronym synset
                     hyponym_lemmas = [str(lemma.name()).replace('_',' ') for lemma in hyponym_synset.lemmas()]
                     # Add them to the meronym set for the lemma
                     all_hyponyms[original_lemma] = all_hyponyms[original_lemma].union(set(hyponym_lemmas))
     # Make the sets lists, so it can be turned into JSON
-    all_hyponyms = {k:list(v) for k,v in all_hyponyms.items() if list(v)}
+    all_hyponyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in all_hyponyms.items() if list(v)}
     return all_hyponyms
 
 # Returns only the pairs that appear in WordNet (that are confirmed meronyms)  
@@ -96,5 +112,5 @@ def create_meronym_json(string, filepath):
 
     json.dump(tree, open(filepath, 'w'))
 
-#d = get_meronyms()
-#create_json(d, 'wordnet_meronyms.json')
+#d = get_antonyms()
+#create_json(d, 'wordnet_antonyms.json')
