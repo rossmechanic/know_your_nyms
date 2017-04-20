@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Schoolbell" rel="stylesheet">
+
     <!-- jQuery -->
     <script   src="https://code.jquery.com/jquery-3.1.1.min.js"
               integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
@@ -36,10 +40,10 @@
     {% endblock %}
 
     </head>
-    <body>
+    <body style="background-image: url('{% static "images/background.jpg" %}')">
         {% if user.is_authenticated %}
             <!-- Fixed navbar -->
-            <nav class="navbar navbar-inverse navbar-fixed-top">
+            <nav class="navbar navbar-default navbar-fixed-top">
               <div class="container">
                 <div class="navbar-header">
                   <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -48,15 +52,17 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                   </button>
-                  <a class="navbar-brand" href="/">
+
+                  <a class="navbar-brand" href="/"">
                       <img alt="know-your-nyms-logo"
-                           height="100%"
-                           src={% static "images/white_logo_transparent_background_cropped.png" %}>
+                           height="150%"
+                           src={% static "images/dark_logo_transparent_background_nowords.png" %}>
                   </a>
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                   <ul class="nav navbar-nav navbar-right navbar-">
-                    <li><a href="/signout">Logout</a></li>
+
+                    <li style="font-family:'Roboto Mono', sans-serif;"><a href="/signout">Logout</a></li>
                     </li>
                   </ul>
                 </div><!--/.nav-collapse -->
@@ -68,5 +74,25 @@
         {% endblock %}
         </div>
 
+
+  <footer style="text-align: center; margin-top:150px; font-family:Schoolbell"> Created with ♥ at  <img alt="know-your-nyms-logo"
+                           height="40px"
+                           src={% static "images/penn_engineering.png" %}>
+  </footer>
+
+ <!--  <section class="footer">
+      <div class="pure-u-1 pure-u-md-3-24">
+      </div>
+
+
+      <div class="pure-u-1 pure-u-md-10-24">
+        <p style="text-align: center; font-family:Schoolbell"> Created with ♥ in Philadelphia</p>
+      </div>
+      <div class="pure-u-1 pure-u-md-7-24"></div>
+    </div>  
+
+  </section>
+ -->
     </body>
+
 </html>

@@ -14,14 +14,14 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7 col-md-offset-1">
-                <h1 class="game-question">{{ question }} {{ base_word }}?</h1>
+                <h1 class="game-question" style="font-family: Schoolbell, sans-serif">{{ question }} {{ base_word }}?</h1>
             </div>
             <div class="col-md-4">
-                <h1>Timer: <span class="timer">20</span></h1>
+                <h1 style="font-family: Roboto Mono, sans-serif;">Timer: <span class="timer">20</span></h1>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6 col-md-offset-2">
+            <div class="col-md-6 col-md-offset-3">
                 <form id="input-form" method="POST" action="./scoring/">
                     {% csrf_token %}
                     {{ formset.management_form }}

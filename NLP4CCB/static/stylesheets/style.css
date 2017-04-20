@@ -1,7 +1,15 @@
 body {
     padding-top: 70px;
     padding-bottom: 30px;
+
+/*    background-image: url('{% static "images/background.png" %}');*/
+    background-image: url("images/background.png");
+
 }
+
+/*h1 {
+  font-family: 'Roboto Mono', sans-serif;
+}*/
 
 .game-question {
     text-align: center;
@@ -29,12 +37,19 @@ img.team {
    height:80px;
 }
 
-.example {
-    color: royalblue;
+.boxed {
+  border: 1px;
+  border-color: gray;
 }
 
 .instructions-modal {
     text-align: left;
+}
+
+#start-button {
+    font-family: 'Roboto Mono', sans-serif;
+    border-radius: 0;
+    box-shadow: 4px 4px 1px #888888;
 }
 
 /* CSS for d3 bar chart*/
@@ -49,4 +64,5 @@ img.team {
 .axis--x path {
     display: none;
 }
+
 
