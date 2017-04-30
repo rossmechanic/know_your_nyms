@@ -6,7 +6,7 @@
 
 {% block content %}
     <form class= "form-signin" id="user_form" method="post" action="/signup/" enctype="multipart/form-data">
-        <h2 class="form-signin-heading" style="font-family:'Schoolbell', sans-serif; text-align:center">Register for KnowYourNyms!</h2>
+        <h2 class="form-signin-headingschool-bell" style="text-align: center">Register for KnowYourNyms!</h2>
         {% csrf_token %}
         {% if signup_failed %}
             <div class="alert alert-danger" role="alert" style="padding: 8px">
@@ -17,7 +17,7 @@
             <label for={{ field.id_for_label }} class="sr-only">{{ field.label }}</label>
             {{ field }}
         {% endfor %}
-        <button class="btn btn-lg btn-primary btn-block" type="submit" style="font-family:'Roboto Mono', sans-serif; border-radius: 0px;box-shadow: 4px 4px 1px #888888;">Signup</button>
+        <button class="btn btn-lg btn-primary btn-block nym-button roboto-mono" type="submit">Signup</button>
     </form>
 
 {% endblock %}

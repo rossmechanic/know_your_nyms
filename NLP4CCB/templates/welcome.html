@@ -26,25 +26,21 @@
     {% if request.user.is_authenticated %}
         <br>
 
-        <h1 class="welcome-col" style="font-family:'Schoolbell', sans-serif;"> Welcome {{ request.user.username }}!  </h1>
-        <h4 class="welcome-col" style="font-family:'Roboto Mono', sans-serif; "> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
-        <h4 class="welcome-col" style="font-family:'Roboto Mono', sans-serif; "> Total Score: <b> {{ total_score }} </b></h4>
-        <h4 class="welcome-col" style="font-family:'Roboto Mono', sans-serif; "> Average Score Per Round: <b> {{ average_score }} </b> </h4>
+        <h1 class="welcome-col school-bell"> Welcome {{ request.user.username }}!  </h1>
+        <h4 class="welcome-col roboto-mono"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
+        <h4 class="welcome-col roboto-mono"> Total Score: <b> {{ total_score }} </b></h4>
+        <h4 class="welcome-col roboto-mono"> Average Score Per Round: <b> {{ average_score }} </b> </h4>
     {% endif %}
     <br>
 
 <div class="container">
     <div class="row">
         <div class="col-md-12 welcome-col">
-
-{#            <a type="button" class="btn btn-info btn-lg" href='/signout' id="logout-button" style="font-family:'Roboto Mono', sans-serif; ">Logout</a>#}
-
-            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#howToModal" style="font-family:'Roboto Mono', sans-serif; border-radius: 0px;box-shadow: 4px 4px 1px #888888;">How to Play</button>
+            <button type="button" class="btn btn-info btn-lg nym-button" data-toggle="modal" data-target="#howToModal">How to Play</button>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-lg btn-primary" data-toggle="modal" data-target="#teamModal" style="font-family:'Roboto Mono', sans-serif; border-radius: 0px;box-shadow: 4px 4px 1px #888888;" >About the Team</button>
+            <button type="button" class="btn btn-lg btn-primary nym-button" data-toggle="modal" data-target="#teamModal" >About the Team</button>
             &nbsp;&nbsp;
-
-            <a type="button" class="btn btn-lg btn-success" id="start-button">Start Round</a>
+            <a type="button" class="btn btn-lg btn-success nym-button" id="start-button">Start Round</a>
 
             <br> <br>
             {% if request.user.is_authenticated %}
@@ -64,26 +60,26 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h3 class="modal-title" style="font-family:'Schoolbell', sans-serif; ">About This Game</h3>
+                    <h3 class="modal-title school-bell">About This Game</h3>
                   </div>
-                  <div class="modal-body instructions-modal" style="font-family:'Roboto Mono', sans-serif; ">
+                  <div class="modal-body instructions-modal roboto-mono">
 
-                            <div class="boxed" style="border: 1px; border-style:solid;border-color: gray; padding-left: 10px;padding-right:10px">            
-                      <h3 style="text-align: center; font-family: Schoolbell">Welcome!<br> </h3>
+                            <div class="boxed">
+                      <h3 class="welcome-col school-bell">Welcome!<br> </h3>
                         <b style="color:#337ab7">Sign in</b> if you already have an account.<br>
                         If you don't have one, <b style="color:#337ab7">Sign up</b>!<br>
                       <!--   #5bc0de -->
                         Click <b style="color:#5cb85c">Start Round</b> to begin playing.<br>
                         For each round, you'll have <b>20 seconds</b> to identify as many word relations as you can.<br> <br>
-</div>
+                            </div>
                         <br>
 
 
-                        <div class="boxed" style="border: 1px; border-style:solid;border-color: gray;padding-left: 10px;padding-right:10px">
-                            <h4 style="font-family: Schoolbell, sans-serif">Example:</h4>
+                        <div class="boxed">
+                            <h4 class="school-bell">Example:</h4>
                             If the relationship is <b style="color:#ff7f7f">meronym</b>, you may be asked to
                             <br>
-                            <h4 style="font-family: Schoolbell, sans-serif; text-align:center">
+                            <h4 class="welcome-col school-bell">
                             "Name parts of a face?"</h4>
                             To which you might answer...<br>
 
@@ -98,8 +94,8 @@
                         </div>
                         <br>
                   
-                <div class="boxed" style="border: 1px; border-style:solid;border-color: gray;padding-left: 10px;padding-right:10px">
-                     <h4 style="text-align: center; font-family: Schoolbell">Scoring<br> </h4>
+                <div class="boxed">
+                     <h4 class="welcome-col school-bell">Scoring<br> </h4>
                         You get points for naming words.<br>
                         Your score for each word is a percentage of how many other players have also said it!<br>
                         Bonus points are awarded for words in <a href="https://wordnet.princeton.edu/">WordNet</a>, a handcrafted lexical database. <br>
@@ -109,10 +105,10 @@
                         </div>
 
 
-                      <h3 style="font-family: Schoolbell;text-align: center">Have fun!</h3>
+                      <h3 class="welcome-col school-bell">Have fun!</h3>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 0px;box-shadow: 4px 4px 1px #888888; font-family:Roboto Mono, sans-serif">Close</button>
+                    <button type="button" class="btn btn-default nym-button roboto-mono" data-dismiss="modal">Close</button>
                   </div>
                 </div>
 
@@ -128,10 +124,10 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h3 class="modal-title" style="font-family: Schoolbell, sans-serif">About the team</h3>
+                    <h3 class="modal-title school-bell">About the team</h3>
                   </div>
                   <div class="modal-body">
-                     <div class="row" style="font-family:Roboto Mono, sans-serif">
+                     <div class="row roboto-mono">
                          <div class="col-md-4">
                              <img class="team" src="{% static "images/hannah_cutler.jpg" %}"><br>
                              <b>Hannah Cutler</b><br> is a Senior studying Computer Science.<br>
@@ -165,17 +161,16 @@
                             <a href="https://www.linkedin.com/in/rossmechanic/" style="margin-right:10px;color:white;">
                             <img src="{% static "images/linkedin.png" %}" style="width:10%;height:10%">
                             </a>
-                            <a href="mailto:rossmechanic@seas.upenn.edu">
+                            <a href="mailto:mechanic@seas.upenn.edu">
                             <img src="{% static "images/email.png" %}" style="width:10%;height:10%">
                             </a>
                              </div>
                      </div>
                       <br>
-                     <div class="row" style="font-family:Roboto Mono, sans-serif">
+                     <div class="row roboto-mono">
                      <br>
                          <div class="col-md-12">
-                       <!--   <h3 style="font-family: Schoolbell, sans-serif" >Advisors:</h3> -->
-                          <b style="font-family: Schoolbell, sans-serif">Advisors:</b><br>
+                          <b class="school-bell">Advisors:</b><br>
                          <b><a href="http://www.cis.upenn.edu/~ccb/">Dr. Chris Callison-Burch</a></b><br>
                          <b><a href="https://www.linkedin.com/in/sneha-rajana-462a33bb/">Sneha Rajana</a></b>
                          </div>
@@ -184,7 +179,7 @@
                   </div>
 
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 0px;box-shadow: 4px 4px 1px #888888; font-family:Roboto Mono, sans-serif">Close</button>
+                    <button type="button" class="btn btn-default nym-button roboto-mono" data-dismiss="modal">Close</button>
                   </div>
                 </div>
 
