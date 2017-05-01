@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import UserStat, Relation, UserInput, Challenge
+from models import UserStat, Relation, UserInput, Challenge, Pass
 
 
 def accept_challenge(modeladmin, request, queryset):
@@ -42,7 +42,11 @@ class ChallengeAdmin(admin.ModelAdmin):
 	actions = [accept_challenge, deny_challenge]
 
 
+class PassAdmin(admin.ModelAdmin):
+	list_display = ['user', 'base_word', 'type']
+
 admin.site.register(UserStat, UserStatAdmin)
 admin.site.register(Relation, RelationAdmin)
 admin.site.register(UserInput, UserInputAdmin)
 admin.site.register(Challenge, ChallengeAdmin)
+admin.site.register(Pass, PassAdmin)

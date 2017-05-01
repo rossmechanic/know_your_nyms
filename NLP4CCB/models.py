@@ -42,3 +42,14 @@ class Challenge(models.Model):
 	relation = models.ForeignKey(Relation)
 	sentence = models.CharField(max_length=140)
 	is_pending = models.BooleanField()
+
+class Pass(models.Model):
+	TYPES = (
+		('hyponyms', 'hyponyms'),
+		('meronyms', 'meronyms'),
+		('antonyms', 'antonyms'),
+		('synonyms', 'synonyms')
+	)
+	user = models.ForeignKey(User)
+	base_word = models.CharField(max_length=50)
+	type = models.CharField(max_length=50, choices=TYPES)
