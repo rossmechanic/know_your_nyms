@@ -98,7 +98,7 @@ elif USE_DEV:
 		}
 	}
 else:
-	credentials = json.load(open(os.path.join(BASE_DIR, '../../db.config.json'), 'r'))
+	credentials = json.load(open(os.path.join(BASE_DIR, 'db.config.json'), 'r'))
 	DATABASES = {
 		'default': {
 			'ENGINE': 'django.db.backends.oracle',
