@@ -100,7 +100,8 @@ def get_esp_scores(input_words, relations_percentages):
 									for word in input_words}
 
 
-def store_round(sem_rel, base_word, word_scores, user):
+def store_round(sem_rel, base_word, word_scores, request):
+	user = request.user
 	round_score = 0
 	user_stat = get_or_create_user_stat(user)
 	try:
@@ -109,7 +110,9 @@ def store_round(sem_rel, base_word, word_scores, user):
 		user_stat = UserStat.objects.create(user=user)
 		user_stat.save()
 	user_stat.rounds_played += 1
-	inc_index(sem_rel, user_stat)
+	# Only increment rel index when the word was chosen deterministically
+	if not request.session['random_vocab']:
+		inc_index(sem_rel, user_stat)
 
 	for word,scores in word_scores:
 		word_score = scores['total_score']

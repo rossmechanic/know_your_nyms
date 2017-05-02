@@ -15,7 +15,7 @@ from models import WordRelationshipForm
 relationships = ['synonyms','antonyms','hyponyms','meronyms']
 vocabs = {}
 for rel in relationships:
-	vocab_file = 'data/' + rel + '_vocab.txt'
+	vocab_file = 'data/' + rel + '_base_words.txt'
 	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
 		lines = f.readlines()
 	vocabs[rel] = [word.lower().strip() for word in lines]
@@ -75,11 +75,13 @@ def models(request):
 	vocab = vocabs[sem_rel]
 	user_stat = utils.get_or_create_user_stat(request.user)
 	vocab_index = utils.rel_index(sem_rel, user_stat)
-	# Go in a set order for the vocabulary for each user.
-	if vocab_index < len(vocab):
-		base_word = vocab[vocab_index]
-	else:
+	# Usually go in a set order for the vocabulary for each user.
+	if vocab_index >= len(vocab) or random.random() < 0.2:
 		base_word = random.choice(vocab)
+		request.session['random_vocab'] = True
+	else:
+		base_word = vocab[vocab_index]
+		request.session['random_vocab'] = False
 	# Handle word starting with a vowel
 	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
 		starts_vowel = utils.starts_with_vowel(base_word)
@@ -128,7 +130,7 @@ def scoring(request):
 				answer += 'a '
 		answer += base_word
 		context['answer'] = answer
-		utils.store_round(sem_rel, base_word, word_scores, request.user)
+		utils.store_round(sem_rel, base_word, word_scores, request)
 		return render(request, 'scoring.html', context)
 	else:
 		return redirect('/models/')
