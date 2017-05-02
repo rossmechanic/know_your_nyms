@@ -29,7 +29,8 @@ else:
 	DEBUG = True
 
 ALLOWED_HOSTS = [u'know-your-nyms-prod.sveppriec2.us-west-2.elasticbeanstalk.com', 'localhost',
-				 u'127.0.0.1', u'www.know-your-nyms.com']
+				 u'127.0.0.1', u'know-your-nyms-prod.m33mxhbfrg.us-west-2.elasticbeanstalk.com',
+				 u'www.know-your-nyms.com']
 
 # Application definition
 

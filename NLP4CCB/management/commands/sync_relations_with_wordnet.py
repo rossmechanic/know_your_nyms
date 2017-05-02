@@ -4,6 +4,7 @@ import os
 import json
 from NLP4CCB.models import Relation
 
+
 class Command(BaseCommand):
 	help = 'Syncs current relations in the database such that the in_wordnet column is accurate'
 
