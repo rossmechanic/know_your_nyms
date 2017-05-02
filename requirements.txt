@@ -1,4 +1,11 @@
+appdirs==1.4.3
+click==6.7
 cx-Oracle==5.2.1
 Django==1.10.3
+first==2.0.1
 nltk==3.2.2
+packaging==16.8
+passgen==1.0.1
+pip-tools==1.8.2
+pyparsing==2.2.0
 six==1.10.0
