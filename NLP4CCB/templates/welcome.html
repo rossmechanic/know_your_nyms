@@ -23,27 +23,24 @@
             </div>
        </div>
     </div>
-
-    <br>
     {% if request.user.is_authenticated %}
-    <h1 class="welcome-col"> Welcome {{ request.user.username }}!  </h1>
-    <h4 class="welcome-col"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
-    <h4 class="welcome-col"> Total Score: <b> {{ total_score }} </b></h4>
-    <h4 class="welcome-col"> Average Score Per Round: <b> {{ average_score }} </b> </h4>
+        <br>
+
+        <h1 class="welcome-col school-bell"> Welcome {{ request.user.username }}!  </h1>
+        <h4 class="welcome-col roboto-mono"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
+        <h4 class="welcome-col roboto-mono"> Total Score: <b> {{ total_score }} </b></h4>
+        <h4 class="welcome-col roboto-mono"> Average Score Per Round: <b> {{ average_score }} </b> </h4>
     {% endif %}
     <br>
 
 <div class="container">
     <div class="row">
         <div class="col-md-12 welcome-col">
-
-{#            <a type="button" class="btn btn-info btn-lg" href='/signout' id="logout-button">Logout</a>#}
-
-            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#howToModal">How to Play</button>
+            <button type="button" class="btn btn-info btn-lg nym-button" data-toggle="modal" data-target="#howToModal">How to Play</button>
             &nbsp;&nbsp;
-            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#teamModal">About the Team</button>
+            <button type="button" class="btn btn-lg btn-primary nym-button" data-toggle="modal" data-target="#teamModal" >About the Team</button>
             &nbsp;&nbsp;
-            <a type="button" class="btn btn-info btn-lg" id="start-button">Start Round</a>
+            <a type="button" class="btn btn-lg btn-success nym-button" id="start-button">Start Round</a>
 
             <br> <br>
             {% if request.user.is_authenticated %}
@@ -63,16 +60,29 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">About This Game</h4>
+                    <h3 class="modal-title school-bell">About This Game</h3>
                   </div>
-                  <div class="modal-body instructions-modal">
-                      <p style="text-align: center"><b>Welcome!</b><br> </p>
-                        First, create an account if you don't have one already, and sign in.<br>
-                        Click Start Round to begin playing a game.<br>
-                        For each round, you'll have 20 seconds to identify as many word relations as you can.<br> <br>
-                        <div class="example">
-                            Example: If the relationship is <b>meronym</b>, you may be asked to "Name parts of a <b>face</b>?" <br>
+                  <div class="modal-body instructions-modal roboto-mono">
+
+                            <div class="boxed">
+                      <h3 class="welcome-col school-bell">Welcome!<br> </h3>
+                        <b style="color:#337ab7">Sign in</b> if you already have an account.<br>
+                        If you don't have one, <b style="color:#337ab7">Sign up</b>!<br>
+                      <!--   #5bc0de -->
+                        Click <b style="color:#5cb85c">Start Round</b> to begin playing.<br>
+                        For each round, you'll have <b>20 seconds</b> to identify as many word relations as you can.<br> <br>
+                            </div>
+                        <br>
+
+
+                        <div class="boxed">
+                            <h4 class="school-bell">Example:</h4>
+                            If the relationship is <b style="color:#ff7f7f">meronym</b>, you may be asked to
+                            <br>
+                            <h4 class="welcome-col school-bell">
+                            "Name parts of a face?"</h4>
                             To which you might answer...<br>
+
                               <ul>
                                   <li><b>eyes</b></li>
                                   <li><b>nose</b></li>
@@ -80,15 +90,25 @@
                                   <li><b>mouth</b></li>
                                   <li><b>chin</b></li>
                               </ul>
+                               Press the <b style="color:gray">TAB key</b> or <b style="color:gray">ENTER</b> to create another box for word entry.<br><br>
                         </div>
+                        <br>
+                  
+                <div class="boxed">
+                     <h4 class="welcome-col school-bell">Scoring<br> </h4>
+                        You get points for naming words.<br>
                         Your score for each word is a percentage of how many other players have also said it!<br>
-                        Bonus points (50) are awarded for words in WordNet, a handcrafted lexical database. <br>
-                        Repeated words or empty boxes will not be considered for scoring. <br>
-                        Finally, use tab or enter to create another box for word entry. <br> <br>
-                      <p style="text-align: center"><b>Enjoy the game!</b><br> </p> <br>
+                        Bonus points are awarded for words in <a href="https://wordnet.princeton.edu/">WordNet</a>, a handcrafted lexical database. <br>
+                        Repeated words or empty boxes will not be considered for scoring.
+                        <br>
+
+                        </div>
+
+
+                      <h3 class="welcome-col school-bell">Have fun!</h3>
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default nym-button roboto-mono" data-dismiss="modal">Close</button>
                   </div>
                 </div>
 
@@ -104,29 +124,62 @@
                 <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">About the team</h4>
+                    <h3 class="modal-title school-bell">About the team</h3>
                   </div>
                   <div class="modal-body">
-                     <div class="row">
+                     <div class="row roboto-mono">
                          <div class="col-md-4">
                              <img class="team" src="{% static "images/hannah_cutler.jpg" %}"><br>
-                             <b>Hannah Cutler</b><br> is a Senior in CIS</div>
+                             <b>Hannah Cutler</b><br> is a Senior studying Computer Science.<br>
+                            
+                            <a href="https://www.linkedin.com/in/hannah-cutler" style="margin-right:10px;color:white;">
+                            <img src="{% static "images/linkedin.png" %}" style="width:10%;height:10%">
+                            </a>
+                            <a href="mailto:hcutler@seas.upenn.edu">
+                            <img src="{% static "images/email.png" %}" style="width:10%;height:10%">
+                            </a>
+                             </div>
+
                          <div class="col-md-4">
                              <img class="team" src="{% static "images/dean_fulgoni.jpg" %}"><br>
-                             <b>Dean Fulgoni</b><br> is a Senior in NETS</div>
+                             <b>Dean Fulgoni</b><br> is a Senior studying <a href="http://www.nets.upenn.edu/">NETS</a>.<br>
+                            
+                            <a href="https://www.linkedin.com/in/dean-fulgoni-17629090/" style="margin-right:10px;color:white;">
+                            <img src="{% static "images/linkedin.png" %}" style="width:10%;height:10%">
+                            </a>
+                            <a href="mailto:dfulgoni@seas.upenn.edu">
+                            <img src="{% static "images/email.png" %}" style="width:10%;height:10%">
+                            </a>
+
+                             </div>
+
+
+
                          <div class="col-md-4">
                               <img class="team" src="{% static "images/ross_mechanic.jpg" %}"><br>
-                             <b>Ross Mechanic</b><br> is a Senior in CIS</div>
+                             <b>Ross Mechanic</b><br> is a Senior studying Computer Science.<br>
+                            <a href="https://www.linkedin.com/in/rossmechanic/" style="margin-right:10px;color:white;">
+                            <img src="{% static "images/linkedin.png" %}" style="width:10%;height:10%">
+                            </a>
+                            <a href="mailto:mechanic@seas.upenn.edu">
+                            <img src="{% static "images/email.png" %}" style="width:10%;height:10%">
+                            </a>
+                             </div>
                      </div>
                       <br>
-                     <div class="row">
-                         <div class="col-md-12">Advisor: <br><b><a href="http://www.cis.upenn.edu/~ccb/">Dr. Chris Callison-Burch</a></b></div>
+                     <div class="row roboto-mono">
+                     <br>
+                         <div class="col-md-12">
+                          <b class="school-bell">Advisors:</b><br>
+                         <b><a href="http://www.cis.upenn.edu/~ccb/">Dr. Chris Callison-Burch</a></b><br>
+                         <b><a href="https://www.linkedin.com/in/sneha-rajana-462a33bb/">Sneha Rajana</a></b>
+                         </div>
                      </div>
 
                   </div>
 
                   <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default nym-button roboto-mono" data-dismiss="modal">Close</button>
                   </div>
                 </div>
 

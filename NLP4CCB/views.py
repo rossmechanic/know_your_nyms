@@ -33,6 +33,14 @@ rel_a_map = {'synonyms': 'Another word for ',
 			 'meronyms': 'Parts of '
 			 }
 
+# Dictionary for sem_rel to amount of time on timer:
+rel_time_map = {
+	'synonyms': 10,
+	'antonyms': 10,
+	'hyponyms': 15,
+	'meronyms': 20
+}
+
 def index(request):
 	context = dict()
 	if request.user.is_authenticated():
@@ -52,8 +60,12 @@ def models(request):
 	# We should select a relationship randomly from the set of selected ones. If none were selected,
 	# just choose randomly for all (unless we want some javascript solution)
 	if request.method == 'POST':
-		new_rels = request.POST.getlist('checks')
-		request.session['relationships'] = new_rels
+		if 'skip' in request.POST:
+			utils.skip_word(request)
+			return HttpResponse("Success")
+		else:
+			new_rels = request.POST.getlist('checks')
+			request.session['relationships'] = new_rels
 
 	rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms', 'hyponyms', 'synonyms']
 
@@ -82,7 +94,8 @@ def models(request):
 		"formset": word_relationship_formset,
 		"base_word": base_word,
 		"sem_rel": sem_rel,
-		"question": question
+		"question": question,
+		"time": rel_time_map[sem_rel]
 	}
 	return render(request, 'input_words.html', context)
 

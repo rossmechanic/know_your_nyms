@@ -1,7 +1,7 @@
 import json
 import os
 from NLP4CCB_Django_App import settings
-from models import UserInput, UserStat, Relation
+from models import UserInput, UserStat, Relation, Pass
 from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 stemmer = PorterStemmer()
@@ -96,8 +96,8 @@ def get_esp_scores(input_words, relations_percentages):
 	stem_dict = {stemmer.stem(word): word for word in relations_percentages.keys()}
 	# For each input_word, if its stem appears in the stems of the words seen, map the word
 	# to the percentage of the word already seen with that stem
-	return {word:float(relations_percentages[stem_dict[stemmer.stem(word)]]*100) if stemmer.stem(word) in stem_dict else 0
-									for word in input_words }
+	return {word: float(relations_percentages[stem_dict[stemmer.stem(word)]]*100) if stemmer.stem(word) in stem_dict else 0
+									for word in input_words}
 
 
 def store_round(sem_rel, base_word, word_scores, request):
@@ -132,9 +132,11 @@ def store_round(sem_rel, base_word, word_scores, request):
 	user_stat.total_score += round_score
 	user_stat.save()
 
+
 def starts_with_vowel(word):
-	vowels = ['A','E','I','O','U','a','e','i','o','u']
+	vowels = ['A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u']
 	return word[0] in vowels
+
 
 def get_or_create_user_stat(user):
 	try:
@@ -143,6 +145,7 @@ def get_or_create_user_stat(user):
 		user_stat = UserStat.objects.create(user=user)
 		user_stat.save()
 	return user_stat
+
 
 def rel_index(sem_rel, user_stat):
 	if sem_rel == 'synonyms':
@@ -154,6 +157,7 @@ def rel_index(sem_rel, user_stat):
 	elif sem_rel == 'meronyms':
 		return user_stat.meronyms_index
 
+
 def inc_index(sem_rel, user_stat):
 	if sem_rel == 'synonyms':
 		user_stat.synonyms_index += 1
@@ -163,3 +167,15 @@ def inc_index(sem_rel, user_stat):
 		user_stat.hyponyms_index += 1
 	elif sem_rel == 'meronyms':
 		user_stat.meronyms_index += 1
+
+
+def skip_word(request):
+	sem_rel = request.POST['sem_rel']
+	base_word = request.POST['base_word']
+	user_stat = UserStat.objects.get(user=request.user)
+	inc_index(sem_rel, user_stat)
+	user_stat.save()
+
+	pass_object = Pass.objects.create(user=request.user, type=sem_rel, base_word=base_word)
+	pass_object.save()
+

@@ -6,6 +6,7 @@
     <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
 {% endblock %}
 {% block scripts %}
+    <script src={% static "javascripts/js-cookie/js.cookie.js" %}></script>
     <script src={% static "javascripts/input_words.js" %}></script>
 {% endblock %}
 
@@ -14,14 +15,14 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7 col-md-offset-1">
-                <h1 class="game-question">{{ question }} {{ base_word }}?</h1>
+                <h1 class="game-question school-bell">{{ question }} {{ base_word }}?</h1>
             </div>
             <div class="col-md-4">
-                <h1>Timer: <span class="timer">20</span></h1>
+                <h1 class="roboto-mono">Timer: <span class="timer">{{ time }}</span></h1>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-6 col-md-offset-2">
+            <div class="col-md-5 col-md-offset-3">
                 <form id="input-form" method="POST" action="./scoring/">
                     {% csrf_token %}
                     {{ formset.management_form }}
@@ -33,6 +34,11 @@
                         </div>
                     {% endfor %}
                 </form>
+            </div>
+            <div class="col-md-4">
+                <button id="skip-btn" class="button btn-primary btn-lg nym-button">
+                    Skip Word
+                </button>
             </div>
         </div>
     </div>

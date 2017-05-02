@@ -20,10 +20,10 @@
 
 
 {% block content %}
-    <div class="container-fluid">
+    <div class="container-fluid roboto-mono">
         <div class="row">
             <div class="col-md-offset-1 col-md-5" id="score-report-div" style="text-align: center">
-                <h1 class="score-report-header">Score Report</h1>
+                <h1 class="score-report-header school-bell">Score Report</h1>
                 <table class="table table-bordered table-hover">
                     <thead>
                         <th>{{ answer }}</th>
@@ -62,13 +62,13 @@
             </div>
             {% if percentages.data and times_played > 0 %}
                 <div class="col-md-5 #bar-chart">
-                    <h1 class="top-words-header">Top Answers</h1>
+                    <h1 class="top-words-header school-bell">Top Answers</h1>
                     <svg width="580" height="400"></svg>
                 </div>
             {% endif %}
         </div>
         <div class="row" style="text-align: center">
-            <a type="button" class="btn btn-success btn-lg" href="models/">Next Round</a>
+            <a type="button" class="btn btn-success btn-lg nym-button" href="models/">Next Round</a>
         </div>
     </div>
 {% endblock %}

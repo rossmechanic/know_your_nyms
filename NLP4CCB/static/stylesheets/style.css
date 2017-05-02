@@ -3,6 +3,7 @@ body {
     padding-bottom: 30px;
 }
 
+
 .game-question {
     text-align: center;
 }
@@ -29,12 +30,34 @@ img.team {
    height:80px;
 }
 
-.example {
-    color: royalblue;
+.boxed {
+    border: 1px;
+    border-color: gray;
+    border-style:solid;
+    padding-left: 10px;
+    padding-right:10px
 }
 
 .instructions-modal {
     text-align: left;
+}
+
+.nym-button {
+    font-family: 'Roboto Mono', sans-serif;
+    border-radius: 0;
+    box-shadow: 4px 4px 1px #888888;
+}
+
+.roboto-mono {
+    font-family: Roboto Mono, sans-serif;
+}
+
+.school-bell {
+    font-family: Schoolbell, sans-serif;
+}
+
+.center {
+    text-align: center !important;
 }
 
 /* CSS for d3 bar chart*/
@@ -49,4 +72,5 @@ img.team {
 .axis--x path {
     display: none;
 }
+
 

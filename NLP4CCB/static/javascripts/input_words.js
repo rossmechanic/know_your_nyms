@@ -1,6 +1,8 @@
 /**
  * Created by rossmechanic on 11/29/16.
  */
+var Cookies = window.Cookies;
+
 $(document).ready(function(){
     var $timer = $(".timer");
     var time = parseInt($timer.text())
@@ -19,10 +21,31 @@ $(document).ready(function(){
         }
     },500);
 
+    $('#id_form-0-word').focus();
+
     var submitWords = function() {
         $("#input-form").submit();
         $('.word-rel-formset > input').prop("disabled", true);
-    }
+    };
+
+    var skipWord = function() {
+        var csrftoken = Cookies.get('csrftoken');
+        $.ajax({
+           beforeSend: function(xhr) {
+               xhr.setRequestHeader("X-CSRFToken", csrftoken);
+           },
+            type: "POST",
+            url: '/models/',
+            data: {skip: 'true', sem_rel: $('#id_form-SEM_REL').val(), base_word: $('#id_form-BASE_WORD').val()},
+            success: function() {
+                window.location.href='/models';
+            }
+        });
+    };
+
+    $('#skip-btn').on('click', function(){
+       skipWord();
+    });
 
     $(document).on('keydown','.word-rel-formset', function(event){
         if ((event.which === 9 || event.which === 13 || event.which === 51) && $(this).is(':last-child')) {
