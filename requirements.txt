@@ -6,5 +6,6 @@ nltk==3.2.2
 packaging==16.8
 passgen==1.0.1
 pip-tools==1.8.2
+psycopg2==2.7.1
 pyparsing==2.2.0
 six==1.10.0
