@@ -29,7 +29,8 @@ if 'DEBUG' in os.environ:
 else:
 	DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', u'127.0.0.1', u'www.know-your-nyms.com']
+ALLOWED_HOSTS = ['localhost', u'127.0.0.1', u'www.know-your-nyms.com',
+				 u'know-your-nyms-dev.jibrb3kjiu.us-east-1.elasticbeanstalk.com']
 
 # Application definition
 
@@ -124,7 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'US/Eastern'
 
 USE_I18N = True
 
