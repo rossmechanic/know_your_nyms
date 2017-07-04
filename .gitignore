@@ -21,4 +21,6 @@
 
 db.config.json
 
+db_dev.config.json
+
 *.DS_Store
