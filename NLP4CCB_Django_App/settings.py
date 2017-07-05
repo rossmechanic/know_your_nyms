@@ -92,16 +92,28 @@ if 'RDS_HOSTNAME' in os.environ:
 	}
 else:
 	credentials = json.load(open(os.path.join(BASE_DIR, 'db.config.json'), 'r'))
-	DATABASES = {
-		'default': {
-			'ENGINE': 'django.db.backends.postgresql',
-			'NAME': credentials['RDS_DB_NAME'],
-			'USER': credentials['RDS_USERNAME'],
-			'PASSWORD': credentials['RDS_PASSWORD'],
-			'HOST': credentials['RDS_HOSTNAME'],
-			'PORT': credentials['RDS_PORT']
+	if DEBUG:
+		DATABASES = {
+			'default': {
+				'ENGINE': 'django.db.backends.postgresql',
+				'NAME': credentials['dev']['RDS_DB_NAME'],
+				'USER': credentials['dev']['RDS_USERNAME'],
+				'PASSWORD': credentials['dev']['RDS_PASSWORD'],
+				'HOST': credentials['dev']['RDS_HOSTNAME'],
+				'PORT': credentials['dev']['RDS_PORT']
+			}
 		}
-	}
+	else:
+		DATABASES = {
+			'default': {
+				'ENGINE': 'django.db.backends.postgresql',
+				'NAME': credentials['prod']['RDS_DB_NAME'],
+				'USER': credentials['prod']['RDS_USERNAME'],
+				'PASSWORD': credentials['prod']['RDS_PASSWORD'],
+				'HOST': credentials['prod']['RDS_HOSTNAME'],
+				'PORT': credentials['prod']['RDS_PORT']
+			}
+		}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
