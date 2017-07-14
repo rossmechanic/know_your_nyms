@@ -62,7 +62,6 @@ $(document).ready(function () {
 
     var data = window.percentages['data'];
     var timesPlayed = window.timesPlayed;
-    console.log(timesPlayed);
     if (data.length > 0 && timesPlayed >= 5) {
         draw(data);
         $(window).resize(function () {

@@ -1,7 +1,9 @@
 import json
 import os
+import sets
+import random
 from NLP4CCB_Django_App import settings
-from models import UserInput, UserStat, Relation, Pass
+from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat
 from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 stemmer = PorterStemmer()
@@ -68,6 +70,29 @@ def confirmed_relations(base_word, input_words, sem_rel):
 			challenge_bonuses[word] = 0.0
 	return challenge_bonuses
 
+def get_relations_percentages_no_filter(sem_rel, base_word):
+	user_inputs = UserInput.objects.filter(relation__type=sem_rel, relation__base_word=base_word)
+	input_words = [u.relation.input_word for u in user_inputs]
+	stem_dict = {} # Maps a stem to an actual word
+	input_word_dict = {}
+	for w in input_words:
+		# If we haven't seen this word stem, make a new entry
+		if stemmer.stem(w) not in stem_dict:
+			stem_dict[stemmer.stem(w)] = w
+			input_word_dict[w] = 1
+		# If we have, add one to the associated word for that existing stem
+		else:
+			input_word_dict[stem_dict[stemmer.stem(w)]] += 1
+
+	# The number of people that have played this word
+	times_played = user_inputs.values('user', 'round_number').distinct().count()
+	words = [word for word in input_word_dict]
+
+	# Percentage of players that said a relation
+	percentages = [(word, round((float(input_word_dict[word]) / times_played), 3)) for word in words]
+	percentages.sort(key=lambda x: x[1])
+	return percentages[::-1]
+
 
 def get_relations_percentages(sem_rel, base_word):
 	user_inputs = UserInput.objects.filter(relation__type=sem_rel, relation__base_word=base_word)
@@ -85,8 +110,15 @@ def get_relations_percentages(sem_rel, base_word):
 
 	# The number of people that have played this word
 	times_played = user_inputs.values('user', 'round_number').distinct().count()
+	filtered_words = [word for word in input_word_dict]
+	total = 0
+	for word in filtered_words:
+		if input_word_dict[word] >= 2:
+			total += input_word_dict[word]
+	filtered_words = filter(lambda x: float(input_word_dict[x] > 2), filtered_words)
+
 	# Percentage of players that said a relation
-	percentages = [(word, round((float(input_word_dict[word]) / times_played), 3)) for word in input_word_dict]
+	percentages = [(word, round((float(input_word_dict[word]) / total), 3)) for word in filtered_words]
 	percentages.sort(key=lambda x: x[1])
 	return percentages[::-1]
 
@@ -99,8 +131,83 @@ def get_esp_scores(input_words, relations_percentages):
 	return {word: float(relations_percentages[stem_dict[stemmer.stem(word)]]*100) if stemmer.stem(word) in stem_dict else 0
 									for word in input_words}
 
+# Average score per round over all players. Each weighted equally, regardless of rounds played.
+def get_overall_player_avg():
+	lst = list(map(lambda x: div(x.total_score, x.rounds_played), list(UserStat.objects.all())))
+	return sum(lst)/float(len(lst))
 
-def store_round(sem_rel, base_word, word_scores, request):
+def get_overall_player_std_dev(avg):
+	lst = list(map(lambda x: div(x.total_score, x.rounds_played), list(UserStat.objects.all())))
+	sqsum = 0.0
+	for a in lst:
+		sqsum += (a-avg)**2.0
+	return sqsum/float(len(lst))
+
+# Average score over all words. Each weighted equally, regardless of rounds played.
+def get_overall_score_avg():
+	lst = WordStat.objects.values_list('avg_score', flat=True)
+	return sum(lst)/float(len(lst))
+
+def get_overall_score_std_dev(avg):
+	lst = WordStat.objects.values_list('avg_score', flat=True)
+	sqsum = 0.0
+	for a in lst:
+		sqsum += (a-avg)**2.0
+	return sqsum/float(len(lst))
+
+# Adds a relation object to the database
+def create_relation(sem_rel, base_word, word):
+	try:
+		relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
+	except ObjectDoesNotExist:
+		relation = Relation.objects.create(type=sem_rel, base_word=base_word, input_word=word)
+		relation.save()
+	return relation
+
+# Removes a relation object from the database
+def delete_relation(sem_rel, base_word, word):
+	try:
+		relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
+		Relation.delete(relation)
+		return
+	except ObjectDoesNotExist:
+		return
+
+def exists_relation(sem_rel, base_word, word):
+	try:
+		relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
+		return True;
+	except ObjectDoesNotExist:
+		return False
+
+def get_or_create_conf_stat(sem_rel, base_word, word):
+	try:
+		relation = ConfirmationStat.objects.get(sem_rel=sem_rel, base_word=base_word, input_word=word)
+	except ObjectDoesNotExist:
+		relation = ConfirmationStat.objects.create(sem_rel=sem_rel, base_word=base_word, input_word=word)
+		relation.save()
+	return relation
+
+# Creates or edits a confirmation relation.
+def confirm_or_reject_relation(sem_rel, base_word, word, decision):
+	try:
+		relation = ConfirmationStat.objects.get(sem_rel=sem_rel, base_word=base_word, input_word=word)
+		if decision == 1:
+			relation.times_confirmed += 1
+		elif decision == 0: 
+			relation.times_rejected += 1
+	except ObjectDoesNotExist:
+		relation = ConfirmationStat.objects.create(sem_rel=sem_rel, base_word=base_word, input_word=word)
+	relation.save()
+
+# Save results of a round of the confirmation game
+def save_confirmation_scores(word_set, decisions, sem_rel, base_word):
+	for i in range(len(decisions)):
+		confirm_or_reject_relation(sem_rel, base_word, word_set[i], decisions[i])
+
+# Storing data on a round from an authenticated player
+# Updates user_stat
+def store_round(sem_rel, base_word, index, word_scores, request):
 	user = request.user
 	round_score = 0
 	user_stat = get_or_create_user_stat(user)
@@ -110,33 +217,50 @@ def store_round(sem_rel, base_word, word_scores, request):
 		user_stat = UserStat.objects.create(user=user)
 		user_stat.save()
 	user_stat.rounds_played += 1
-	# Only increment rel index when the word was chosen deterministically
-	if not request.session['random_vocab']:
-		inc_index(sem_rel, user_stat)
+	
+	nonempty = False
 
+	# Creates a relation to save in the database, and a UserInput object
 	for word,scores in word_scores:
+		nonempty = True
 		word_score = scores['total_score']
 		round_score += word_score
-		try:
-			relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
-		except ObjectDoesNotExist:
-			relation = Relation.objects.create(type=sem_rel, base_word=base_word, input_word=word)
-			relation.save()
+		relation = create_relation(sem_rel, base_word, word)
 		user_input = UserInput.objects.create(user=user,
 											  round_number=user_stat.rounds_played,
 											  relation=relation,
 											  word_score=word_score)
 
 		user_input.save()
-
+	# Update the statistics for this word with new data. Adds a score bonus if this word has not been played 5 times yet
+	word_stat = get_or_create_word_stat(base_word, sem_rel, index)
+	if word_stat.rounds_played <= 5 and nonempty:
+		round_score += 40
+	save_word_result(base_word, sem_rel, round_score)
 	user_stat.total_score += round_score
 	user_stat.save()
+
+# Storing data on a round from an unauthenticated player
+def anon_store_round(sem_rel, base_word, index, word_scores):
+	round_score = 0
+
+	# Creates a relation to save in the database
+	# Player is anonymous, so we have no user data to save.
+	for word,scores in word_scores:
+		word_score = scores['total_score']
+		round_score += word_score
+		create_relation(sem_rel, base_word, word)
+
+	# Update the statistics for this word with new data. Adds a score bonus if this word has not been played 5 times yet
+	word_stat = get_or_create_word_stat(base_word, sem_rel, index)
+	if word_stat.rounds_played <= 5:
+		round_score += 40
+	save_word_result(base_word, sem_rel, round_score)
 
 
 def starts_with_vowel(word):
 	vowels = ['A', 'E', 'I', 'O', 'U', 'a', 'e', 'i', 'o', 'u']
 	return word[0] in vowels
-
 
 def get_or_create_user_stat(user):
 	try:
@@ -146,36 +270,193 @@ def get_or_create_user_stat(user):
 		user_stat.save()
 	return user_stat
 
+def get_or_create_word_stat(word, rel, i):
+	try:
+		word_stat = WordStat.objects.get(word=word, sem_rel=rel, index=i)
+	except ObjectDoesNotExist:
+		word_stat = WordStat.objects.create(word=word, sem_rel=rel, index=i)
+		word_stat.save()
+	return word_stat
 
-def rel_index(sem_rel, user_stat):
-	if sem_rel == 'synonyms':
-		return user_stat.synonyms_index
-	elif sem_rel == 'antonyms':
-		return user_stat.antonyms_index
-	elif sem_rel == 'hyponyms':
-		return user_stat.hyponyms_index
-	elif sem_rel == 'meronyms':
-		return user_stat.meronyms_index
+# Updates the stats of a word with a new score
+def save_word_result(word, sem_rel, score):
+	word_stat = get_or_create_word_stat(word, sem_rel, 0)
+	word_stat.avg_score = (word_stat.avg_score * word_stat.rounds_played + score)/(word_stat.rounds_played + 1)
+	word_stat.rounds_played = word_stat.rounds_played + 1
+	word_stat.save()
 
-
-def inc_index(sem_rel, user_stat):
-	if sem_rel == 'synonyms':
-		user_stat.synonyms_index += 1
-	elif sem_rel == 'antonyms':
-		user_stat.antonyms_index += 1
-	elif sem_rel == 'hyponyms':
-		user_stat.hyponyms_index += 1
-	elif sem_rel == 'meronyms':
-		user_stat.meronyms_index += 1
+# Adds a CompletedStat object for this word to the database. Used to determine if a player has completed a word or not
+def mark_played(user, index, word, sem_rel):
+	try:
+		cset = CompletedStat.objects.filter(user=user, sem_rel=sem_rel, index=index, base_word=word)
+		cmp_stat = CompletedStat.objects.get(user=user, sem_rel=sem_rel, index=index, base_word=word)
+	except ObjectDoesNotExist:
+		cmp_stat = CompletedStat.objects.create(user=user, sem_rel=sem_rel, index=index, base_word=word)
+		cmp_stat.save()
 
 
 def skip_word(request):
 	sem_rel = request.POST['sem_rel']
 	base_word = request.POST['base_word']
-	user_stat = UserStat.objects.get(user=request.user)
-	inc_index(sem_rel, user_stat)
-	user_stat.save()
+	index = request.POST['word_index']
 
 	pass_object = Pass.objects.create(user=request.user, type=sem_rel, base_word=base_word)
 	pass_object.save()
+
+	passes = Pass.objects.filter(type=sem_rel, base_word=base_word).distinct().count()
+	plays = get_or_create_word_stat(base_word, sem_rel, index).rounds_played
+
+	# If the ratio between passes and plays gets too large, we retire words, meaning they won't be selected dynamically again.
+	if passes + plays >= 30 and passes > 3*plays:
+		word_stat = get_or_create_word_stat(base_word, sem_rel, index)
+		word_stat.retired = True
+		word_stat.save()
+	elif passes + plays >= 30:
+		word_stat = get_or_create_word_stat(base_word, sem_rel, index)
+		word_stat.retired = False
+		word_stat.save()
+
+# Rank given a sorted list.
+def rank(user_stat_arr, user_stat, getStat, lo, hi):
+	mid = (lo + hi)//2
+	if lo == hi and user_stat_arr[lo].user.username == user_stat.user.username:
+		return lo
+	elif lo == hi:
+		return -1
+	if getStat(user_stat) == getStat(user_stat_arr[mid]):
+		if user_stat_arr[lo].user.username == user_stat.user.username:
+			return mid
+		return rank(user_stat_arr, user_stat, getStat, mid + 1, hi) + rank(user_stat_arr, user_stat, getStat, lo, mid) + 1
+	elif getStat(user_stat) > getStat(user_stat_arr[mid]):
+		return rank(user_stat_arr, user_stat, getStat, lo, mid)
+	elif getStat(user_stat) < getStat(user_stat_arr[mid]):
+		return rank(user_stat_arr, user_stat, getStat, mid + 1, hi)
+
+
+# Divides two numbers, but returns 0 if it would divide by zero.
+def div(a, b):
+	return 0 if b == 0 else a/b
+
+def random_select_unplayed_word(vocab_size, sem_rel):
+	unplayed = sets.Set()
+	for i in range (0, vocab_size):
+		unplayed.add(i)
+	# The unplayed words are ones with no statistics created yet.
+	for word_stat in WordStat.objects.filter(sem_rel=sem_rel):
+		if word_stat.index in unplayed:
+			unplayed.remove(word_stat.index)
+	return random.choice(tuple(unplayed))
+
+
+def dynamic_select_word(user, vocab_size, sem_rel, ind):
+	# We create a set of indices of words that this player could play, and narrow it down as we go
+	# Initially all words in this relationship are prospective choices
+	word_choices = sets.Set()
+	for i in range (0, vocab_size):
+		word_choices.add(i)
+
+
+	# If the user is authenticated, gather data on their average score relative to the rest of the playerbase	
+	if user.is_authenticated():
+		user_stat = get_or_create_user_stat(user)
+		player_avg = div(user_stat.total_score, user_stat.rounds_played)
+		overall_player_avg = get_overall_player_avg()
+		overall_player_std_dev = get_overall_player_std_dev(overall_player_avg)
+		z_score = (player_avg - overall_player_avg)/overall_player_std_dev
+
+		# Use that information about the player's relative rank to select a question with similarly 
+		# difficulty relative to other questions
+		question_avg = get_overall_score_avg()
+		question_std_dev = get_overall_score_std_dev(question_avg)
+		goal_question_avg = question_avg - z_score * question_std_dev
+
+		# Remove completed questions from prospective choices
+		done = CompletedStat.objects.filter(user=user, sem_rel=sem_rel).filter().values_list('index', flat=True)
+
+		for i in done:
+			if i in word_choices:
+				word_choices.remove(i)
+
+		# Remove questions too far from the goal score, calculated above
+		# Also remove questions that are retired.
+		unviable = list(filter(lambda x: abs(x.avg_score - goal_question_avg) > .5 * question_std_dev or x.retired, 
+		list(WordStat.objects.filter(sem_rel=sem_rel))))
+		unviable_ind = list(map(lambda x: x.index, unviable))
+		for i in unviable_ind:
+			if i in word_choices:
+				word_choices.remove(i)
+		
+		# Remove passed questions from prospective choices
+		passed = Pass.objects.filter(user=user, type=sem_rel)
+
+		for p in passed:
+			if ind[p.base_word, sem_rel] in word_choices:
+				word_choices.remove(ind[p.base_word, sem_rel])		
+			
+	# If there are no words close enough to the desired average score, we just pick a random one. 
+	if len(word_choices) == 0:
+		return random.randint(0, vocab_size - 1)
+
+	# Otherwise pick a random one from the viable set of questions.	
+	# If the user isn't authenticated, any word is valid as none are removed from 'word_choices'. So it effectively picks a random word.
+	return random.choice(tuple(word_choices))
+
+def find_base_word(base_words, sem_rel):
+	return random.choice(base_words[sem_rel].keys())
+
+
+def find_word_pairs(base_word, sem_rel, top_words):
+	# Words are chosen with probability proportional to their score.
+	word_scores = dict()
+	for (a,b) in top_words[(sem_rel, base_word)]:
+		word_scores[a] = b
+	total = 0
+	for word in word_scores:
+		total += word_scores[word]
+	play_words = list()
+	while len(play_words) < 25:
+		rand = random.uniform(0, total)
+		for word in word_scores:
+			rand -= word_scores[word]
+			if rand < 0:
+				total -= word_scores[word]
+				play_words.append(word)
+				del word_scores[word]
+				break
+
+	random.shuffle(play_words)
+	return play_words
+
+def is_confirmed(sem_rel, base_word, word):
+	relation = get_or_create_conf_stat(sem_rel, base_word, word)
+	return relation.times_confirmed > relation.times_rejected
+
+def int_to_bool(i):
+	if i == 1:
+		return True
+	else:
+		return False
+def int_to_yn(i):
+	if i == 1:
+		return "Yes"
+	else:
+		return "No"
+
+def add_det(phrase, base_word, sem_rel, determiners):
+	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
+		if base_word in determiners:
+			phrase += determiners[base_word]
+		elif starts_with_vowel(base_word):
+			phrase += 'an '
+		else:
+			phrase += 'a '
+
+
+
+
+
+
+
+
+
 

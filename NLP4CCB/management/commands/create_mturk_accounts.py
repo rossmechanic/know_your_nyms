@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
 		max_turk_num += 1
 
-		output_csv_string = 'Username,Password\n'
+		output_csv_string = ''
 		for i in range(max_turk_num, max_turk_num + options['num_turkers'][0]):
 			username = 'mturk' + str(i)
 			password = passgen(length=12, punctuation=False, digits=True, case='both')

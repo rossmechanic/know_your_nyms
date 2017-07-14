@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+
+{% block scripts %}
+    <script src={% static "javascripts/welcome.js" %}></script>
+{% endblock %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+    <br>
+    <br>
+
+    <div class="container">
+       <div class="row">
+            <div class="col-md-12 welcome-col">
+                <img class="logo" src="{% static "images/dark_logo_transparent_background.png" %}">
+            </div>
+       </div>
+    </div>
+
+    {% if request.user.is_authenticated %}
+        <br>
+
+        <h1 class="welcome-col school-bell"> Welcome {{ request.user.username }}!  </h1>
+
+    {% else %}
+        <br>
+
+        <h1 class="welcome-col school-bell"> Welcome Guest!  </h1>
+    {% endif %}    
+    <div class="container">
+            <div class="row">
+                <div class="col-md-12 welcome-col">
+                    &nbsp;&nbsp;
+                    <a href="/"a type="button" class="btn btn-lg btn-success nym-button" id="home">Home</a>
+                </div>
+            </div>
+    </div>
+
+    {% if request.user.is_authenticated %}
+        <br>
+        <h4 class="welcome-col roboto-mono"> Average Score: <b> {{ avg_score }} </b></h4>
+        <h4 class="welcome-col roboto-mono"> Rank <b> {{ avg_score_rank }} / {{ num_players }}</b> in Average Score</h4>
+        <h4 class="welcome-col roboto-mono"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
+        <h4 class="welcome-col roboto-mono"> Rank <b> {{ rounds_played_rank }} / {{ num_players }}</b> in Rounds Played</h4>
+        <h4 class="welcome-col roboto-mono"> Total Score: <b> {{ total_score }} </b></h4>
+        <h4 class="welcome-col roboto-mono"> Rank <b> {{ total_score_rank }} / {{ num_players }}</b> in Total Score</h4>
+    {% endif %}
+        <h1 class="welcome-col school-bell"> Leaderboard - Average Score per Round</h1>
+        <h4 class="welcome-col roboto-mono"> (Minimum 10 Rounds) </b></h4>
+        <h4 class="welcome-col roboto-mono"> 1st: <b> {{ avg_rank1 }} </b> - <b> {{ avg_score1 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 2nd: <b> {{ avg_rank2 }} </b> - <b> {{ avg_score2 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 3rd: <b> {{ avg_rank3 }} </b> - <b> {{ avg_score3 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 4th: <b> {{ avg_rank4 }} </b> - <b> {{ avg_score4 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 5th: <b> {{ avg_rank5 }} </b> - <b> {{ avg_score5 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 6th: <b> {{ avg_rank6 }} </b> - <b> {{ avg_score6 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 7th: <b> {{ avg_rank7 }} </b> - <b> {{ avg_score7 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 8th: <b> {{ avg_rank8 }} </b> - <b> {{ avg_score8 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 9th: <b> {{ avg_rank9 }} </b> - <b> {{ avg_score9 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 10th: <b> {{ avg_rank10 }} </b> - <b> {{ avg_score10 }} </b> </h4>
+
+        <h1 class="welcome-col school-bell"> Hardest Words - Average Score per Round</h1>
+        <h4 class="welcome-col roboto-mono"> (Minimum 10 Plays) </b></h4>
+        <h4 class="welcome-col roboto-mono"> 1st: {{ sem_rel1 }} <b> {{ word_rank1 }} </b> - <b> {{ word_score1 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 2nd: {{ sem_rel2 }} <b> {{ word_rank2 }} </b> - <b> {{ word_score2 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 3rd: {{ sem_rel3 }} <b> {{ word_rank3 }} </b> - <b> {{ word_score3 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 4th: {{ sem_rel4 }} <b> {{ word_rank4 }} </b> - <b> {{ word_score4 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 5th: {{ sem_rel5 }} <b> {{ word_rank5 }} </b> - <b> {{ word_score5 }} </b> </h4>  
+
+
+        <h1 class="welcome-col school-bell"> Leaderboard - Rounds Played </h1>
+        <h4 class="welcome-col roboto-mono"> 1st: <b> {{ rnd_rank1 }} </b> - <b> {{ rnd_score1 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 2nd: <b> {{ rnd_rank2 }} </b> - <b> {{ rnd_score2 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 3rd: <b> {{ rnd_rank3 }} </b> - <b> {{ rnd_score3 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 4th: <b> {{ rnd_rank4 }} </b> - <b> {{ rnd_score4 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 5th: <b> {{ rnd_rank5 }} </b> - <b> {{ rnd_score5 }} </b> </h4>
+
+        <h1 class="welcome-col school-bell"> Leaderboard - Total Score </h1>
+        <h4 class="welcome-col roboto-mono"> 1st: <b> {{ ttl_rank1 }} </b> - <b> {{ ttl_score1 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 2nd: <b> {{ ttl_rank2 }} </b> - <b> {{ ttl_score2 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 3rd: <b> {{ ttl_rank3 }} </b> - <b> {{ ttl_score3 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 4th: <b> {{ ttl_rank4 }} </b> - <b> {{ ttl_score4 }} </b> </h4>
+        <h4 class="welcome-col roboto-mono"> 5th: <b> {{ ttl_rank5 }} </b> - <b> {{ ttl_score5 }} </b> </h4>   
+    <br>
+
+{% endblock %}

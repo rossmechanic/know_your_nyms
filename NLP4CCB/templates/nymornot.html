@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+{% block scripts %}
+    <script src={% static "javascripts/js-cookie/js.cookie.js" %}></script>
+    <script src="{% static 'javascripts/nymornot.js' %}?v=0002"></script>
+{% endblock %}
+
+
+{% block content%}
+<script>
+    {% autoescape off %}
+        window.word_set = "{{ word_set|safe }}"
+    {% endautoescape %}
+</script>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7 col-md-offset-1">
+                <h1 class="game-question school-bell">{{ phrase }} {{ base_word }}?</h1>
+                <br>
+                <div class="row" style="text-align:center">
+                    <button id="false-btn" class="btn btn-primary btn-lg nym-button">  f : False  </button>
+                    <button id="true-btn" class="btn btn-primary btn-lg nym-button">   True : j  </button>
+                     <br>
+                     <br>
+                    <h1 class="game-question school-bell"><span class="curr_word">{{ curr_word }}</span></h1>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h1 class="roboto-mono">Timer: <span class="timer">{{ time }}</span></h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-5 col-md-offset-3">
+                <form id="input-form" method="POST" action="/conf_scoring/">
+                {% csrf_token %}
+                {{ formset.management_form }}
+                <input id="BASE_WORD" name="base_word" type="hidden" value="{{ base_word }}">
+                <input id="SEM_REL" name="sem_rel" type="hidden" value="{{ sem_rel }}">
+                <input id="WORD_SET" name="word_set" type="hidden" value="{{ word_set|safe }}">
+                <input id="RESULTS" name="results" type="hidden" value="">
+                </form>   
+            </div>
+            <div class="col-md-4">
+                <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+

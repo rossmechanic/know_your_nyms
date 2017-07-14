@@ -26,8 +26,9 @@
                 <form id="input-form" method="POST" action="./scoring/">
                     {% csrf_token %}
                     {{ formset.management_form }}
-                    <input id="id_form-BASE_WORD" name="base_word" type="hidden" value={{ base_word }}>
+                    <input id="id_form-BASE_WORD" name="base_word" type="hidden" value="{{ base_word }}">
                     <input id="id_form-SEM_REL" name="sem_rel" type="hidden" value={{ sem_rel }}>
+                    <input id="id_form-WORD_INDEX" name="word_index" type="hidden" value={{ word_index }}>
                     {% for form in formset %}
                         <div class="form-group word-rel-formset" index="0">
                             {{ form.word }}
@@ -39,7 +40,13 @@
                 <button id="skip-btn" class="button btn-primary btn-lg nym-button">
                     Skip Word
                 </button>
+                <button id="done-btn" class="button btn-primary btn-lg nym-button">
+                    Done
+                </button>
+                <br>
+                <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>
             </div>
+
         </div>
     </div>
 

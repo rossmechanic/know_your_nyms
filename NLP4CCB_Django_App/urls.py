@@ -16,6 +16,9 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 from NLP4CCB.views import index
+from NLP4CCB.views import leaderboard
+from NLP4CCB.views import confirmation
+from NLP4CCB.views import confirmation_scoring
 import views
 
 urlpatterns = [
@@ -24,5 +27,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^signin/', views.signin),
     url(r'^signout/', views.signout),
-    url(r'^signup/', views.signup)
+    url(r'^signup/', views.signup),
+    url(r'^leaderboard/', leaderboard),
+    url(r'^confirmation/', confirmation),
+    url(r'^conf_scoring', confirmation_scoring)
 ]

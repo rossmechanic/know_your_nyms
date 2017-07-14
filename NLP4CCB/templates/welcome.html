@@ -30,20 +30,34 @@
         <h4 class="welcome-col roboto-mono"> Total Rounds Played: <b> {{ rounds_played }} </b></h4>
         <h4 class="welcome-col roboto-mono"> Total Score: <b> {{ total_score }} </b></h4>
         <h4 class="welcome-col roboto-mono"> Average Score Per Round: <b> {{ average_score }} </b> </h4>
+    {% else %}
+        <h1 class="welcome-col school-bell"> Welcome Guest!  </h1>
+        <h4 class="welcome-col roboto-mono"> Sign Up To Save Scores!</b></h4>
     {% endif %}
     <br>
 
 <div class="container">
     <div class="row">
         <div class="col-md-12 welcome-col">
+            {% if request.user.is_authenticated %}
+            {% else %}
+              &nbsp;&nbsp;
+              <a href="/signin/" a type="button" class="btn btn-lg btn-primary nym-button" id="signin">Sign In</a>
+              <br> <br>
+            {% endif %}
+
             <button type="button" class="btn btn-info btn-lg nym-button" data-toggle="modal" data-target="#howToModal">How to Play</button>
             &nbsp;&nbsp;
             <button type="button" class="btn btn-lg btn-primary nym-button" data-toggle="modal" data-target="#teamModal" >About the Team</button>
             &nbsp;&nbsp;
+            <a href="/leaderboard/" a type="button" class="btn btn-lg btn-success nym-button" id="leaderboard">Leaderboards</a>
+            <br> <br>
+
             <a type="button" class="btn btn-lg btn-success nym-button" id="start-button">Start Round</a>
+            &nbsp;&nbsp;
+            <a type="button" class="btn btn-lg btn-success nym-button" id="start-conf-button">Start 'Nym Or Not' Round</a>
 
             <br> <br>
-            {% if request.user.is_authenticated %}
                 <form id='rel-type-form' action="/models/" method="POST">
                     {% csrf_token %}
                     <label class="checkbox-inline"><input type="checkbox" name='checks' value="synonyms" checked>Synonyms</label>
@@ -51,7 +65,6 @@
                     <label class="checkbox-inline"><input type="checkbox" name='checks' value="hyponyms" checked>Hyponyms</label>
                     <label class="checkbox-inline"><input type="checkbox" name='checks' value="meronyms" checked>Meronyms</label>
                 </form>
-            {% endif %}
             <!-- How to Modal content-->
             <div id="howToModal" class="modal fade" role="dialog">
               <div class="modal-dialog">
@@ -70,7 +83,7 @@
                         If you don't have one, <b style="color:#337ab7">Sign up</b>!<br>
                       <!--   #5bc0de -->
                         Click <b style="color:#5cb85c">Start Round</b> to begin playing.<br>
-                        For each round, you'll have <b>20 seconds</b> to identify as many word relations as you can.<br> <br>
+                        For each round, you'll have <b>10-20 seconds</b> to identify as many word relations as you can.<br> <br>
                             </div>
                         <br>
 

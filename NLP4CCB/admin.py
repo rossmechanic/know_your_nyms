@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import UserStat, Relation, UserInput, Challenge, Pass
+from models import UserStat, Relation, UserInput, Challenge, Pass, CompletedStat, WordStat, ConfirmationStat
 
 
 def accept_challenge(modeladmin, request, queryset):
@@ -26,12 +26,19 @@ deny_challenge.short_description = "Deny selected challenges"
 
 # Register your models here.
 class UserStatAdmin(admin.ModelAdmin):
-	list_display = ['user', 'rounds_played', 'total_score', 'synonyms_index', 'antonyms_index', 'hyponyms_index', 'meronyms_index']
+	list_display = ['user', 'rounds_played', 'total_score', 'synonyms_index', 'antonyms_index', 'hyponyms_index', 'meronyms_index', 'last_login']
 
+class WordStatAdmin(admin.ModelAdmin):
+	list_display = ['word', 'index', 'sem_rel', 'avg_score', 'rounds_played', 'retired']
+
+class CompletedStatAdmin(admin.ModelAdmin):
+	list_display = ['user', 'sem_rel', 'index', 'base_word']
 
 class RelationAdmin(admin.ModelAdmin):
 	list_display = ['type', 'base_word', 'input_word', 'in_word_net', 'challenge_accepted']
 
+class ConfirmationStatAdmin(admin.ModelAdmin):
+	list_display = ['sem_rel', 'base_word', 'input_word', 'times_confirmed', 'times_rejected']
 
 class UserInputAdmin(admin.ModelAdmin):
 	list_display = ['user', 'round_number', 'relation', 'word_score']
@@ -45,7 +52,10 @@ class ChallengeAdmin(admin.ModelAdmin):
 class PassAdmin(admin.ModelAdmin):
 	list_display = ['user', 'base_word', 'type']
 
+admin.site.register(CompletedStat, CompletedStatAdmin)
+admin.site.register(WordStat, WordStatAdmin)
 admin.site.register(UserStat, UserStatAdmin)
+admin.site.register(ConfirmationStat, ConfirmationStatAdmin)
 admin.site.register(Relation, RelationAdmin)
 admin.site.register(UserInput, UserInputAdmin)
 admin.site.register(Challenge, ChallengeAdmin)

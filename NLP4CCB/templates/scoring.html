@@ -52,6 +52,15 @@
 
                     {%  endfor %}
                 </table>
+                {% if first_response_bonus %}
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <th>First Response Bonus</th>
+                            <th>{{ first_response_bonus }}</th>
+                        </thead>
+                    </table>
+                {% endif %}
+
                 <table class="table table-bordered table-hover">
                     <thead>
                         <th>Round Score</th>
@@ -69,6 +78,7 @@
         </div>
         <div class="row" style="text-align: center">
             <a type="button" class="btn btn-success btn-lg nym-button" href="models/">Next Round</a>
+            <a type="button" class="btn btn-success btn-lg nym-button" a href="/">Home</a>
         </div>
     </div>
 {% endblock %}
