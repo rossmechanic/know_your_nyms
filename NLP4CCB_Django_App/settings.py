@@ -20,7 +20,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '*4(1v)*ar#gjx*l-_7!h1ke21_*x^5l8jr17lr6nxc(&u^*72o'
+SECRET_KEY = '*4(1v)*ar#gjx*l-_7!h1ke21_*x^5l8jr17lr6nxc(&u^*72o' if 'SECRET_KEY' not in os.environ \
+	else os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if 'DEBUG' in os.environ:
@@ -28,9 +29,9 @@ if 'DEBUG' in os.environ:
 else:
 	DEBUG = True
 
-ALLOWED_HOSTS = [u'know-your-nyms-prod.sveppriec2.us-west-2.elasticbeanstalk.com', 'localhost',
-				 u'127.0.0.1', u'know-your-nyms-prod.m33mxhbfrg.us-west-2.elasticbeanstalk.com',
-				 u'www.know-your-nyms.com']
+ALLOWED_HOSTS = ['localhost', u'127.0.0.1', u'www.know-your-nyms.com',
+				 u'know-your-nyms-dev.us-west-2.elasticbeanstalk.com',
+				 u'know-your-nyms-prod.us-west-2.elasticbeanstalk.com']
 
 # Application definition
 
@@ -78,11 +79,10 @@ WSGI_APPLICATION = 'NLP4CCB_Django_App.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
-USE_DEV = True
 if 'RDS_HOSTNAME' in os.environ:
 	DATABASES = {
 		'default': {
-			'ENGINE': 'django.db.backends.oracle',
+			'ENGINE': 'django.db.backends.postgresql',
 			'NAME': os.environ['RDS_DB_NAME'],
 			'USER': os.environ['RDS_USERNAME'],
 			'PASSWORD': os.environ['RDS_PASSWORD'],
@@ -90,25 +90,30 @@ if 'RDS_HOSTNAME' in os.environ:
 			'PORT': os.environ['RDS_PORT']
 		}
 	}
-elif USE_DEV:
-	DATABASES = {
-		'default': {
-			'ENGINE': 'django.db.backends.sqlite3',
-			'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-		}
-	}
 else:
 	credentials = json.load(open(os.path.join(BASE_DIR, 'db.config.json'), 'r'))
-	DATABASES = {
-		'default': {
-			'ENGINE': 'django.db.backends.oracle',
-			'NAME': credentials['RDS_DB_NAME'],
-			'USER': credentials['RDS_USERNAME'],
-			'PASSWORD': credentials['RDS_PASSWORD'],
-			'HOST': credentials['RDS_HOSTNAME'],
-			'PORT': credentials['RDS_PORT']
+	if DEBUG:
+		DATABASES = {
+			'default': {
+				'ENGINE': 'django.db.backends.postgresql',
+				'NAME': credentials['dev']['RDS_DB_NAME'],
+				'USER': credentials['dev']['RDS_USERNAME'],
+				'PASSWORD': credentials['dev']['RDS_PASSWORD'],
+				'HOST': credentials['dev']['RDS_HOSTNAME'],
+				'PORT': credentials['dev']['RDS_PORT']
+			}
 		}
-	}
+	else:
+		DATABASES = {
+			'default': {
+				'ENGINE': 'django.db.backends.postgresql',
+				'NAME': credentials['prod']['RDS_DB_NAME'],
+				'USER': credentials['prod']['RDS_USERNAME'],
+				'PASSWORD': credentials['prod']['RDS_PASSWORD'],
+				'HOST': credentials['prod']['RDS_HOSTNAME'],
+				'PORT': credentials['prod']['RDS_PORT']
+			}
+		}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.10/ref/settings/#auth-password-validators
@@ -133,7 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'US/Eastern'
 
 USE_I18N = True
 

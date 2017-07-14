@@ -134,26 +134,26 @@ def get_esp_scores(input_words, relations_percentages):
 # Average score per round over all players. Each weighted equally, regardless of rounds played.
 def get_overall_player_avg():
 	lst = list(map(lambda x: div(x.total_score, x.rounds_played), list(UserStat.objects.all())))
-	return sum(lst)/float(len(lst))
+	return div(sum(lst), float(len(lst)))
 
 def get_overall_player_std_dev(avg):
 	lst = list(map(lambda x: div(x.total_score, x.rounds_played), list(UserStat.objects.all())))
 	sqsum = 0.0
 	for a in lst:
 		sqsum += (a-avg)**2.0
-	return sqsum/float(len(lst))
+	return div(sqsum, float(len(lst)))
 
 # Average score over all words. Each weighted equally, regardless of rounds played.
 def get_overall_score_avg():
 	lst = WordStat.objects.values_list('avg_score', flat=True)
-	return sum(lst)/float(len(lst))
+	return div(sum(lst), float(len(lst)))
 
 def get_overall_score_std_dev(avg):
 	lst = WordStat.objects.values_list('avg_score', flat=True)
 	sqsum = 0.0
 	for a in lst:
 		sqsum += (a-avg)**2.0
-	return sqsum/float(len(lst))
+	return div(sqsum, float(len(lst)))
 
 # Adds a relation object to the database
 def create_relation(sem_rel, base_word, word):
@@ -280,11 +280,13 @@ def get_or_create_word_stat(word, rel, i):
 
 # Updates the stats of a word with a new score
 def save_word_result(word, sem_rel, score):
-	word_stat = get_or_create_word_stat(word, sem_rel, 0)
-	word_stat.avg_score = (word_stat.avg_score * word_stat.rounds_played + score)/(word_stat.rounds_played + 1)
-	word_stat.rounds_played = word_stat.rounds_played + 1
-	word_stat.save()
-
+	try:
+		word_stat = WordStat.objects.get(word=word, sem_rel=sem_rel)
+		word_stat.avg_score = (word_stat.avg_score * word_stat.rounds_played + score)/(word_stat.rounds_played + 1)
+		word_stat.rounds_played = word_stat.rounds_played + 1
+		word_stat.save()
+	except ObjectDoesNotExist:
+		return
 # Adds a CompletedStat object for this word to the database. Used to determine if a player has completed a word or not
 def mark_played(user, index, word, sem_rel):
 	try:
@@ -318,6 +320,8 @@ def skip_word(request):
 
 # Rank given a sorted list.
 def rank(user_stat_arr, user_stat, getStat, lo, hi):
+	if len(user_stat_arr) == 0:
+		return -1
 	mid = (lo + hi)//2
 	if lo == hi and user_stat_arr[lo].user.username == user_stat.user.username:
 		return lo
@@ -352,8 +356,8 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	# We create a set of indices of words that this player could play, and narrow it down as we go
 	# Initially all words in this relationship are prospective choices
 	word_choices = sets.Set()
-	for i in range (0, vocab_size):
-		word_choices.add(i)
+	for stat in WordStat.objects.filter(sem_rel=sem_rel):
+		word_choices.add(stat.index)
 
 
 	# If the user is authenticated, gather data on their average score relative to the rest of the playerbase	
@@ -362,7 +366,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 		player_avg = div(user_stat.total_score, user_stat.rounds_played)
 		overall_player_avg = get_overall_player_avg()
 		overall_player_std_dev = get_overall_player_std_dev(overall_player_avg)
-		z_score = (player_avg - overall_player_avg)/overall_player_std_dev
+		z_score = div((player_avg - overall_player_avg), overall_player_std_dev)
 
 		# Use that information about the player's relative rank to select a question with similarly 
 		# difficulty relative to other questions
@@ -379,7 +383,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 
 		# Remove questions too far from the goal score, calculated above
 		# Also remove questions that are retired.
-		unviable = list(filter(lambda x: abs(x.avg_score - goal_question_avg) > .5 * question_std_dev or x.retired, 
+		unviable = list(filter(lambda x: abs(x.avg_score - goal_question_avg) > .3 * question_std_dev or x.retired, 
 		list(WordStat.objects.filter(sem_rel=sem_rel))))
 		unviable_ind = list(map(lambda x: x.index, unviable))
 		for i in unviable_ind:
@@ -395,6 +399,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 			
 	# If there are no words close enough to the desired average score, we just pick a random one. 
 	if len(word_choices) == 0:
+		print("empty")
 		return random.randint(0, vocab_size - 1)
 
 	# Otherwise pick a random one from the viable set of questions.	

@@ -290,7 +290,6 @@ def leaderboard(request):
 		context['rounds_played'] = user_stat.rounds_played
 		context['total_score'] = round(user_stat.total_score, 2)
 		context['avg_score'] = round(utils.div(user_stat.total_score, user_stat.rounds_played), 2)
-
 		rounds_played_rank = utils.rank(rnds_played_set, user_stat, lambda x: x.rounds_played, 0, len(rnds_played_set) - 1)
 		total_score_rank = utils.rank(total_score_set, user_stat, lambda x: x.total_score, 0, len(total_score_set) - 1)
 		avg_score_rank = utils.rank(average_score_list, user_stat, lambda x: utils.div(x.total_score, x.rounds_played), 0, len(average_score_list) - 1)
