@@ -31,6 +31,19 @@ def score_words(base_word, input_words, sem_rel, relations_percentages):
 				   'total_score': words_to_total_scores[word]
 					} ) for word in input_words]
 
+def score_conf_words (sem_rel, base_word, word_set, results):
+	word_scores = list()
+	i = 0
+	if len(results) > 0:
+		while i < 25 and results[i] != 0:
+			stat = get_or_create_conf_stat(sem_rel, base_word, word_set[i])
+			if exists_relation(sem_rel, base_word, word_set[i]):
+				correct = int_to_bool(results[i])
+			else:
+				correct = stat.times_rejected == stat.times_confirmed or int_to_bool(results[i]) == (stat.times_confirmed > stat.times_rejected)
+			word_scores.append((word_set[i], int_to_yn(results[i]), 10 if correct else 0))
+			i += 1
+	return word_scores
 
 def clean_input_words(input_words):
 	input_words = [str(word).lower() for word in input_words]
@@ -164,15 +177,6 @@ def create_relation(sem_rel, base_word, word):
 		relation.save()
 	return relation
 
-# Removes a relation object from the database
-def delete_relation(sem_rel, base_word, word):
-	try:
-		relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
-		Relation.delete(relation)
-		return
-	except ObjectDoesNotExist:
-		return
-
 def exists_relation(sem_rel, base_word, word):
 	try:
 		relation = Relation.objects.get(type=sem_rel, base_word=base_word, input_word=word)
@@ -201,7 +205,7 @@ def confirm_or_reject_relation(sem_rel, base_word, word, decision):
 	relation.save()
 
 # Save results of a round of the confirmation game
-def save_confirmation_scores(word_set, decisions, sem_rel, base_word):
+def save_conf_scores(word_set, decisions, sem_rel, base_word):
 	for i in range(len(decisions)):
 		confirm_or_reject_relation(sem_rel, base_word, word_set[i], decisions[i])
 
@@ -399,7 +403,6 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 			
 	# If there are no words close enough to the desired average score, we just pick a random one. 
 	if len(word_choices) == 0:
-		print("empty")
 		return random.randint(0, vocab_size - 1)
 
 	# Otherwise pick a random one from the viable set of questions.	
@@ -407,34 +410,56 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	return random.choice(tuple(word_choices))
 
 def find_base_word(base_words, sem_rel):
-	return random.choice(base_words[sem_rel].keys())
+	available = list()
+	bw_rel_count = dict()
+	for rel in Relation.objects.filter(type=sem_rel):
+		if rel.base_word not in bw_rel_count:
+	 		bw_rel_count[rel.base_word] = 1
+	 	else:
+	 		bw_rel_count[rel.base_word] += 1
+	for base_word in bw_rel_count:
+	 	if bw_rel_count[base_word] >= 5:
+	 		available.append(base_word)
+	if len(available) == 0:
+		return random.choice(base_words)
 
+	return random.choice(available)
 
 def find_word_pairs(base_word, sem_rel, top_words):
-	# Words are chosen with probability proportional to their score.
-	word_scores = dict()
-	for (a,b) in top_words[(sem_rel, base_word)]:
-		word_scores[a] = b
-	total = 0
-	for word in word_scores:
-		total += word_scores[word]
 	play_words = list()
-	while len(play_words) < 25:
-		rand = random.uniform(0, total)
+	# The model only predicted values/words for single words, not multi-word phrases
+
+	# The model didn't make a prediction on this base word.
+	if " " in base_word:
+		print("hi")
+	# The model made predictions, so we use those to find words to play.
+	else:
+		# Words are chosen with probability proportional to their score.
+		word_scores = dict()
+		for (a,b) in top_words[(sem_rel, base_word)]:
+			word_scores[a] = b
+		total = 0
 		for word in word_scores:
-			rand -= word_scores[word]
-			if rand < 0:
-				total -= word_scores[word]
-				play_words.append(word)
-				del word_scores[word]
-				break
+			total += word_scores[word]
+
+		existing_rels = Relation.objects.filter(type=sem_rel, base_word=base_word)
+		to_use = random.randint(min(2, len(existing_rels)), min(15, len(existing_rels)))
+		used_rels = random.sample(existing_rels, to_use)
+		for rel in used_rels:
+			play_words.append(rel.input_word)
+
+		while len(play_words) < 25:
+			rand = random.uniform(0, total)
+			for word in word_scores:
+				rand -= word_scores[word]
+				if rand < 0:
+					total -= word_scores[word]
+					play_words.append(word)
+					del word_scores[word]
+					break
 
 	random.shuffle(play_words)
 	return play_words
-
-def is_confirmed(sem_rel, base_word, word):
-	relation = get_or_create_conf_stat(sem_rel, base_word, word)
-	return relation.times_confirmed > relation.times_rejected
 
 def int_to_bool(i):
 	if i == 1:
@@ -450,12 +475,12 @@ def int_to_yn(i):
 def add_det(phrase, base_word, sem_rel, determiners):
 	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
 		if base_word in determiners:
-			phrase += determiners[base_word]
+			return phrase + determiners[base_word]
 		elif starts_with_vowel(base_word):
-			phrase += 'an '
+			return phrase + 'an '
 		else:
-			phrase += 'a '
-
+			return phrase + 'a '
+	return phrase
 
 
 

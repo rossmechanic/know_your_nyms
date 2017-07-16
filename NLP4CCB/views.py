@@ -52,21 +52,17 @@ for rel in relationships:
 		ind[vocabs[rel][i], rel] = i
 
 top_words = dict()
-conf_base_words = dict()
-det_file = 'data/model_top_words.txt'
 pat = re.compile(r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
-for line in open(os.path.join(settings.STATIC_ROOT, det_file)):
-	res = pat.match(line)
-	if res:
-		sem_rel = res.group('sem_rel')
-		base_word = res.group('base_word')
-		if not((sem_rel,base_word) in top_words):
-			top_words[(sem_rel,base_word)] = list()
-		top_words[(sem_rel,base_word)].append((res.group('word'), float(res.group('score'))))
-		if not(sem_rel in conf_base_words):
-			conf_base_words[sem_rel] = dict()
-		if not(base_word in conf_base_words[sem_rel]):
-			conf_base_words[sem_rel][base_word] = True
+for rel in relationships:
+	pred_file = 'data/predictions_' + rel + '_top100.txt'
+	for line in open(os.path.join(settings.STATIC_ROOT, pred_file)):
+		res = pat.match(line)
+		if res:
+			sem_rel = res.group('sem_rel')
+			base_word = res.group('base_word')
+			if (sem_rel,base_word) not in top_words:
+				top_words[(sem_rel,base_word)] = list()
+			top_words[(sem_rel,base_word)].append((res.group('word'), float(res.group('score'))))
 
 
 
@@ -129,6 +125,7 @@ def models(request):
 	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
 
 	# The question and list of base words are specific to the selected relationship type
+	print(sem_rel)
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
 	# 20% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
@@ -139,7 +136,7 @@ def models(request):
 	base_word = vocab[vocab_index]
 
 	# Add the correct determiner to a word
-	utils.add_det(question, base_word, sem_rel, determiners)
+	question = utils.add_det(question, base_word, sem_rel, determiners)
 
 	context = {
 		"title": "Know Your Nyms?",
@@ -189,7 +186,7 @@ def scoring(request):
 		context['times_played'] = user_inputs.values('user', 'round_number').distinct().count()
 		answer = rel_a_map[sem_rel]
 
-		utils.add_det(answer, base_word, sem_rel, determiners)
+		answer = utils.add_det(answer, base_word, sem_rel, determiners)
 		answer += base_word
 		context['answer'] = answer
 
@@ -214,10 +211,10 @@ def confirmation(request):
 	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
 
 	vocab = vocabs[sem_rel]
-	base_word = utils.find_base_word(conf_base_words, sem_rel)
+	base_word = utils.find_base_word(vocab, sem_rel)
 
 	phrase = rel_p_map[sem_rel]
-	phrase += 'a '
+	phrase = utils.add_det(phrase, base_word, sem_rel, determiners)
 
 	word_set = utils.find_word_pairs(base_word, sem_rel, top_words)
 	context = {
@@ -225,7 +222,7 @@ def confirmation(request):
 		"formset": word_relationship_formset,
 		"base_word": base_word,
 		"sem_rel": sem_rel,
-		"word_set": word_set,
+		"word_set": {'data': [{'word': str(word)} for word in word_set]},
 		"curr_word": word_set[0],
 		"phrase": phrase,
 		"time": 20
@@ -236,7 +233,7 @@ def confirmation_scoring(request):
 	if request.method == 'POST':
 		print("ws "+ request.POST['word_set'])
 		print("res "+ request.POST['results'])
-		word_set = request.POST['word_set'].replace("['", "").replace("']", "").split("', '")
+		word_set = request.POST['word_set'].split(",")
 
 		results = list() if request.POST['results'] == '' else [int(x) for x in request.POST['results'].split(",")]
 
@@ -246,21 +243,17 @@ def confirmation_scoring(request):
 
 
 		context = dict()
-		word_scores = list()
-		i = 0
+		word_scores = utils.score_conf_words(sem_rel, base_word, word_set, results)
 		round_total = 0
-		if len(results) > 0:
-			while i < 25 and results[i] != 0:
-				word_scores.append((word_set[i], utils.int_to_yn(results[i]), 10 if utils.is_confirmed(sem_rel, base_word, word_set[i]) == utils.int_to_bool(results[i]) else 0))
-				round_total += 10 if utils.is_confirmed(sem_rel, base_word, word_set[i]) == utils.int_to_bool(results[i]) else 0
-				i += 1
+		for (a,b,score) in word_scores:
+			round_total += score
 
-		utils.save_confirmation_scores(word_set, results, sem_rel, base_word)
+		utils.save_conf_scores(word_set, results, sem_rel, base_word)
 		context['word_scores'] = word_scores
 		context['round_total'] = round_total
 
 		answer = rel_a_map[sem_rel]
-		utils.add_det(answer, base_word, sem_rel, determiners)
+		answer = utils.add_det(answer, base_word, sem_rel, determiners)
 
 		answer += base_word
 		context['answer'] = answer

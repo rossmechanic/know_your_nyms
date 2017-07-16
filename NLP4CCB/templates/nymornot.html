@@ -7,16 +7,16 @@
 {% endblock %}
 {% block scripts %}
     <script src={% static "javascripts/js-cookie/js.cookie.js" %}></script>
+    <script type="text/javascript">
+        (function () {
+            window.word_set = {{ word_set|safe }};
+        })();
+    </script>
     <script src="{% static 'javascripts/nymornot.js' %}?v=0002"></script>
 {% endblock %}
 
 
 {% block content%}
-<script>
-    {% autoescape off %}
-        window.word_set = "{{ word_set|safe }}"
-    {% endautoescape %}
-</script>
     <div class="container">
         <div class="row">
             <div class="col-md-7 col-md-offset-1">
