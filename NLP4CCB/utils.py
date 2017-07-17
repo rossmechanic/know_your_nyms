@@ -308,8 +308,8 @@ def skip_word(request, conc_rating):
 	pass_object = Pass.objects.create(user=request.user, type=sem_rel, base_word=base_word)
 	pass_object.save()
 
-	passes = Pass.objects.filter(type=sem_rel, base_word=base_word).distinct().count()
-	plays = get_or_create_word_stat(base_word, sem_rel, index).rounds_played
+	passes = float(Pass.objects.filter(type=sem_rel, base_word=base_word).distinct().count())
+	plays = float(get_or_create_word_stat(base_word, sem_rel, index).rounds_played)
 
 	(conc_mean, percent_known) = conc_rating[base_word]
 
