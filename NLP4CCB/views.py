@@ -108,8 +108,10 @@ def index(request):
 
 def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
-	user_stat = utils.get_or_create_user_stat(request.user)
-	user_stat.last_login = date.today()
+	if request.user.is_authenticated:
+		user_stat = utils.get_or_create_user_stat(request.user)
+		user_stat.last_login = date.today()
+		user_stat.save()
 
 	# We should select a relationship randomly from the set of selected ones. If none were selected,
 	# just choose randomly for all (unless we want some javascript solution)
