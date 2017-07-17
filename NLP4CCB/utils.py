@@ -294,14 +294,13 @@ def save_word_result(word, sem_rel, score):
 # Adds a CompletedStat object for this word to the database. Used to determine if a player has completed a word or not
 def mark_played(user, index, word, sem_rel):
 	try:
-		cset = CompletedStat.objects.filter(user=user, sem_rel=sem_rel, index=index, base_word=word)
 		cmp_stat = CompletedStat.objects.get(user=user, sem_rel=sem_rel, index=index, base_word=word)
 	except ObjectDoesNotExist:
 		cmp_stat = CompletedStat.objects.create(user=user, sem_rel=sem_rel, index=index, base_word=word)
 		cmp_stat.save()
 
 
-def skip_word(request):
+def skip_word(request, conc_rating):
 	sem_rel = request.POST['sem_rel']
 	base_word = request.POST['base_word']
 	index = request.POST['word_index']
@@ -312,15 +311,26 @@ def skip_word(request):
 	passes = Pass.objects.filter(type=sem_rel, base_word=base_word).distinct().count()
 	plays = get_or_create_word_stat(base_word, sem_rel, index).rounds_played
 
+	(conc_mean, percent_known) = conc_rating[base_word]
+
 	# If the ratio between passes and plays gets too large, we retire words, meaning they won't be selected dynamically again.
-	if passes + plays >= 30 and passes > 3*plays:
-		word_stat = get_or_create_word_stat(base_word, sem_rel, index)
-		word_stat.retired = True
-		word_stat.save()
-	elif passes + plays >= 30:
-		word_stat = get_or_create_word_stat(base_word, sem_rel, index)
-		word_stat.retired = False
-		word_stat.save()
+	if passes + plays >= 30:
+		if base_word in conc_rating:	
+			# This factor is close to zero if the concreteness of this word is high, and near 1 if it is low. 
+			factor = (5.0 - conc_mean)/5.0
+			# If significantly less people choose to answer a question than predicted by concreteness rankings' word knowledge score but
+			# but regardless of some words' play rate, we want to keep them as long as their concreteness is large enough.
+			# A word with conc rating 4 has to have only 20% of all who see the word play it - since it's quite concrete, there should be good answers
+			# regardless if a fair number of people have skipped it.
+			if plays/(passes + plays) < .6 * percent_known and plays/(passes + plays) < factor:
+				word_stat = get_or_create_word_stat(base_word, sem_rel, index)
+				word_stat.retired = True
+				word_stat.save()
+		else:
+			if plays/(passes + plays) < .2:
+				word_stat = get_or_create_word_stat(base_word, sem_rel, index)
+				word_stat.retired = True
+				word_stat.save()
 
 # Rank given a sorted list.
 def rank(user_stat_arr, user_stat, getStat, lo, hi):
@@ -425,13 +435,27 @@ def find_base_word(base_words, sem_rel):
 
 	return random.choice(available)
 
-def find_word_pairs(base_word, sem_rel, top_words):
+def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 	play_words = list()
-	# The model only predicted values/words for single words, not multi-word phrases
 
-	# The model didn't make a prediction on this base word.
+	existing_rels = Relation.objects.filter(type=sem_rel, base_word=base_word)
+	to_use = random.randint(min(3, len(existing_rels)), min(15, len(existing_rels)))
+	used_rels = random.sample(existing_rels, to_use)
+	for rel in used_rels:
+			play_words.append(rel.input_word)
+
+	# The model only predicted values/words for single words, not multi-word phrases
+	# If he model didn't make a prediction on this base word, grab a random word's predicted set.
+
 	if " " in base_word:
-		print("hi")
+		rand_words = list()
+		rand_pred_word = " "
+		while " " in rand_pred_word:
+			rand_pred_word = random.choice(vocabs[sem_rel])
+		pred_sample = random.sample(top_words[(sem_rel, rand_pred_word)], 25 - to_use)
+		for word in pred_sample:
+			play_words.append(word)
+
 	# The model made predictions, so we use those to find words to play.
 	else:
 		# Words are chosen with probability proportional to their score.
@@ -441,12 +465,6 @@ def find_word_pairs(base_word, sem_rel, top_words):
 		total = 0
 		for word in word_scores:
 			total += word_scores[word]
-
-		existing_rels = Relation.objects.filter(type=sem_rel, base_word=base_word)
-		to_use = random.randint(min(3, len(existing_rels)), min(15, len(existing_rels)))
-		used_rels = random.sample(existing_rels, to_use)
-		for rel in used_rels:
-			play_words.append(rel.input_word)
 
 		while len(play_words) < 25:
 			rand = random.uniform(0, total)

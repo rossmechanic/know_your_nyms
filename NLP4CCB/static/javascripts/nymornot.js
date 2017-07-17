@@ -31,7 +31,6 @@ $(document).ready(function(){
     $('#false-btn').on('click', function(){
         results[current] = 2
         current += 1;
-        console.log(word_set[current]['word'])
         $('#RESULTS').val(results.toString());
         if(current == 25){
             window.clearInterval(timeUpdater);
@@ -43,7 +42,6 @@ $(document).ready(function(){
     $('#true-btn').on('click', function(){
         results[current] = 1
         current += 1;
-        console.log(word_set[current]['word'])
         $('#RESULTS').val(results.toString());
         if(current == 25){
             window.clearInterval(timeUpdater);
@@ -65,7 +63,6 @@ $(document).ready(function(){
         }
         if (e.which === 74 || e.which === 70){
             current += 1;
-            console.log(word_set[current]['word'])
             $('#RESULTS').val(results.toString());
             if(current == 25){
                 window.clearInterval(timeUpdater);

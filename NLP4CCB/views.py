@@ -46,11 +46,13 @@ for rel in det_rels:
 			else:
 				determiners[word] = p + ' '
 
+# Map from words to their index.
 ind = dict()
 for rel in relationships:
 	for i in range (0, len(vocabs[rel])):
 		ind[vocabs[rel][i], rel] = i
 
+# Map from base words to the top 100 model predictions and their scores
 top_words = dict()
 pat = re.compile(r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
 for rel in relationships:
@@ -64,7 +66,22 @@ for rel in relationships:
 				top_words[(sem_rel,base_word)] = list()
 			top_words[(sem_rel,base_word)].append((res.group('word'), float(res.group('score'))))
 
-
+conc_rating = dict()
+conc_file = 'data/concreteness_ratings.txt'
+ignorefirst = True
+for line in open(os.path.join(settings.STATIC_ROOT, conc_file)):
+	if not ignorefirst:
+		words = line.split('\t')
+		base_word = words[0]
+		conc_mean = float(words[2])
+		percent_known = float(words[6])
+		in_base_words = False
+		for rel in relationships:
+			if (base_word,rel) in ind and not in_base_words:
+				conc_rating[base_word] = (conc_mean, percent_known)
+				in_base_words = True
+	else:
+		ignorefirst = False
 
 # Dictionary for sem_rel to question
 rel_q_map = {'synonyms': 'What is another word for ',
@@ -118,7 +135,7 @@ def models(request):
 	if request.method == 'POST':
 		if 'skip' in request.POST:
 			if request.user.is_authenticated():
-				utils.skip_word(request)
+				utils.skip_word(request, conc_rating)
 			return HttpResponse("Success")
 		else:
 			new_rels = request.POST.getlist('checks')
@@ -127,7 +144,6 @@ def models(request):
 	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
 
 	# The question and list of base words are specific to the selected relationship type
-	print(sem_rel)
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
 	# 20% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
@@ -218,7 +234,7 @@ def confirmation(request):
 	phrase = rel_p_map[sem_rel]
 	phrase = utils.add_det(phrase, base_word, sem_rel, determiners)
 
-	word_set = utils.find_word_pairs(base_word, sem_rel, top_words)
+	word_set = utils.find_word_pairs(base_word, sem_rel, top_words, vocab)
 	context = {
 		"title": "Know Your Nyms?",
 		"formset": word_relationship_formset,
@@ -233,13 +249,10 @@ def confirmation(request):
 
 def confirmation_scoring(request):
 	if request.method == 'POST':
-		print("ws "+ request.POST['word_set'])
-		print("res "+ request.POST['results'])
 		word_set = request.POST['word_set'].split(",")
 
 		results = list() if request.POST['results'] == '' else [int(x) for x in request.POST['results'].split(",")]
 
-		print(len(results))
 		sem_rel = request.POST['sem_rel']
 		base_word = request.POST['base_word']
 
