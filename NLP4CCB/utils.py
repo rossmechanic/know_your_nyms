@@ -198,7 +198,7 @@ def confirm_or_reject_relation(sem_rel, base_word, word, decision):
 		relation = ConfirmationStat.objects.get(sem_rel=sem_rel, base_word=base_word, input_word=word)
 		if decision == 1:
 			relation.times_confirmed += 1
-		elif decision == 0: 
+		elif decision == 2: 
 			relation.times_rejected += 1
 	except ObjectDoesNotExist:
 		relation = ConfirmationStat.objects.create(sem_rel=sem_rel, base_word=base_word, input_word=word)
@@ -443,7 +443,7 @@ def find_word_pairs(base_word, sem_rel, top_words):
 			total += word_scores[word]
 
 		existing_rels = Relation.objects.filter(type=sem_rel, base_word=base_word)
-		to_use = random.randint(min(2, len(existing_rels)), min(15, len(existing_rels)))
+		to_use = random.randint(min(3, len(existing_rels)), min(15, len(existing_rels)))
 		used_rels = random.sample(existing_rels, to_use)
 		for rel in used_rels:
 			play_words.append(rel.input_word)
