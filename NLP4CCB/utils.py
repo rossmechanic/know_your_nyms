@@ -31,17 +31,20 @@ def score_words(base_word, input_words, sem_rel, relations_percentages):
 				   'total_score': words_to_total_scores[word]
 					} ) for word in input_words]
 
+# Returns a list in this form: (base word, yes/no, percent agreed, score) 
+# for each confirmation or rejection of a nym pair from the confirmation game.
 def score_conf_words (sem_rel, base_word, word_set, results):
 	word_scores = list()
 	i = 0
 	if len(results) > 0:
 		while i < 25 and results[i] != 0:
 			stat = get_or_create_conf_stat(sem_rel, base_word, word_set[i])
-			if exists_relation(sem_rel, base_word, word_set[i]):
-				correct = int_to_bool(results[i])
-			else:
-				correct = stat.times_rejected == stat.times_confirmed or int_to_bool(results[i]) == (stat.times_confirmed > stat.times_rejected)
-			word_scores.append((word_set[i], int_to_yn(results[i]), 10 if correct else 0))
+			conf = stat.times_confirmed
+			rej = stat.times_rejected
+			correct = rej == conf or int_to_bool(results[i]) == (conf > rej)
+			percent_agreed = 100 * (1 if rej == 0 and conf == 0 else conf/(conf + rej) if int_to_bool(results[i]) else rej/(conf + rej))
+			percent_agreed = round(percent_agreed)
+			word_scores.append((word_set[i], int_to_yn(results[i]), percent_agreed, 7 if correct else 0))
 			i += 1
 	return word_scores
 
@@ -82,29 +85,6 @@ def confirmed_relations(base_word, input_words, sem_rel):
 		except ObjectDoesNotExist:
 			challenge_bonuses[word] = 0.0
 	return challenge_bonuses
-
-def get_relations_percentages_no_filter(sem_rel, base_word):
-	user_inputs = UserInput.objects.filter(relation__type=sem_rel, relation__base_word=base_word)
-	input_words = [u.relation.input_word for u in user_inputs]
-	stem_dict = {} # Maps a stem to an actual word
-	input_word_dict = {}
-	for w in input_words:
-		# If we haven't seen this word stem, make a new entry
-		if stemmer.stem(w) not in stem_dict:
-			stem_dict[stemmer.stem(w)] = w
-			input_word_dict[w] = 1
-		# If we have, add one to the associated word for that existing stem
-		else:
-			input_word_dict[stem_dict[stemmer.stem(w)]] += 1
-
-	# The number of people that have played this word
-	times_played = user_inputs.values('user', 'round_number').distinct().count()
-	words = [word for word in input_word_dict]
-
-	# Percentage of players that said a relation
-	percentages = [(word, round((float(input_word_dict[word]) / times_played), 3)) for word in words]
-	percentages.sort(key=lambda x: x[1])
-	return percentages[::-1]
 
 
 def get_relations_percentages(sem_rel, base_word):
@@ -195,6 +175,9 @@ def get_or_create_conf_stat(sem_rel, base_word, word):
 # Creates or edits a confirmation relation.
 def confirm_or_reject_relation(sem_rel, base_word, word, decision):
 	try:
+		relationset = ConfirmationStat.objects.filter(sem_rel=sem_rel, base_word=base_word, input_word=word)
+		if len(relationset) > 1:
+			relationset[0].delete()
 		relation = ConfirmationStat.objects.get(sem_rel=sem_rel, base_word=base_word, input_word=word)
 		if decision == 1:
 			relation.times_confirmed += 1
@@ -438,6 +421,7 @@ def find_base_word(base_words, sem_rel):
 def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 	play_words = list()
 
+	# Add some relations from the existing relations in the database to the playset.
 	existing_rels = Relation.objects.filter(type=sem_rel, base_word=base_word)
 	to_use = random.randint(min(3, len(existing_rels)), min(15, len(existing_rels)))
 	used_rels = random.sample(existing_rels, to_use)
@@ -453,12 +437,12 @@ def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 		while " " in rand_pred_word:
 			rand_pred_word = random.choice(vocabs[sem_rel])
 		pred_sample = random.sample(top_words[(sem_rel, rand_pred_word)], 25 - to_use)
-		for word in pred_sample:
+		for (word, m) in pred_sample:
 			play_words.append(word)
 
 	# The model made predictions, so we use those to find words to play.
 	else:
-		# Words are chosen with probability proportional to their score.
+		# Words are chosen with probability proportional to their predicted score.
 		word_scores = dict()
 		for (a,b) in top_words[(sem_rel, base_word)]:
 			word_scores[a] = b
@@ -478,18 +462,21 @@ def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 
 	random.shuffle(play_words)
 	return play_words
-
+# 1 is true and 2 is false.
 def int_to_bool(i):
 	if i == 1:
 		return True
 	else:
 		return False
+
+# 1 is yes and 2 is no.
 def int_to_yn(i):
 	if i == 1:
 		return "Yes"
 	else:
 		return "No"
 
+# Adds a determiner if necessary.
 def add_det(phrase, base_word, sem_rel, determiners):
 	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
 		if base_word in determiners:

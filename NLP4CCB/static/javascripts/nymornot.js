@@ -1,6 +1,7 @@
 var Cookies = window.Cookies;
 
 $(document).ready(function(){
+    var play_set_size = 25
     var $timer = $(".timer");
     var $curr_word = $(".curr_word");
     var word_set = window.word_set['data'];
@@ -9,7 +10,10 @@ $(document).ready(function(){
         ws_ret[i] = word_set[i]['word'];
     }  
     $('#WORD_SET').val(ws_ret.toString());
-    var results = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+    var results = [];
+    for (var i = 0, i < play_set_size; i++) {
+        results[i] = 0;
+    }  
     var time = parseInt($timer.text());
     var current = 0;
     var timeUpdater = window.setInterval(function(){
@@ -32,7 +36,7 @@ $(document).ready(function(){
         results[current] = 2
         current += 1;
         $('#RESULTS').val(results.toString());
-        if(current == 25){
+        if(current == play_set_size){
             window.clearInterval(timeUpdater);
             submit();
         }
@@ -43,7 +47,7 @@ $(document).ready(function(){
         results[current] = 1
         current += 1;
         $('#RESULTS').val(results.toString());
-        if(current == 25){
+        if(current == play_set_size){
             window.clearInterval(timeUpdater);
             submit();
         }
@@ -55,16 +59,16 @@ $(document).ready(function(){
         $("#input-form").submit();
     };
     $(document).keydown(function(e) {
-        if(e.which === 74) {
+        if(e.which === 89) {
             results[current] = 1
         }
-        else if(e.which === 70){
+        else if(e.which === 78){
             results[current] = 2
         }
-        if (e.which === 74 || e.which === 70){
+        if (e.which === 89 || e.which === 78){
             current += 1;
             $('#RESULTS').val(results.toString());
-            if(current == 25){
+            if(current == play_set_size){
                 window.clearInterval(timeUpdater);
                 submit();
             }

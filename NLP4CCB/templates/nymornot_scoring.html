@@ -20,9 +20,10 @@
                     <thead>
                         <th>{{ answer }}</th>
                         <th>Your Answer</th>
+                        <th>Percent Agreed</th>
                         <th>Word Score</th>
                     </thead>
-                    {% for word, ans, score in word_scores %}
+                    {% for word, ans, agr, score in word_scores %}
                         {% if score %}
                             <tr class="success">
                         {% else %}
@@ -30,6 +31,7 @@
                         {% endif %}
                             <td>{{ word }}</td>
                             <td>{{ ans }}</td>
+                            <td>{{ agr }}</td>
                             <td>{{ score }}</td>
                         </tr>
 
@@ -46,7 +48,7 @@
             </div>
         </div>
         <div class="row" style="text-align: center">
-            <a type="button" class="btn btn-success btn-lg nym-button" href="/confirmation/">Next Round</a>
+            <a type="button" class="btn btn-success btn-lg nym-button" href="/models/">Next Round</a>
             <a type="button" class="btn btn-success btn-lg nym-button" a href="/">Home</a>
         </div>
     </div>

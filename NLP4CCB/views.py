@@ -66,6 +66,7 @@ for rel in relationships:
 				top_words[(sem_rel,base_word)] = list()
 			top_words[(sem_rel,base_word)].append((res.group('word'), float(res.group('score'))))
 
+# Find the top 100 words predicted by the model for each base word in the concreteness data set.
 conc_rating = dict()
 conc_file = 'data/concreteness_ratings.txt'
 ignorefirst = True
@@ -146,11 +147,17 @@ def models(request):
 	# The question and list of base words are specific to the selected relationship type
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
-	# 20% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
-	if random.random() <= 0.2:
-		vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+	# 85% of the time, play the normal word game.
+	if random.random() > .15:
+		# 20% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
+		if random.random() <= 0.2:
+			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+		else:
+			vocab_index = utils.dynamic_select_word(request.user, len(vocab), sem_rel, ind)
+	# The other 15%, play the 'confirmation' game.
 	else:
-		vocab_index = utils.dynamic_select_word(request.user, len(vocab), sem_rel, ind)
+		return redirect('/confirmation/')
+
 	base_word = vocab[vocab_index]
 
 	# Add the correct determiner to a word
@@ -191,7 +198,7 @@ def scoring(request):
 		context['word_scores'] = word_scores
 		round_total = sum([scores['total_score'] for word,scores in word_scores])
 
-		# If this word has been played less than 5 times, give the user a bonus
+		# If this word has been played less than 5 times, give the user a score bonus
 		# 1 form returned means that no words were submitted
 		word_stat = utils.get_or_create_word_stat(base_word, sem_rel, index)
 		first_response_bonus = 40 if word_stat.rounds_played <= 5 and (num_forms_returned > 1 or input_words[0] != '') else 0
@@ -225,16 +232,21 @@ def confirmation(request):
 		new_rels = request.POST.getlist('checks')
 		request.session['relationships'] = new_rels
 
+	# We should select a relationship randomly from the set of selected ones. If none were selected,
+	# just choose randomly for all
 	rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms', 'hyponyms', 'synonyms']
 	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
 
 	vocab = vocabs[sem_rel]
+	# Select a base word to play the word game on. Picks from words with at least 5 relations created by the normal word game.
 	base_word = utils.find_base_word(vocab, sem_rel)
 
 	phrase = rel_p_map[sem_rel]
+	# Add the correct determiner to the word
 	phrase = utils.add_det(phrase, base_word, sem_rel, determiners)
 
-	word_set = utils.find_word_pairs(base_word, sem_rel, top_words, vocab)
+	# Find words to compare against base word. Mixture of relations and top words from the model.
+	word_set = utils.find_word_pairs(base_word, sem_rel, top_words, vocabs)
 	context = {
 		"title": "Know Your Nyms?",
 		"formset": word_relationship_formset,
@@ -258,9 +270,10 @@ def confirmation_scoring(request):
 
 
 		context = dict()
+		# Save result of the nym confirmation game.
 		word_scores = utils.score_conf_words(sem_rel, base_word, word_set, results)
 		round_total = 0
-		for (a,b,score) in word_scores:
+		for (a,b,c,score) in word_scores:
 			round_total += score
 
 		utils.save_conf_scores(word_set, results, sem_rel, base_word)
