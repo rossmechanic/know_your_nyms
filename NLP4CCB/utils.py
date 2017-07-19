@@ -297,15 +297,15 @@ def skip_word(request, conc_rating):
 	(conc_mean, percent_known) = conc_rating[base_word]
 
 	# If the ratio between passes and plays gets too large, we retire words, meaning they won't be selected dynamically again.
-	if passes + plays >= 30:
+	if passes + plays >= 50:
 		if base_word in conc_rating:	
 			# This factor is close to zero if the concreteness of this word is high, and near 1 if it is low. 
-			factor = (5.0 - conc_mean)/5.0
+			factor = (5.0 - conc_mean * .8)/5.0
 			# If significantly less people choose to answer a question than predicted by concreteness rankings' word knowledge score but
 			# but regardless of some words' play rate, we want to keep them as long as their concreteness is large enough.
 			# A word with conc rating 4 has to have only 20% of all who see the word play it - since it's quite concrete, there should be good answers
 			# regardless if a fair number of people have skipped it.
-			if plays/(passes + plays) < .6 * percent_known and plays/(passes + plays) < factor:
+			if plays/(passes + plays) < .5 * percent_known and plays/(passes + plays) < factor:
 				word_stat = get_or_create_word_stat(base_word, sem_rel, index)
 				word_stat.retired = True
 				word_stat.save()
@@ -426,7 +426,7 @@ def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 	to_use = random.randint(min(3, len(existing_rels)), min(15, len(existing_rels)))
 	used_rels = random.sample(existing_rels, to_use)
 	for rel in used_rels:
-			play_words.append(rel.input_word)
+		play_words.append(rel.input_word)
 
 	# The model only predicted values/words for single words, not multi-word phrases
 	# If he model didn't make a prediction on this base word, grab a random word's predicted set.
@@ -436,7 +436,20 @@ def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 		rand_pred_word = " "
 		while " " in rand_pred_word:
 			rand_pred_word = random.choice(vocabs[sem_rel])
-		pred_sample = random.sample(top_words[(sem_rel, rand_pred_word)], 25 - to_use)
+
+		available = list()
+		words_no_dup = dict()
+		for word in top_words[(sem_rel, rand_pred_word)]:
+			words_no_dup[word] = True
+
+		for word in play_words:
+			if word in words_no_dup:
+				del words_no_dup[word]
+
+		for word in words_no_dup:
+			available.append(word)
+
+		pred_sample = random.sample(available, 25 - to_use)
 		for (word, m) in pred_sample:
 			play_words.append(word)
 
@@ -446,6 +459,12 @@ def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 		word_scores = dict()
 		for (a,b) in top_words[(sem_rel, base_word)]:
 			word_scores[a] = b
+
+		# No duplicate words.
+		for word in play_words:
+			if word in word_scores:
+				del word_scores[word]
+
 		total = 0
 		for word in word_scores:
 			total += word_scores[word]
@@ -462,6 +481,7 @@ def find_word_pairs(base_word, sem_rel, top_words, vocabs):
 
 	random.shuffle(play_words)
 	return play_words
+
 # 1 is true and 2 is false.
 def int_to_bool(i):
 	if i == 1:

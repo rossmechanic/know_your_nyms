@@ -12,7 +12,7 @@
             window.word_set = {{ word_set|safe }};
         })();
     </script>
-    <script src="{% static 'javascripts/nymornot.js' %}?v=0002"></script>
+    <script src="{% static 'javascripts/nymornot.js' %}?v=0005"></script>
 {% endblock %}
 
 
@@ -32,9 +32,12 @@
             </div>
             <div class="col-md-4">
                 <h1 class="roboto-mono">Timer: <span class="timer">{{ time }}</span></h1>
+                <button id="undo-btn" class="button btn-primary btn-lg nym-button">
+                    z : Undo
+                </button>
+                <br>
+                <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>
             </div>
-        </div>
-        <div class="row">
             <div class="col-md-5 col-md-offset-3">
                 <form id="input-form" method="POST" action="/conf_scoring/">
                 {% csrf_token %}
@@ -45,10 +48,6 @@
                 <input id="RESULTS" name="results" type="hidden" value="">
                 </form>   
             </div>
-            <div class="col-md-4">
-                <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>
-            </div>
-
         </div>
     </div>
 

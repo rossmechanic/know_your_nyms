@@ -11,7 +11,7 @@ $(document).ready(function(){
     }  
     $('#WORD_SET').val(ws_ret.toString());
     var results = [];
-    for (var i = 0, i < play_set_size; i++) {
+    for (var i = 0; i < play_set_size; i++) {
         results[i] = 0;
     }  
     var time = parseInt($timer.text());
@@ -55,6 +55,15 @@ $(document).ready(function(){
 
     });
 
+    $('#undo-btn').on('click', function(){
+        if (current > 0) {
+            current -= 1;
+            results[current] = 0;
+            $('#RESULTS').val(results.toString());
+            $curr_word.text(word_set[current]['word']);
+        }
+    });
+
     var submit = function() {
         $("#input-form").submit();
     };
@@ -64,6 +73,14 @@ $(document).ready(function(){
         }
         else if(e.which === 78){
             results[current] = 2
+        }
+        else if(e.which == 90){
+            if (current > 0) {
+                current -= 1;
+                results[current] = 0;
+                $('#RESULTS').val(results.toString());
+                $curr_word.text(word_set[current]['word']);
+            }    
         }
         if (e.which === 89 || e.which === 78){
             current += 1;
