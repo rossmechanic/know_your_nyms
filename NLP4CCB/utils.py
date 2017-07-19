@@ -39,8 +39,8 @@ def score_conf_words (sem_rel, base_word, word_set, results):
 	if len(results) > 0:
 		while i < 25 and results[i] != 0:
 			stat = get_or_create_conf_stat(sem_rel, base_word, word_set[i])
-			conf = stat.times_confirmed
-			rej = stat.times_rejected
+			conf = float(stat.times_confirmed)
+			rej = float(stat.times_rejected)
 			correct = rej == conf or int_to_bool(results[i]) == (conf > rej)
 			percent_agreed = 100 * (1 if rej == 0 and conf == 0 else conf/(conf + rej) if int_to_bool(results[i]) else rej/(conf + rej))
 			percent_agreed = round(percent_agreed)
