@@ -46,7 +46,8 @@ def score_conf_words (sem_rel, base_word, word_set, results):
 			percent_agreed = round(percent_agreed)
 			word_scores.append((word_set[i], int_to_yn(results[i]), percent_agreed, 7 if correct else 0))
 			i += 1
-	return word_scores
+
+	return sorted(word_scores, key = lambda x: (x[3], x[1], x[0]))
 
 def clean_input_words(input_words):
 	input_words = [str(word).lower() for word in input_words]
@@ -106,7 +107,7 @@ def get_relations_percentages(sem_rel, base_word):
 	filtered_words = [word for word in input_word_dict]
 	total = 0
 	for word in filtered_words:
-		if input_word_dict[word] >= 2:
+		if input_word_dict[word] > 2:
 			total += input_word_dict[word]
 	filtered_words = filter(lambda x: float(input_word_dict[x] > 2), filtered_words)
 
