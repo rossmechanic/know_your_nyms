@@ -149,7 +149,7 @@ def models(request):
 	vocab = vocabs[sem_rel]
 	# 85% of the time, play the normal word game.
 	if random.random() > .15:
-		# 20% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
+		# 5% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
 		if random.random() <= 0.05:
 			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
 		else:
