@@ -36,7 +36,7 @@ $(document).ready(function(){
            },
             type: "POST",
             url: '/models/',
-            data: {skip: 'true', sem_rel: $('#id_form-SEM_REL').val(), base_word: $('#id_form-BASE_WORD').val()},
+            data: {skip: 'true', sem_rel: $('#id_form-SEM_REL').val(), base_word: $('#id_form-BASE_WORD').val(), word_index: $('#id_form-WORD_INDEX').val()},
             success: function() {
                 window.location.href='/models';
             }
@@ -47,8 +47,13 @@ $(document).ready(function(){
        skipWord();
     });
 
+    $('#done-btn').on('click', function(){
+        window.clearInterval(timeUpdater);
+        submitWords();
+    });
+
     $(document).on('keydown','.word-rel-formset', function(event){
-        if ((event.which === 9 || event.which === 13 || event.which === 51) && $(this).is(':last-child')) {
+        if ((event.which === 9 || event.which === 13) && $(this).is(':last-child')) {
             event.preventDefault();
             var newIndex = String(parseInt(this.getAttribute("index")) + 1);
             $(this).after(
