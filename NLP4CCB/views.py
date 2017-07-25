@@ -295,7 +295,7 @@ def leaderboard(request):
 	rnds_played_set = UserStat.objects.order_by('-rounds_played')
 	total_score_set = UserStat.objects.order_by('-total_score')
 	word_score_set = WordStat.objects.order_by('avg_score')
-	# Only words played 5+ times are allowed on the leaderboard
+	# Only words played 10+ times are allowed on the leaderboard
 	word_score_list = list(filter(lambda x: x.rounds_played >= 10, word_score_set))
 
 	average_score_list = list(UserStat.objects.all())
@@ -326,7 +326,7 @@ def leaderboard(request):
 			context['word_score' + str(i+1)] = round(stat.avg_score, 2)
 			context['sem_rel' + str(i+1)] = ("Synonyms of " if stat.sem_rel == 'synonyms' else 
 											"Antonyms of " if stat.sem_rel == 'antonyms' else
-											rel_a_map[stat.sem_rel] + determiners[stat.word])
+											rel_a_map[stat.sem_rel] + utils.get_det(stat.word, determiners))
 	for i in range (0,5):
 		if i < len(rnds_played_set):
 			stat = rnds_played_set[i]

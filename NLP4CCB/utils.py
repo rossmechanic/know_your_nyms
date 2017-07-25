@@ -359,6 +359,11 @@ def random_select_unplayed_word(vocab_size, sem_rel):
 		i += 1
 	return guess_index
 
+def get_det(base_word, determiners):
+	if base_word in determiners:
+		return determiners[base_word]
+	else:
+		return ""
 
 def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	# We create a set of indices of words that this player could play, and narrow it down as we go
@@ -514,7 +519,7 @@ def int_to_yn(i):
 def add_det(phrase, base_word, sem_rel, determiners):
 	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
 		if base_word in determiners:
-			return phrase + determiners[base_word]
+			return phrase + get_det(base_word, determiners)
 		elif starts_with_vowel(base_word):
 			return phrase + 'an '
 		else:
