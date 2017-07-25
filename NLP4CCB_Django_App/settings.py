@@ -27,7 +27,7 @@ SECRET_KEY = '*4(1v)*ar#gjx*l-_7!h1ke21_*x^5l8jr17lr6nxc(&u^*72o' if 'SECRET_KEY
 if 'DEBUG' in os.environ:
 	DEBUG = os.environ['DEBUG']
 else:
-	DEBUG = False
+	DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', u'127.0.0.1', u'www.know-your-nyms.com',
 				 u'know-your-nyms-dev.us-west-2.elasticbeanstalk.com',
