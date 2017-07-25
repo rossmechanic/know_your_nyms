@@ -105,15 +105,9 @@ def get_relations_percentages(sem_rel, base_word):
 
 	# The number of people that have played this word
 	times_played = user_inputs.values('user', 'round_number').distinct().count()
-	filtered_words = [word for word in input_word_dict]
-	total = 0
-	for word in filtered_words:
-		if input_word_dict[word] > 2:
-			total += input_word_dict[word]
-	filtered_words = filter(lambda x: float(input_word_dict[x] > 2), filtered_words)
 
 	# Percentage of players that said a relation
-	percentages = [(word, round((float(input_word_dict[word]) / total), 3)) for word in filtered_words]
+	percentages = [(word, round((float(input_word_dict[word]) / times_played), 3)) for word in input_word_dict]
 	percentages.sort(key=lambda x: x[1])
 	return percentages[::-1]
 
@@ -225,7 +219,7 @@ def store_round(sem_rel, base_word, index, word_scores, request):
 	word_stat = get_or_create_word_stat(base_word, sem_rel, index)
 	if word_stat.rounds_played <= 5 and nonempty:
 		round_score += 40
-	save_word_result(base_word, sem_rel, round_score)
+	save_word_result(base_word, sem_rel, round_score, index)
 	user_stat.total_score += round_score
 	user_stat.save()
 
@@ -244,7 +238,7 @@ def anon_store_round(sem_rel, base_word, index, word_scores):
 	word_stat = get_or_create_word_stat(base_word, sem_rel, index)
 	if word_stat.rounds_played <= 5:
 		round_score += 40
-	save_word_result(base_word, sem_rel, round_score)
+	save_word_result(base_word, sem_rel, round_score, index)
 
 
 def starts_with_vowel(word):
@@ -268,9 +262,9 @@ def get_or_create_word_stat(word, rel, i):
 	return word_stat
 
 # Updates the stats of a word with a new score
-def save_word_result(word, sem_rel, score):
+def save_word_result(word, sem_rel, score, i):
 	try:
-		word_stat = WordStat.objects.get(word=word, sem_rel=sem_rel)
+		word_stat = WordStat.objects.get(word=word, sem_rel=sem_rel, index=i)
 		word_stat.avg_score = (word_stat.avg_score * word_stat.rounds_played + score)/(word_stat.rounds_played + 1)
 		word_stat.rounds_played = word_stat.rounds_played + 1
 		word_stat.save()
@@ -345,7 +339,7 @@ def random_select_unplayed_word(vocab_size, sem_rel):
 	for i in range (0, vocab_size):
 		unplayed.add(i)
 	# The unplayed words are ones with no statistics created yet.
-	for word_stat in WordStat.objects.filter(sem_rel=sem_rel):
+	for word_stat in WordStat.objects.filter(sem_rel=sem_rel).distinct('word'):
 		if word_stat.index in unplayed:
 			unplayed.remove(word_stat.index)
 	return random.choice(tuple(unplayed))
@@ -355,7 +349,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	# We create a set of indices of words that this player could play, and narrow it down as we go
 	# Initially all words in this relationship are prospective choices
 	word_choices = sets.Set()
-	for stat in WordStat.objects.filter(sem_rel=sem_rel):
+	for stat in WordStat.objects.filter(sem_rel=sem_rel).distinct('word'):
 		word_choices.add(stat.index)
 
 
@@ -385,7 +379,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 		# Remove questions too far from the goal score, calculated above
 		# Also remove questions that are retired.
 		unviable = list(filter(lambda x: (abs(x.avg_score - goal_question_avg) > .3 * question_std_dev and x.rounds_played >= 5) or x.retired, 
-		list(WordStat.objects.filter(sem_rel=sem_rel))))
+		list(WordStat.objects.filter(sem_rel=sem_rel).distinct('word'))))
 
 		unviable_ind = list(map(lambda x: x.index, unviable))
 		for i in unviable_ind:

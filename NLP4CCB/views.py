@@ -157,8 +157,9 @@ def models(request):
 	# The other 15%, play the 'confirmation' game.
 	else:
 		return redirect('/confirmation/')
-
 	base_word = vocab[vocab_index]
+	word_stat = WordStat.objects.filter(sem_rel=sem_rel)
+
 
 	# Add the correct determiner to a word
 	question = utils.add_det(question, base_word, sem_rel, determiners)
@@ -201,6 +202,7 @@ def scoring(request):
 		# If this word has been played less than 5 times, give the user a score bonus
 		# 1 form returned means that no words were submitted
 		word_stat = utils.get_or_create_word_stat(base_word, sem_rel, index)
+		
 		first_response_bonus = 40 if word_stat.rounds_played <= 5 and (num_forms_returned > 1 or input_words[0] != '') else 0
 		if request.user.is_authenticated():
 			user_stat = utils.get_or_create_user_stat(request.user)
