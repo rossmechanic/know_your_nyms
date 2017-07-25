@@ -4,6 +4,7 @@
 var Cookies = window.Cookies;
 
 $(document).ready(function(){
+    var submitted = false;
     var $timer = $(".timer");
     var time = parseInt($timer.text())
     var timeUpdater = window.setInterval(function(){
@@ -24,23 +25,29 @@ $(document).ready(function(){
     $('#id_form-0-word').focus();
 
     var submitWords = function() {
-        $("#input-form").submit();
-        $('.word-rel-formset > input').prop("disabled", true);
+        if (!submitted){
+            submitted = true;
+            $("#input-form").submit();
+            $('.word-rel-formset > input').prop("disabled", true);
+        }
     };
 
     var skipWord = function() {
-        var csrftoken = Cookies.get('csrftoken');
-        $.ajax({
-           beforeSend: function(xhr) {
-               xhr.setRequestHeader("X-CSRFToken", csrftoken);
-           },
-            type: "POST",
-            url: '/models/',
-            data: {skip: 'true', sem_rel: $('#id_form-SEM_REL').val(), base_word: $('#id_form-BASE_WORD').val(), word_index: $('#id_form-WORD_INDEX').val()},
-            success: function() {
-                window.location.href='/models';
-            }
-        });
+        if (!submitted){
+            submitted = true;
+            var csrftoken = Cookies.get('csrftoken');
+            $.ajax({
+               beforeSend: function(xhr) {
+                   xhr.setRequestHeader("X-CSRFToken", csrftoken);
+               },
+                type: "POST",
+                url: '/models/',
+                data: {skip: 'true', sem_rel: $('#id_form-SEM_REL').val(), base_word: $('#id_form-BASE_WORD').val(), word_index: $('#id_form-WORD_INDEX').val()},
+                success: function() {
+                    window.location.href='/models';
+                }
+            });
+        }
     };
 
     $('#skip-btn').on('click', function(){

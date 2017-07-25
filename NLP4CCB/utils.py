@@ -254,6 +254,7 @@ def get_or_create_user_stat(user):
 	return user_stat
 
 def get_or_create_word_stat(word, rel, i):
+	delete_wordstat_duplicates(word, rel)
 	try:
 		word_stat = WordStat.objects.get(word=word, sem_rel=rel, index=i)
 	except ObjectDoesNotExist:
@@ -261,15 +262,25 @@ def get_or_create_word_stat(word, rel, i):
 		word_stat.save()
 	return word_stat
 
+def delete_wordstat_duplicates(word, rel):
+	word_set = WordStat.objects.filter(word=word, sem_rel=rel)
+	i = len(word_set) - 1
+	while i > 0:
+		stat = word_set[i]
+		WordStat.delete(stat)
+		i -= 1
+
 # Updates the stats of a word with a new score
 def save_word_result(word, sem_rel, score, i):
 	try:
+		delete_wordstat_duplicates(word, sem_rel)
 		word_stat = WordStat.objects.get(word=word, sem_rel=sem_rel, index=i)
 		word_stat.avg_score = (word_stat.avg_score * word_stat.rounds_played + score)/(word_stat.rounds_played + 1)
 		word_stat.rounds_played = word_stat.rounds_played + 1
 		word_stat.save()
 	except ObjectDoesNotExist:
 		return
+
 # Adds a CompletedStat object for this word to the database. Used to determine if a player has completed a word or not
 def mark_played(user, index, word, sem_rel):
 	try:
@@ -290,11 +301,10 @@ def skip_word(request, conc_rating):
 	passes = float(Pass.objects.filter(type=sem_rel, base_word=base_word).distinct().count())
 	plays = float(get_or_create_word_stat(base_word, sem_rel, index).rounds_played)
 
-	(conc_mean, percent_known) = conc_rating[base_word]
-
 	# If the ratio between passes and plays gets too large, we retire words, meaning they won't be selected dynamically again.
 	if passes + plays >= 50:
 		if base_word in conc_rating:	
+			(conc_mean, percent_known) = conc_rating[base_word]
 			# This factor is close to zero if the concreteness of this word is high, and near 1 if it is low. 
 			factor = (5.0 - conc_mean * .8)/5.0
 			# If significantly less people choose to answer a question than predicted by concreteness rankings' word knowledge score but
@@ -335,14 +345,19 @@ def div(a, b):
 	return 0 if b == 0 else a/b
 
 def random_select_unplayed_word(vocab_size, sem_rel):
-	unplayed = sets.Set()
-	for i in range (0, vocab_size):
-		unplayed.add(i)
-	# The unplayed words are ones with no statistics created yet.
+	played = sets.Set()
+	# Randomly selects a word and retries if this word has been played by someone already.
+	# Caps at 20 tries. Selects an unplayed word with high probability.
+
 	for word_stat in WordStat.objects.filter(sem_rel=sem_rel).distinct('word'):
-		if word_stat.index in unplayed:
-			unplayed.remove(word_stat.index)
-	return random.choice(tuple(unplayed))
+		played.add(word_stat.index)
+	guess_index = random.randint(0, vocab_size - 1)
+
+	i = 0
+	while i < 20 and guess_index in played: 
+		guess_index = random.randint(0, vocab_size - 1)
+		i += 1
+	return guess_index
 
 
 def dynamic_select_word(user, vocab_size, sem_rel, ind):

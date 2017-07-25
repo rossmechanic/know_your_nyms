@@ -150,7 +150,7 @@ def models(request):
 	# 85% of the time, play the normal word game.
 	if random.random() > .15:
 		# 5% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
-		if random.random() <= 0.05:
+		if random.random() >= 0.05:
 			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
 		else:
 			vocab_index = utils.dynamic_select_word(request.user, len(vocab), sem_rel, ind)
@@ -180,13 +180,12 @@ def scoring(request):
 		sem_rel = request.POST['sem_rel']
 		base_word = request.POST['base_word']
 		index = request.POST['word_index']
-
 		# If the user is authenticated, mark this word as played.
 		if request.user.is_authenticated():
 			utils.mark_played(request.user, index, base_word, sem_rel)
 
 		num_forms_returned = int(request.POST['form-TOTAL_FORMS'])
-		input_words = [request.POST["form-%s-word" % i] for i in range(num_forms_returned)]
+		input_words = [(request.POST["form-%s-word" % i])[0:50] for i in range(num_forms_returned)]
 		context = {}
 		# Creates scores based on the words and the semantic relationship
 		context['base_word'] = base_word
@@ -295,7 +294,7 @@ def leaderboard(request):
 	context = dict()
 	rnds_played_set = UserStat.objects.order_by('-rounds_played')
 	total_score_set = UserStat.objects.order_by('-total_score')
-	word_score_set = WordStat.objects.order_by('-avg_score')
+	word_score_set = WordStat.objects.order_by('avg_score')
 	# Only words played 5+ times are allowed on the leaderboard
 	word_score_list = list(filter(lambda x: x.rounds_played >= 10, word_score_set))
 
