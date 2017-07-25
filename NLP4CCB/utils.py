@@ -1,6 +1,7 @@
 import json
 import os
 import sets
+import math
 import random
 from NLP4CCB_Django_App import settings
 from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat
@@ -135,7 +136,7 @@ def get_overall_player_std_dev(avg):
 	sqsum = 0.0
 	for a in lst:
 		sqsum += (a-avg)**2.0
-	return div(sqsum, float(len(lst)))
+	return math.sqrt(div(sqsum, float(len(lst))))
 
 # Average score over all words. Each weighted equally, regardless of rounds played.
 def get_overall_score_avg():
@@ -147,7 +148,7 @@ def get_overall_score_std_dev(avg):
 	sqsum = 0.0
 	for a in lst:
 		sqsum += (a-avg)**2.0
-	return div(sqsum, float(len(lst)))
+	return math.sqrt(div(sqsum, float(len(lst))))
 
 # Adds a relation object to the database
 def create_relation(sem_rel, base_word, word):
@@ -362,6 +363,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	if user.is_authenticated():
 		user_stat = get_or_create_user_stat(user)
 		player_avg = div(user_stat.total_score, user_stat.rounds_played)
+
 		overall_player_avg = get_overall_player_avg()
 		overall_player_std_dev = get_overall_player_std_dev(overall_player_avg)
 		z_score = div((player_avg - overall_player_avg), overall_player_std_dev)
@@ -372,6 +374,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 		question_std_dev = get_overall_score_std_dev(question_avg)
 		goal_question_avg = question_avg - z_score * question_std_dev
 
+
 		# Remove completed questions from prospective choices
 		done = CompletedStat.objects.filter(user=user, sem_rel=sem_rel).filter().values_list('index', flat=True)
 
@@ -381,8 +384,9 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 
 		# Remove questions too far from the goal score, calculated above
 		# Also remove questions that are retired.
-		unviable = list(filter(lambda x: abs(x.avg_score - goal_question_avg) > .3 * question_std_dev or x.retired, 
+		unviable = list(filter(lambda x: (abs(x.avg_score - goal_question_avg) > .3 * question_std_dev and x.rounds_played >= 5) or x.retired, 
 		list(WordStat.objects.filter(sem_rel=sem_rel))))
+
 		unviable_ind = list(map(lambda x: x.index, unviable))
 		for i in unviable_ind:
 			if i in word_choices:
