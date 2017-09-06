@@ -27,7 +27,7 @@ determiners = dict()
 pat = re.compile(r'(?P<word>[0-9a-zA-Z ]+)=(?P<det>\S*)$')
 det_rels = ['meronyms', 'hyponyms']
 for rel in det_rels:
-	det_file = 'data/' + rel + '_determiners.txt'
+	det_file = rel + '_determiners.txt'
 	for line in open(os.path.join(settings.STATIC_ROOT, det_file)):
 		res = pat.match(line)
 		if res:
