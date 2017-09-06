@@ -61,7 +61,7 @@ for rel in relationships:
 
 # Find the top 100 words predicted by the model for each base word in the concreteness data set.
 conc_rating = dict()
-conc_file = 'data/concreteness_ratings.txt'
+conc_file = 'concreteness_ratings.txt'
 ignorefirst = True
 for line in open(os.path.join(settings.STATIC_ROOT, conc_file)):
 	if not ignorefirst:
