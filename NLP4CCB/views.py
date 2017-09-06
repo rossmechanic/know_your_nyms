@@ -17,7 +17,7 @@ from models import WordStat
 relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms']
 vocabs = {}
 for rel in relationships:
-	vocab_file = 'data/' + rel + '_base_words.txt'
+	vocab_file = "original_{rel}_base_words.txt".format(rel=rel)
 	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
 		lines = f.readlines()
 	vocabs[rel] = [word.lower().strip() for word in lines]
