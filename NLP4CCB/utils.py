@@ -1,6 +1,7 @@
 import json
 import os
 import sets
+import math
 import random
 from NLP4CCB_Django_App import settings
 from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat
@@ -104,15 +105,9 @@ def get_relations_percentages(sem_rel, base_word):
 
 	# The number of people that have played this word
 	times_played = user_inputs.values('user', 'round_number').distinct().count()
-	filtered_words = [word for word in input_word_dict]
-	total = 0
-	for word in filtered_words:
-		if input_word_dict[word] > 2:
-			total += input_word_dict[word]
-	filtered_words = filter(lambda x: float(input_word_dict[x] > 2), filtered_words)
 
 	# Percentage of players that said a relation
-	percentages = [(word, round((float(input_word_dict[word]) / total), 3)) for word in filtered_words]
+	percentages = [(word, round((float(input_word_dict[word]) / times_played), 3)) for word in input_word_dict]
 	percentages.sort(key=lambda x: x[1])
 	return percentages[::-1]
 
@@ -135,7 +130,7 @@ def get_overall_player_std_dev(avg):
 	sqsum = 0.0
 	for a in lst:
 		sqsum += (a-avg)**2.0
-	return div(sqsum, float(len(lst)))
+	return math.sqrt(div(sqsum, float(len(lst))))
 
 # Average score over all words. Each weighted equally, regardless of rounds played.
 def get_overall_score_avg():
@@ -147,7 +142,7 @@ def get_overall_score_std_dev(avg):
 	sqsum = 0.0
 	for a in lst:
 		sqsum += (a-avg)**2.0
-	return div(sqsum, float(len(lst)))
+	return math.sqrt(div(sqsum, float(len(lst))))
 
 # Adds a relation object to the database
 def create_relation(sem_rel, base_word, word):
@@ -224,7 +219,7 @@ def store_round(sem_rel, base_word, index, word_scores, request):
 	word_stat = get_or_create_word_stat(base_word, sem_rel, index)
 	if word_stat.rounds_played <= 5 and nonempty:
 		round_score += 40
-	save_word_result(base_word, sem_rel, round_score)
+	save_word_result(base_word, sem_rel, round_score, index)
 	user_stat.total_score += round_score
 	user_stat.save()
 
@@ -243,7 +238,7 @@ def anon_store_round(sem_rel, base_word, index, word_scores):
 	word_stat = get_or_create_word_stat(base_word, sem_rel, index)
 	if word_stat.rounds_played <= 5:
 		round_score += 40
-	save_word_result(base_word, sem_rel, round_score)
+	save_word_result(base_word, sem_rel, round_score, index)
 
 
 def starts_with_vowel(word):
@@ -259,6 +254,7 @@ def get_or_create_user_stat(user):
 	return user_stat
 
 def get_or_create_word_stat(word, rel, i):
+	delete_wordstat_duplicates(word, rel)
 	try:
 		word_stat = WordStat.objects.get(word=word, sem_rel=rel, index=i)
 	except ObjectDoesNotExist:
@@ -266,15 +262,25 @@ def get_or_create_word_stat(word, rel, i):
 		word_stat.save()
 	return word_stat
 
+def delete_wordstat_duplicates(word, rel):
+	word_set = WordStat.objects.filter(word=word, sem_rel=rel)
+	i = len(word_set) - 1
+	while i > 0:
+		stat = word_set[i]
+		WordStat.delete(stat)
+		i -= 1
+
 # Updates the stats of a word with a new score
-def save_word_result(word, sem_rel, score):
+def save_word_result(word, sem_rel, score, i):
 	try:
-		word_stat = WordStat.objects.get(word=word, sem_rel=sem_rel)
+		delete_wordstat_duplicates(word, sem_rel)
+		word_stat = WordStat.objects.get(word=word, sem_rel=sem_rel, index=i)
 		word_stat.avg_score = (word_stat.avg_score * word_stat.rounds_played + score)/(word_stat.rounds_played + 1)
 		word_stat.rounds_played = word_stat.rounds_played + 1
 		word_stat.save()
 	except ObjectDoesNotExist:
 		return
+
 # Adds a CompletedStat object for this word to the database. Used to determine if a player has completed a word or not
 def mark_played(user, index, word, sem_rel):
 	try:
@@ -295,11 +301,10 @@ def skip_word(request, conc_rating):
 	passes = float(Pass.objects.filter(type=sem_rel, base_word=base_word).distinct().count())
 	plays = float(get_or_create_word_stat(base_word, sem_rel, index).rounds_played)
 
-	(conc_mean, percent_known) = conc_rating[base_word]
-
 	# If the ratio between passes and plays gets too large, we retire words, meaning they won't be selected dynamically again.
 	if passes + plays >= 50:
 		if base_word in conc_rating:	
+			(conc_mean, percent_known) = conc_rating[base_word]
 			# This factor is close to zero if the concreteness of this word is high, and near 1 if it is low. 
 			factor = (5.0 - conc_mean * .8)/5.0
 			# If significantly less people choose to answer a question than predicted by concreteness rankings' word knowledge score but
@@ -340,21 +345,31 @@ def div(a, b):
 	return 0 if b == 0 else a/b
 
 def random_select_unplayed_word(vocab_size, sem_rel):
-	unplayed = sets.Set()
-	for i in range (0, vocab_size):
-		unplayed.add(i)
-	# The unplayed words are ones with no statistics created yet.
-	for word_stat in WordStat.objects.filter(sem_rel=sem_rel):
-		if word_stat.index in unplayed:
-			unplayed.remove(word_stat.index)
-	return random.choice(tuple(unplayed))
+	played = sets.Set()
+	# Randomly selects a word and retries if this word has been played by someone already.
+	# Caps at 20 tries. Selects an unplayed word with high probability.
 
+	for word_stat in WordStat.objects.filter(sem_rel=sem_rel).distinct('word'):
+		played.add(word_stat.index)
+	guess_index = random.randint(0, vocab_size - 1)
+
+	i = 0
+	while i < 20 and guess_index in played: 
+		guess_index = random.randint(0, vocab_size - 1)
+		i += 1
+	return guess_index
+
+def get_det(base_word, determiners):
+	if base_word in determiners:
+		return determiners[base_word]
+	else:
+		return ""
 
 def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	# We create a set of indices of words that this player could play, and narrow it down as we go
 	# Initially all words in this relationship are prospective choices
 	word_choices = sets.Set()
-	for stat in WordStat.objects.filter(sem_rel=sem_rel):
+	for stat in WordStat.objects.filter(sem_rel=sem_rel).distinct('word'):
 		word_choices.add(stat.index)
 
 
@@ -362,6 +377,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	if user.is_authenticated():
 		user_stat = get_or_create_user_stat(user)
 		player_avg = div(user_stat.total_score, user_stat.rounds_played)
+
 		overall_player_avg = get_overall_player_avg()
 		overall_player_std_dev = get_overall_player_std_dev(overall_player_avg)
 		z_score = div((player_avg - overall_player_avg), overall_player_std_dev)
@@ -372,6 +388,7 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 		question_std_dev = get_overall_score_std_dev(question_avg)
 		goal_question_avg = question_avg - z_score * question_std_dev
 
+
 		# Remove completed questions from prospective choices
 		done = CompletedStat.objects.filter(user=user, sem_rel=sem_rel).filter().values_list('index', flat=True)
 
@@ -381,8 +398,9 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 
 		# Remove questions too far from the goal score, calculated above
 		# Also remove questions that are retired.
-		unviable = list(filter(lambda x: abs(x.avg_score - goal_question_avg) > .3 * question_std_dev or x.retired, 
-		list(WordStat.objects.filter(sem_rel=sem_rel))))
+		unviable = list(filter(lambda x: (abs(x.avg_score - goal_question_avg) > .3 * question_std_dev and x.rounds_played >= 5) or x.retired, 
+		list(WordStat.objects.filter(sem_rel=sem_rel).distinct('word'))))
+
 		unviable_ind = list(map(lambda x: x.index, unviable))
 		for i in unviable_ind:
 			if i in word_choices:
@@ -501,7 +519,7 @@ def int_to_yn(i):
 def add_det(phrase, base_word, sem_rel, determiners):
 	if sem_rel == 'hyponyms' or sem_rel == 'meronyms':
 		if base_word in determiners:
-			return phrase + determiners[base_word]
+			return phrase + get_det(base_word, determiners)
 		elif starts_with_vowel(base_word):
 			return phrase + 'an '
 		else:
