@@ -69,7 +69,7 @@ def clean_input_words(input_words):
 
 
 def word_net(base_word, input_words, sem_rel):
-	json_f = 'data/wordnet_' + sem_rel + '.json'
+	json_f = 'wordnet_' + sem_rel + '.json'
 	# Now will get json data of known meronym pairs.
 	known_pairs = json.load(open(os.path.join(settings.STATIC_ROOT, json_f)))
 	# Accesses word pairs in WordNet. If none exist, gives an empty list.
