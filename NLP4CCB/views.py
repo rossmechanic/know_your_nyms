@@ -143,16 +143,11 @@ def models(request):
 	# The question and list of base words are specific to the selected relationship type
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
-	# 90% of the time, play the normal word game.
-	if random.random() > .1:
-		# 5% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
-		vocab_index = utils.rel_index(sem_rel, user_stat)
-		if random.random() >= 0.95 or len(vocab) < vocab_index:
-			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
-			request.session['random_vocab'] = True
-	# The other 10%, play the 'confirmation' game.
-	else:
-		return redirect('/confirmation/')
+	# 5% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
+	vocab_index = utils.rel_index(sem_rel, user_stat)
+	if random.random() >= 0.95 or len(vocab) < vocab_index:
+		vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+		request.session['random_vocab'] = True
 	base_word = vocab[vocab_index]
 
 	# Add the correct determiner to a word
