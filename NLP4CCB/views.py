@@ -144,10 +144,15 @@ def models(request):
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
 	# 5% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
-	vocab_index = utils.rel_index(sem_rel, user_stat)
-	if random.random() >= 0.95 or len(vocab) < vocab_index:
+	if request.user.is_authenticated:
+		vocab_index = utils.rel_index(sem_rel, user_stat)
+		if random.random() >= 0.95 or len(vocab) < vocab_index:
+			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+			request.session['random_vocab'] = True
+	else:
 		vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
 		request.session['random_vocab'] = True
+		
 	base_word = vocab[vocab_index]
 
 	# Add the correct determiner to a word
