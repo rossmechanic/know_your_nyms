@@ -571,6 +571,8 @@ def rel_index(sem_rel, user_stat):
 		return user_stat.hyponyms_index
 	elif sem_rel == 'meronyms':
 		return user_stat.meronyms_index
+	elif sem_rel == 'concreteness':
+		return user_stat.concreteness_index
 
 
 def inc_index(sem_rel, user_stat):
@@ -582,3 +584,5 @@ def inc_index(sem_rel, user_stat):
 		user_stat.hyponyms_index += 1
 	elif sem_rel == 'meronyms':
 		user_stat.meronyms_index += 1
+	elif sem_rel == 'concreteness':
+		user_stat.concreteness_index += 1
