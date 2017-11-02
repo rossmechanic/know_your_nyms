@@ -23,6 +23,7 @@ class UserStat(models.Model):
 	antonyms_index = models.IntegerField(default=0)
 	hyponyms_index = models.IntegerField(default=0)
 	meronyms_index = models.IntegerField(default=0)
+	concreteness_index = models.IntegerField(default=0)
 	last_login = models.DateField(default=date.today)
 
 class CompletedStat(models.Model):
@@ -74,7 +75,8 @@ class Pass(models.Model):
 		('hyponyms', 'hyponyms'),
 		('meronyms', 'meronyms'),
 		('antonyms', 'antonyms'),
-		('synonyms', 'synonyms')
+		('synonyms', 'synonyms'),
+		('concreteness', 'concreteness')
 	)
 	user = models.ForeignKey(User)
 	base_word = models.CharField(max_length=50)

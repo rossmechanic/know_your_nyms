@@ -14,9 +14,9 @@ from models import WordRelationshipForm
 from models import WordStat
 
 # Read in the vocabulary to traverse
-relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms']
+relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms', 'concreteness']
 vocabs = {}
-for rel in relationships:
+for rel in relationships[:5]:
 	vocab_file = "original_{rel}_vocab.txt".format(rel=rel)
 	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
 		lines = f.readlines()
@@ -40,15 +40,15 @@ for rel in det_rels:
 
 # Map from words to their index.
 ind = dict()
-for rel in relationships:
+for rel in relationships[:4]:
 	for i in range(0, len(vocabs[rel])):
 		ind[vocabs[rel][i], rel] = i
 
 # Map from base words to the top 100 model predictions and their scores
 top_words = dict()
 pat = re.compile(
-	r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
-for rel in relationships:
+	r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms|concreteness))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
+for rel in relationships[:4]:
 	pred_file = 'original_{rel}_vocab.txt'.format(rel=rel)
 	for line in open(os.path.join(settings.STATIC_ROOT, pred_file)):
 		res = pat.match(line)
@@ -81,28 +81,33 @@ for line in open(os.path.join(settings.STATIC_ROOT, conc_file)):
 rel_q_map = {'synonyms': 'What is another word for ',
 			 'antonyms': 'What is the opposite of ',
 			 'hyponyms': 'What are kinds of ',
-			 'meronyms': 'What are parts of '
+			 'meronyms': 'What are parts of ',
+			 'concreteness': 'Is this concrete '
 			 }
 
 rel_a_map = {'synonyms': 'Another word for ',
 			 'antonyms': 'The opposite of ',
 			 'hyponyms': 'Kinds of ',
-			 'meronyms': 'Parts of '
+			 'meronyms': 'Parts of ',
+			 'concreteness': 'Is this concrete '
 			 }
 
 # For the nym or not game
 rel_p_map = {'synonyms': 'Does this mean the same as ',
 			 'antonyms': 'Is this the opposite of ',
 			 'hyponyms': 'Is this a kind of ',
-			 'meronyms': 'Is this a part of '
+			 'meronyms': 'Is this a part of ',
+			 'concreteness': 'Is this concrete '
 			 }
+
 
 # Dictionary for sem_rel to amount of time on timer:
 rel_time_map = {
 	'synonyms': 10,
 	'antonyms': 10,
 	'hyponyms': 15,
-	'meronyms': 20
+	'meronyms': 20,
+	'concreteness': 20
 }
 
 
@@ -137,7 +142,7 @@ def models(request):
 			new_rels = request.POST.getlist('checks')
 			request.session['relationships'] = new_rels
 	rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms',
-																							 'hyponyms', 'synonyms']
+																							 'hyponyms', 'synonyms', 'concreteness']
 	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
 
 	# The question and list of base words are specific to the selected relationship type
