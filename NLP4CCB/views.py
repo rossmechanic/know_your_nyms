@@ -40,7 +40,7 @@ for rel in det_rels:
 
 # Map from words to their index.
 ind = dict()
-for rel in relationships[:4]:
+for rel in relationships[:5]:
 	for i in range(0, len(vocabs[rel])):
 		ind[vocabs[rel][i], rel] = i
 
@@ -48,7 +48,7 @@ for rel in relationships[:4]:
 top_words = dict()
 pat = re.compile(
 	r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms|concreteness))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
-for rel in relationships[:4]:
+for rel in relationships[:5]:
 	pred_file = 'original_{rel}_vocab.txt'.format(rel=rel)
 	for line in open(os.path.join(settings.STATIC_ROOT, pred_file)):
 		res = pat.match(line)
@@ -148,10 +148,10 @@ def models(request):
 	# The question and list of base words are specific to the selected relationship type
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
-	# 5% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
+	# 10% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
 	if request.user.is_authenticated:
 		vocab_index = utils.rel_index(sem_rel, user_stat)
-		if random.random() >= 0.95 or len(vocab) < vocab_index:
+		if random.random() >= 0.90 or len(vocab) < vocab_index:
 			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
 			request.session['random_vocab'] = True
 	else:
@@ -172,7 +172,12 @@ def models(request):
 		"question": question,
 		"time": rel_time_map[sem_rel]
 	}
-	return render(request, 'input_words.html', context)
+
+	# concreteness use a different html
+	if (sem_rel == 'concreteness'):
+		return render(request, 'input_concreteness.html', context)
+	else:
+		return render(request, 'input_words.html', context)
 
 
 def scoring(request):
