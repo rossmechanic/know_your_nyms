@@ -1,5 +1,5 @@
 /**
- * Created by rossmechanic on 4/5/17.
+ * Created by carriewang on 11/10/17.
  */
 $(document).ready(function () {
     function draw(data) {
@@ -23,9 +23,11 @@ $(document).ready(function () {
 
 
         x.domain(data.map(function (d) {
+            console.log(d.word);
             return d.word;
         }));
         y.domain([0, d3.max(data, function (d) {
+            console.log(d.percentage)
             return d.percentage;
         })]);
 
@@ -61,7 +63,6 @@ $(document).ready(function () {
     }
 
     var data = window.percentages['data'];
-    console.log("data" + window.percentages['data']);
     var timesPlayed = window.timesPlayed;
     if (data.length > 0 && timesPlayed >= 5) {
         draw(data);

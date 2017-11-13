@@ -55,6 +55,9 @@ def score_conf_words(sem_rel, base_word, word_set, results):
 
 	return sorted(word_scores, key=lambda x: (x[3], x[1], x[0]))
 
+#for now just return score 5
+def score_concreteness(sem_rel, base_word, word_set, results):
+	return 1
 
 def clean_input_words(input_words):
 	input_words = [str(word).lower() for word in input_words]
