@@ -32,6 +32,8 @@ class CompletedStat(models.Model):
 	index = models.IntegerField(default=0)
 	base_word = models.CharField(max_length=50)
 
+# for concretness maybe average score should always be 1, or the number of times the user has entered yes's
+# no's will simply be rounds_played - avg_score for concreteness
 class WordStat(models.Model):
 	word = models.CharField(max_length=50)
 	index = models.IntegerField(default=0)

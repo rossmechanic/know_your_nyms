@@ -1,17 +1,23 @@
 import os
 import random
 import re
+import json
 from datetime import date
 
 from django.conf import settings
 from django.forms import formset_factory
 from django.shortcuts import *
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.core import serializers
 
 import utils
 from models import UserInput
 from models import UserStat
 from models import WordRelationshipForm
 from models import WordStat
+from django.forms.models import model_to_dict
+
 
 # Read in the vocabulary to traverse
 relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms', 'concreteness']
@@ -179,6 +185,27 @@ def models(request):
 	else:
 		return render(request, 'input_words.html', context)
 
+def concrete_next_word(request):
+	#word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
+	# this has to be concreteness
+	sem_rel = "concreteness"
+	question = rel_q_map[sem_rel]
+	vocab = vocabs[sem_rel]
+	# randomly selects a word
+	vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+	base_word = vocab[vocab_index]
+	# if user is authenticated and the request is get - get the next word
+	if request.user.is_authenticated and request.method == 'POST':
+		data = {
+			"title": "Know Your Nyms?",
+			"base_word": base_word,
+			"word_index": vocab_index,
+			"sem_rel": sem_rel,
+			"question": question,
+			"time": rel_time_map[sem_rel]
+		}
+		print(data);
+		return JsonResponse(data)
 
 def scoring(request):
 	# if this is a POST request, we need to process the form data
@@ -233,6 +260,17 @@ def scoring(request):
 	else:
 		return redirect('/models/')
 
+# for now just score one for everything
+def concreteness_scoring(request):
+	if request.method == 'POST':
+		sem_rel = request.POST['sem_rel']
+		base_word = request.POST['base_word']
+		index = request.POST['word_index']
+		results = request.POST['results']
+		context = {}
+		return render(request, 'concreteness_scoring.html', context)
+	else:
+		return redirect('/models/')
 
 def confirmation(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm)

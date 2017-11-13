@@ -15,7 +15,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7 col-md-offset-1">
-                <h1 class="game-question school-bell">{{ question }} {{ base_word }}?</h1>
+                <h1 class="game-question school-bell" >{{ question }} <span id="update_word" >{{ base_word }}</span>?</h1>
                 <br>
                 <div class="row" style="text-align:center">
                     <button id="false-btn" class="btn btn-primary btn-lg nym-button"> No </button>
@@ -40,18 +40,18 @@
                 <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>
             </div>
             <div class="col-md-5 col-md-offset-3">
-                <form id="input-form" method="POST" action="./scoring/">
+                <form id="input-form" method="POST" action="./concreteness_scoring/">
                 {% csrf_token %}
                 {{ formset.management_form }}
                 <input id="id_form-BASE_WORD" name="base_word" type="hidden" value="{{ base_word }}">
                 <input id="id_form-SEM_REL" name="sem_rel" type="hidden" value={{ sem_rel }}>
                 <input id="id_form-WORD_INDEX" name="word_index" type="hidden" value={{ word_index }}>
                 <input id="id_form-RESULTS" name="results" type="hidden" value="">
-                {% for form in formset %}
+<!--                 {% for form in formset %}
                         <div class="form-group word-rel-formset" index="0">
                             {{ form.word }}
                         </div>
-                {% endfor %}
+                {% endfor %} -->
                 </form>   
             </div>
         </div>
