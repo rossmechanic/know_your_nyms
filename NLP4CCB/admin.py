@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import UserStat, Relation, UserInput, Challenge, Pass, CompletedStat, WordStat, ConfirmationStat
+from models import UserStat, Relation, UserInput, Challenge, Pass, CompletedStat, WordStat, ConfirmationStat, ConcretenessStat
 
 
 def accept_challenge(modeladmin, request, queryset):
@@ -40,6 +40,9 @@ class RelationAdmin(admin.ModelAdmin):
 class ConfirmationStatAdmin(admin.ModelAdmin):
 	list_display = ['sem_rel', 'base_word', 'input_word', 'times_confirmed', 'times_rejected']
 
+class ConcretenessStatAdmin(admin.ModelAdmin):
+	list_display = ['word', 'index', 'sem_rel', 'avg_score', 'total_score', 'rounds_played']
+
 class UserInputAdmin(admin.ModelAdmin):
 	list_display = ['user', 'round_number', 'relation', 'word_score']
 
@@ -56,6 +59,7 @@ admin.site.register(CompletedStat, CompletedStatAdmin)
 admin.site.register(WordStat, WordStatAdmin)
 admin.site.register(UserStat, UserStatAdmin)
 admin.site.register(ConfirmationStat, ConfirmationStatAdmin)
+admin.site.register(ConcretenessStat, ConcretenessStatAdmin)
 admin.site.register(Relation, RelationAdmin)
 admin.site.register(UserInput, UserInputAdmin)
 admin.site.register(Challenge, ChallengeAdmin)

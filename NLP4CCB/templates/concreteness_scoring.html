@@ -6,7 +6,10 @@
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript">
         (function () {
-            window.word_set = {{ word_set|safe }};
+            //window.word = {{word|safe}};
+            window.results = {{ results|safe }};
+            window.scores = {{ scores|safe }};
+            window.scores = {{ total_score | safe }};
         })();
     </script>
     <script src={% static  "javascripts/concreteness_scoring.js"%}></script>
@@ -24,26 +27,30 @@
                 <h1 class="score-report-header school-bell">Score Report</h1>
                 <table class="table table-bordered table-hover">
                     <thead>
-                        <th>{{ answer }}</th>
+                        <!-- <th>{{ answer }}</th> -->
+                        <th>Word</th>
                         <th>Score</th>
+                        <th>Your Answer</th>
+                        <th>Averages</th>
                     </thead>
-                    {% for word, scores in word_scores %}
-                        {% if scores.total_score %}
+                    {% for word, score, answer, avg in scores %}
+ <!--                        {% if scores.total_score %}
                             <tr class="success">
                         {% else %}
                             <tr class="danger">
-                        {% endif %}
+                        {% endif %} -->
                             <td>{{ word }}</td>
-                            <td>{{ scores.esp_score }}</td>
-                            <td>{{ scores.word_net_bonus }}</td>
-                            <td>{{ scores.total_score }}</td>
+                            <td>{{ score }}</td>
+                            <td>{{ answer }}</td>
+                            <td>{{ avg }}</td>
+                            <!-- <td>{{ scores.total_score }}</td> -->
                         </tr>
                     {%  endfor %}
                 </table>
                 <table class="table table-bordered table-hover">
                     <thead>
                         <th>Round Score</th>
-                        <th>{{ round_total }}</th>
+                        <th>{{ total_score }}</th>
                     </thead>
                 </table>
 

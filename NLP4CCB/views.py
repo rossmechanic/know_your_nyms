@@ -1,7 +1,7 @@
 import os
 import random
 import re
-import json
+import json, ast
 from datetime import date
 
 from django.conf import settings
@@ -20,9 +20,9 @@ from django.forms.models import model_to_dict
 
 
 # Read in the vocabulary to traverse
-relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms', 'concreteness']
+relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms', 'concreteness', 'pictures']
 vocabs = {}
-for rel in relationships[:5]:
+for rel in relationships[:6]:
 	vocab_file = "original_{rel}_vocab.txt".format(rel=rel)
 	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
 		lines = f.readlines()
@@ -46,15 +46,15 @@ for rel in det_rels:
 
 # Map from words to their index.
 ind = dict()
-for rel in relationships[:5]:
+for rel in relationships[:6]:
 	for i in range(0, len(vocabs[rel])):
 		ind[vocabs[rel][i], rel] = i
 
 # Map from base words to the top 100 model predictions and their scores
 top_words = dict()
 pat = re.compile(
-	r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms|concreteness))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
-for rel in relationships[:5]:
+	r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms|concreteness|pictures))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
+for rel in relationships[:6]:
 	pred_file = 'original_{rel}_vocab.txt'.format(rel=rel)
 	for line in open(os.path.join(settings.STATIC_ROOT, pred_file)):
 		res = pat.match(line)
@@ -88,14 +88,16 @@ rel_q_map = {'synonyms': 'What is another word for ',
 			 'antonyms': 'What is the opposite of ',
 			 'hyponyms': 'What are kinds of ',
 			 'meronyms': 'What are parts of ',
-			 'concreteness': 'Is this concrete '
+			 'concreteness': 'Rate concreteness ',
+			 'pictures': 'Rate whether picture represent word '
 			 }
 
 rel_a_map = {'synonyms': 'Another word for ',
 			 'antonyms': 'The opposite of ',
 			 'hyponyms': 'Kinds of ',
 			 'meronyms': 'Parts of ',
-			 'concreteness': 'Is this concrete '
+			 'concreteness': 'Is this concrete ',
+			 'pictures': 'Does the picture represent the word '
 			 }
 
 # For the nym or not game
@@ -103,7 +105,8 @@ rel_p_map = {'synonyms': 'Does this mean the same as ',
 			 'antonyms': 'Is this the opposite of ',
 			 'hyponyms': 'Is this a kind of ',
 			 'meronyms': 'Is this a part of ',
-			 'concreteness': 'Is this concrete '
+			 'concreteness': 'Is this concrete ',
+			 'pictures': 'Does the picture represent the word '
 			 }
 
 
@@ -113,7 +116,8 @@ rel_time_map = {
 	'antonyms': 10,
 	'hyponyms': 15,
 	'meronyms': 20,
-	'concreteness': 20
+	'concreteness': 20,
+	'pictures': 10
 }
 
 
@@ -169,19 +173,37 @@ def models(request):
 	# Add the correct determiner to a word
 	question = utils.add_det(question, base_word, sem_rel, determiners)
 
-	context = {
-		"title": "Know Your Nyms?",
-		"formset": word_relationship_formset,
-		"base_word": base_word,
-		"word_index": vocab_index,
-		"sem_rel": sem_rel,
-		"question": question,
-		"time": rel_time_map[sem_rel]
-	}
+	context = {}
+	if (sem_rel != 'pictures'):
+		context = {
+			"title": "Know Your Nyms?",
+			"formset": word_relationship_formset,
+			"base_word": base_word,
+			"word_index": vocab_index,
+			"sem_rel": sem_rel,
+			"question": question,
+			"time": rel_time_map[sem_rel]
+		}
+	else:
+		context = {
+			"title": "Know Your Nyms?",
+			"formset": word_relationship_formset,
+			"base_word": base_word.split()[0],
+			"picture_link": base_word.split()[1],
+			"word_index": vocab_index,
+			"sem_rel": sem_rel,
+			"question": question,
+			"time": rel_time_map[sem_rel]
+		}
+	
+
 
 	# concreteness use a different html
 	if (sem_rel == 'concreteness'):
 		return render(request, 'input_concreteness.html', context)
+	# picture game
+	elif (sem_rel == 'pictures'):
+		return render(request, 'input_pictures.html', context)
 	else:
 		return render(request, 'input_words.html', context)
 
@@ -194,8 +216,8 @@ def concrete_next_word(request):
 	# randomly selects a word
 	vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
 	base_word = vocab[vocab_index]
-	# if user is authenticated and the request is get - get the next word
-	if request.user.is_authenticated and request.method == 'POST':
+	# if the request is get - get the next word
+	if request.method == 'POST':
 		data = {
 			"title": "Know Your Nyms?",
 			"base_word": base_word,
@@ -204,7 +226,29 @@ def concrete_next_word(request):
 			"question": question,
 			"time": rel_time_map[sem_rel]
 		}
-		print(data);
+		return JsonResponse(data)
+
+def pictures_next_word(request):
+	#word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
+	# this has to be pictures
+	sem_rel = "pictures"
+	question = rel_q_map[sem_rel]
+	vocab = vocabs[sem_rel]
+	# randomly selects a word
+	vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+	base_word = vocab[vocab_index]
+	print(base_word);
+	# if the request is get - get the next word
+	if request.method == 'POST':
+		data = {
+			"title": "Know Your Nyms?",
+			"base_word": base_word.split()[0],
+			"picture_link": base_word.split()[1],
+			"word_index": vocab_index,
+			"sem_rel": sem_rel,
+			"question": question,
+			"time": rel_time_map[sem_rel]
+		}
 		return JsonResponse(data)
 
 def scoring(request):
@@ -264,10 +308,24 @@ def scoring(request):
 def concreteness_scoring(request):
 	if request.method == 'POST':
 		sem_rel = request.POST['sem_rel']
-		base_word = request.POST['base_word']
+		# base_word = request.POST['base_word']
 		index = request.POST['word_index']
 		results = request.POST['results']
+		results_index = request.POST['results_index']
+		index_obj = {}
 		context = {}
+		for item in ast.literal_eval(results):
+			# utils.get_or_create_concrete_stat(item['word'], sem_rel)
+			print(item['word'])
+		for item in ast.literal_eval(results_index):
+			print(item['word'], item['index'])
+			index_obj[item['word']] = item['index']
+		context['results'] = ast.literal_eval(results)
+		# scores has 3 elements here
+		scores = utils.score_concreteness(sem_rel, ast.literal_eval(results), index_obj)
+		print(scores)
+		context['scores'] = [(t[0], t[1], t[2], t[3]) for t in scores]
+		context['total_score'] = sum(t[1] for t in scores)
 		return render(request, 'concreteness_scoring.html', context)
 	else:
 		return redirect('/models/')

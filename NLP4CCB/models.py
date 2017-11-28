@@ -24,6 +24,7 @@ class UserStat(models.Model):
 	hyponyms_index = models.IntegerField(default=0)
 	meronyms_index = models.IntegerField(default=0)
 	concreteness_index = models.IntegerField(default=0)
+	pictures_index = models.IntegerField(default=0)
 	last_login = models.DateField(default=date.today)
 
 class CompletedStat(models.Model):
@@ -32,8 +33,6 @@ class CompletedStat(models.Model):
 	index = models.IntegerField(default=0)
 	base_word = models.CharField(max_length=50)
 
-# for concretness maybe average score should always be 1, or the number of times the user has entered yes's
-# no's will simply be rounds_played - avg_score for concreteness
 class WordStat(models.Model):
 	word = models.CharField(max_length=50)
 	index = models.IntegerField(default=0)
@@ -48,6 +47,14 @@ class ConfirmationStat(models.Model):
 	input_word = models.CharField(max_length=50)
 	times_confirmed = models.IntegerField(default=0)
 	times_rejected = models.IntegerField(default=0)
+
+class ConcretenessStat(models.Model):
+	word = models.CharField(max_length=50)
+	index = models.IntegerField(default=0)
+	sem_rel = models.CharField(max_length=50)
+	avg_score = models.FloatField(default=0.0)
+	total_score = models.FloatField(default=0.0)
+	rounds_played = models.IntegerField(default=0)
 	
 class Relation(models.Model):
 	type = models.CharField(max_length=50)
@@ -78,7 +85,8 @@ class Pass(models.Model):
 		('meronyms', 'meronyms'),
 		('antonyms', 'antonyms'),
 		('synonyms', 'synonyms'),
-		('concreteness', 'concreteness')
+		('concreteness', 'concreteness'),
+		('pictures', 'pictures')
 	)
 	user = models.ForeignKey(User)
 	base_word = models.CharField(max_length=50)
