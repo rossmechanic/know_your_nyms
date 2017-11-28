@@ -19,8 +19,8 @@ from NLP4CCB.views import index
 from NLP4CCB.views import leaderboard
 from NLP4CCB.views import confirmation
 from NLP4CCB.views import confirmation_scoring
-from NLP4CCB.views import concreteness_scoring
 from NLP4CCB.views import concrete_next_word
+from NLP4CCB.views import pictures_next_word
 import views
 
 urlpatterns = [
@@ -33,6 +33,6 @@ urlpatterns = [
     url(r'^leaderboard/', leaderboard),
     url(r'^confirmation/', confirmation),
     url(r'^conf_scoring', confirmation_scoring),
-    url(r'^models/concreteness_scoring', concreteness_scoring),
-    url(r'^models/concrete_next_word', concrete_next_word)
+    url(r'^models/concrete_next_word', concrete_next_word),
+    url(r'^models/pictures_next_word', pictures_next_word)
 ]

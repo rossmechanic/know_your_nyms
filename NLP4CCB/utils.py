@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 
 from NLP4CCB_Django_App import settings
-from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat
+from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat, ConcretenessStat
 
 stemmer = PorterStemmer()
 
@@ -55,9 +55,48 @@ def score_conf_words(sem_rel, base_word, word_set, results):
 
 	return sorted(word_scores, key=lambda x: (x[3], x[1], x[0]))
 
-#for now just return score 5
-def score_concreteness(sem_rel, base_word, word_set, results):
-	return 1
+#for now just return score 1
+def score_concreteness(sem_rel, results, index_obj):
+	final_scoring = list()
+	if (len(results) > 0 ):
+		for item in results:
+			print(item)
+			concrete_stat, new_word = get_or_create_concrete_stat(item['word'], item['answer'], sem_rel, index_obj[item['word']])
+			# get one full point for new word
+			# second element is the score, 3rd element is the avg score
+			if new_word:
+				final_scoring.append((item['word'], item['answer'], item['answer'], item['answer']))
+			else:
+				curr_total = concrete_stat.total_score
+				curr_rounds = concrete_stat.rounds_played
+				curr_avg = concrete_stat.avg_score
+
+				concrete_stat.rounds_played = curr_rounds + 1
+				concrete_stat.total_score = curr_total + item['answer']
+				#update avg score
+				new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
+				concrete_stat.avg_score = new_avg
+				concrete_stat.save()
+
+				# sort by old concreteness
+				if item['answer'] >= curr_avg:
+					final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+				else:
+					final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+		# sort from highest to lowest percentage 
+		return sorted(final_scoring, key = lambda x: int(x[3]))[::-1]
+
+def get_or_create_concrete_stat(word, answer, rel, index):
+	delete_wordstat_duplicates(word, rel)
+	new_word = False
+	try:
+		concrete_stat = ConcretenessStat.objects.get(word=word, sem_rel=rel, index=index)
+	# new word: answer is 1 or 0 for yes and no, rounds played is 1
+	except ObjectDoesNotExist:
+		concrete_stat = ConcretenessStat.objects.create(word=word, sem_rel=rel, index=index, avg_score=answer, total_score=answer, rounds_played=1)
+		concrete_stat.save()
+		new_word = True
+	return (concrete_stat, new_word)
 
 def clean_input_words(input_words):
 	input_words = [str(word).lower() for word in input_words]
@@ -576,6 +615,8 @@ def rel_index(sem_rel, user_stat):
 		return user_stat.meronyms_index
 	elif sem_rel == 'concreteness':
 		return user_stat.concreteness_index
+	elif sem_rel == 'pictures':
+		return user_stat.pictures_index
 
 
 def inc_index(sem_rel, user_stat):
@@ -589,3 +630,5 @@ def inc_index(sem_rel, user_stat):
 		user_stat.meronyms_index += 1
 	elif sem_rel == 'concreteness':
 		user_stat.concreteness_index += 1
+	elif sem_rel == 'pictures':
+		user_stat.pictures_index += 1

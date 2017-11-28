@@ -15,14 +15,17 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7 col-md-offset-1">
-                <h1 class="game-question school-bell" >{{ question }} <span id="update_word" >{{ base_word }}</span>?</h1>
+                <h1 class="game-question school-bell" >{{ question }}? <br> <span id="update_word" >{{ base_word }}</span></h1>
                 <br>
                 <div class="row" style="text-align:center">
-                    <button id="false-btn" class="btn btn-primary btn-lg nym-button"> No </button>
-                    <button id="true-btn" class="btn btn-primary btn-lg nym-button"> Yes </button>
+                    <button id="one-btn" class="btn btn-primary btn-lg nym-button"> 1 </button>
+                    <button id="two-btn" class="btn btn-primary btn-lg nym-button"> 2 </button>
+                    <button id="three-btn" class="btn btn-primary btn-lg nym-button"> 3 </button>
+                    <button id="four-btn" class="btn btn-primary btn-lg nym-button"> 4 </button>
+                    <button id="five-btn" class="btn btn-primary btn-lg nym-button"> 5 </button>
                      <br>
                      <br>
-                    <h1 class="game-question school-bell"><span class="curr_word">{{ curr_word }}</span></h1>
+                    <!-- <h1 class="game-question school-bell"><span class="curr_word">{{ curr_word }}</span></h1> -->
                 </div>
             </div>
             <div class="col-md-4">
@@ -42,11 +45,12 @@
             <div class="col-md-5 col-md-offset-3">
                 <form id="input-form" method="POST" action="./concreteness_scoring/">
                 {% csrf_token %}
-                {{ formset.management_form }}
+                <!-- {{ formset.management_form }} -->
                 <input id="id_form-BASE_WORD" name="base_word" type="hidden" value="{{ base_word }}">
                 <input id="id_form-SEM_REL" name="sem_rel" type="hidden" value={{ sem_rel }}>
                 <input id="id_form-WORD_INDEX" name="word_index" type="hidden" value={{ word_index }}>
                 <input id="id_form-RESULTS" name="results" type="hidden" value="">
+                <input id="id_form-RESULTS_INDEX" name="results_index" type="hidden" value="">
 <!--                 {% for form in formset %}
                         <div class="form-group word-rel-formset" index="0">
                             {{ form.word }}
