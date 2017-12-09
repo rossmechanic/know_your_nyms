@@ -55,6 +55,14 @@ class ConcretenessStat(models.Model):
 	avg_score = models.FloatField(default=0.0)
 	total_score = models.FloatField(default=0.0)
 	rounds_played = models.IntegerField(default=0)
+
+class PicturesStat(models.Model):
+	word = models.CharField(max_length=50)
+	index = models.IntegerField(default=0)
+	sem_rel = models.CharField(max_length=50)
+	avg_score = models.FloatField(default=0.0)
+	total_score = models.FloatField(default=0.0)
+	rounds_played = models.IntegerField(default=0)
 	
 class Relation(models.Model):
 	type = models.CharField(max_length=50)

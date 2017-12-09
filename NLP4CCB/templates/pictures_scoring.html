@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block scripts %}
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            window.results = {{ results|safe }};
+            window.scores = {{ scores|safe }};
+            window.scores = {{ total_score | safe }};
+        })();
+    </script>
+    <script src={% static  "javascripts/concreteness_scoring.js"%}></script>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+
+
+{% block content %}
+    <div class="container-fluid roboto-mono">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-5" id="score-report-div" style="text-align: center">
+                <h1 class="score-report-header school-bell">Score Report</h1>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <!-- <th>{{ answer }}</th> -->
+                        <th>Word</th>
+                        <th>Score</th>
+                        <th>Your Answer</th>
+                        <th>Averages</th>
+                    </thead>
+                    <!-- CHECK FOR NON TYPE OBJECT-->
+                    {% for word, score, answer, avg in scores %}
+                            <td>{{ word }}</td>
+                            <td>{{ score }}</td>
+                            <td>{{ answer }}</td>
+                            <td>{{ avg }}</td>
+                        </tr>
+                    {%  endfor %}
+                </table>
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <th>Round Score</th>
+                        <th>{{ total_score }}</th>
+                    </thead>
+                </table>
+
+            </div>
+        </div>
+        <div class="row" style="text-align: center">
+            <a type="button" class="btn btn-success btn-lg nym-button" href="models/">Next Round</a>
+            <a type="button" class="btn btn-success btn-lg nym-button" a href="/">Home</a>
+        </div>
+    </div>
+{% endblock %}
+

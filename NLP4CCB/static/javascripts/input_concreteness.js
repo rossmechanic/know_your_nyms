@@ -160,6 +160,8 @@ $(document).ready(function(){
     // TODO: remove the form-0 stuff...
     // 89 is y, 90 is z, 78 is n
     $(document).keydown(function(e) {
+        //TODO: WIRE WITH KEYBOARDS 1 THROUGH 5
+        
         // if(e.which === 89) {
         //     e.preventDefault();
         //     console.log("yes button");
