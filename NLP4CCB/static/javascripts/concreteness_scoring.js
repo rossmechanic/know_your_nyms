@@ -2,9 +2,6 @@
  * Created by carriewang on 11/10/17.
  */
 $(document).ready(function () {
-    console.log("HELLO");
-    //console.log(window.word);
-    console.log(window.results);
     function draw(data) {
         var $parent = $('svg').parent();
         var parent_width = $parent.width();
@@ -64,23 +61,4 @@ $(document).ready(function () {
                 return height - y(d.percentage);
             });
     }
-
-        // draw(window.results);
-        // $(window).resize(function () {
-        //     $('svg').empty();
-        //     draw(window.results);
-        // });
-
-    // var data = window.percentages['data'];
-    // var timesPlayed = window.timesPlayed;
-    // if (data.length > 0 && timesPlayed >= 5) {
-    //     draw(data);
-    //     $(window).resize(function () {
-    //         $('svg').empty();
-    //         draw(data);
-    //     });
-    // } else {
-    //     $('#score-report-div').removeClass('col-md-5 col-md-offset-1')
-    //         .addClass('col-md-6 col-md-offset-3')
-    // }
 });
