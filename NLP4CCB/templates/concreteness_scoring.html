@@ -27,24 +27,17 @@
                 <h1 class="score-report-header school-bell">Score Report</h1>
                 <table class="table table-bordered table-hover">
                     <thead>
-                        <!-- <th>{{ answer }}</th> -->
                         <th>Word</th>
                         <th>Score</th>
                         <th>Your Answer</th>
                         <th>Averages</th>
                     </thead>
                     {% for word, score, answer, avg in scores %}
- <!--                        {% if scores.total_score %}
-                            <tr class="success">
-                        {% else %}
-                            <tr class="danger">
-                        {% endif %} -->
                         <tr>
                             <td>{{ word }}</td>
                             <td>{{ score }}</td>
                             <td>{{ answer }}</td>
                             <td>{{ avg }}</td>
-                            <!-- <td>{{ scores.total_score }}</td> -->
                         </tr>
                     {%  endfor %}
                 </table>

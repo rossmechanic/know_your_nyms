@@ -161,7 +161,6 @@ def store_concreteness_round(sem_rel, scores, request):
 	nonempty = False
 
 	# Creates a relation to save in the database, and a UserInput object
-	# if sem_rel == "concreteness":
 	for word, score, answer, avg in scores:
 		nonempty = True
 		round_score += score
@@ -172,17 +171,6 @@ def store_concreteness_round(sem_rel, scores, request):
 											  word_score=score)
 
 		user_input.save()
-	# elif sem_rel == "pictures":
-	# 	for word, link, score, answer, avg in scores:
-	# 		nonempty = True
-	# 		round_score += score
-	# 		relation = create_relation(sem_rel, word, link)
-	# 		user_input = UserInput.objects.create(user=user,
-	# 											  round_number=user_stat.rounds_played,
-	# 											  relation=relation,
-	# 											  word_score=score)
-
-	# 		user_input.save()
 		
 	user_stat.total_score += round_score
 	user_stat.save()
@@ -198,10 +186,6 @@ def anon_store_concreteness_round(sem_rel, scores):
 	for word, score, answer, avg in scores:
 		round_score += score
 		create_relation(sem_rel, word, word)
-	# elif sem_rel == "pictures":
-	# 	for word, link, score, answer, avg in scores:
-	# 		round_score += score
-	# 		create_relation(sem_rel, word, link)
 
 
 def select_picture_link(picture_links):
