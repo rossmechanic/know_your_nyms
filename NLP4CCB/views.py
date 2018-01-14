@@ -176,8 +176,6 @@ def models(request):
 		request.session['random_vocab'] = True
 		
 	base_word = vocab[vocab_index]
-	print("vocab index "+str(vocab_index))
-	print("base word "+str(base_word))
 
 	# Add the correct determiner to a word
 	question = utils.add_det(question, base_word, sem_rel, determiners)
@@ -194,11 +192,9 @@ def models(request):
 			"time": rel_time_map[sem_rel]
 		}
 	else:
-		print("HERE")
 		original_pictures = base_word.split('\t')[1]
 		picture_links = original_pictures.split(',')
 		picture_link = utils.select_picture_link(picture_links)
-		print("picture link "+picture_link)
 		context = {
 			"title": "Know Your Nyms?",
 			"formset": word_relationship_formset,
@@ -334,9 +330,8 @@ def pictures_scoring(request):
 			context['results'] = ast.literal_eval(results)
 			# scores has 3 elements here
 			scores = utils.score_pictures(sem_rel, ast.literal_eval(results), index_obj)
-			print(scores)
 			context['scores'] = [(t[0], t[1], t[2], t[3]) for t in scores]
-			context['total_score'] = sum(t[2] for t in scores)
+			context['total_score'] = sum(t[1] for t in scores)
 			# If the user is authenticated, store their data and the new word data.
 			if request.user.is_authenticated():
 				utils.store_concreteness_round(sem_rel, scores, request)
