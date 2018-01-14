@@ -60,11 +60,8 @@ def score_concreteness(sem_rel, results, index_obj):
 	final_scoring = list()
 	if (len(results) > 0 ):
 		for item in results:
-			print(item)
-			if sem_rel == "concreteness":
-				stat, new_word = get_or_create_concrete_stat(item['word'], item['answer'], sem_rel, index_obj[item['word']])
-			elif sem_rel == "pictures":
-				stat, new_word = get_or_create_pictures_stat(item['word'], item['answer'], sem_rel, index_obj[item['word']])
+			stat, new_word = get_or_create_concrete_stat(item['word'], item['answer'], sem_rel, index_obj[item['word']])
+				
 
 			# get one full point for new word
 			# second element is the score, 3rd element is the avg score
@@ -89,6 +86,40 @@ def score_concreteness(sem_rel, results, index_obj):
 		# sort from highest to lowest percentage 
 		return sorted(final_scoring, key = lambda x: int(x[3]))[::-1]
 
+#simple 50/50 rule
+def score_pictures(sem_rel, results, index_obj):
+	final_scoring = list()
+	if (len(results) > 0 ):
+		for item in results:
+			stat, new_word = get_or_create_pictures_stat(item['word'], item['link'], item['answer'], 
+				sem_rel, index_obj[item['word']])
+			if new_word:
+				final_scoring.append((item['word'], 
+					item['answer'], item['answer'], item['answer']))
+			else:
+				curr_total = stat.total_score
+				curr_rounds = stat.rounds_played
+				# >= .50: more yes's, < .50: more nos
+				curr_avg = stat.avg_score
+
+				stat.rounds_played = curr_rounds + 1
+				stat.total_score = curr_total + item['answer']
+				#update avg score
+				new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
+				stat.avg_score = new_avg
+				stat.save()
+
+				if curr_avg >= 0.5:
+					if item["answer"] == 1:
+						final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+					else:
+						final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+				else:
+					if item["answer"] == 0:
+						final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+					else:
+						final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+		return sorted(final_scoring, key = lambda x: int(x[3]))[::-1]
 
 def get_or_create_concrete_stat(word, answer, rel, index):
 	delete_wordstat_duplicates(word, rel)
@@ -102,14 +133,14 @@ def get_or_create_concrete_stat(word, answer, rel, index):
 		new_word = True
 	return (concrete_stat, new_word)
 
-def get_or_create_pictures_stat(word, answer, rel, index):
+def get_or_create_pictures_stat(word, link, answer, rel, index):
 	delete_wordstat_duplicates(word, rel)
 	new_word = False
 	try:
-		picture_stat = PicturesStat.objects.get(word=word, sem_rel=rel, index=index)
+		picture_stat = PicturesStat.objects.get(word=word, link=link, sem_rel=rel, index=index)
 	# new word: answer is 1 or 0 for yes and no, rounds played is 1
 	except ObjectDoesNotExist:
-		picture_stat = PicturesStat.objects.create(word=word, sem_rel=rel, index=index, avg_score=answer, total_score=answer, rounds_played=1)
+		picture_stat = PicturesStat.objects.create(word=word, link=link, sem_rel=rel, index=index, avg_score=answer, total_score=answer, rounds_played=1)
 		picture_stat.save()
 		new_word = True
 	return (picture_stat, new_word)
@@ -130,6 +161,7 @@ def store_concreteness_round(sem_rel, scores, request):
 	nonempty = False
 
 	# Creates a relation to save in the database, and a UserInput object
+	# if sem_rel == "concreteness":
 	for word, score, answer, avg in scores:
 		nonempty = True
 		round_score += score
@@ -140,6 +172,17 @@ def store_concreteness_round(sem_rel, scores, request):
 											  word_score=score)
 
 		user_input.save()
+	# elif sem_rel == "pictures":
+	# 	for word, link, score, answer, avg in scores:
+	# 		nonempty = True
+	# 		round_score += score
+	# 		relation = create_relation(sem_rel, word, link)
+	# 		user_input = UserInput.objects.create(user=user,
+	# 											  round_number=user_stat.rounds_played,
+	# 											  relation=relation,
+	# 											  word_score=score)
+
+	# 		user_input.save()
 		
 	user_stat.total_score += round_score
 	user_stat.save()
@@ -151,9 +194,14 @@ def anon_store_concreteness_round(sem_rel, scores):
 
 	# Creates a relation to save in the database
 	# Player is anonymous, so we have no user data to save.
+	# if sem_rel == "concreteness":
 	for word, score, answer, avg in scores:
 		round_score += score
 		create_relation(sem_rel, word, word)
+	# elif sem_rel == "pictures":
+	# 	for word, link, score, answer, avg in scores:
+	# 		round_score += score
+	# 		create_relation(sem_rel, word, link)
 
 
 def select_picture_link(picture_links):
