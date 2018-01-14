@@ -8,6 +8,8 @@ $(document).ready(function(){
     var results = [];
     var results_index = [];
     var counter = 0;
+    console.log(window.picture_links);
+    console.log($('#id_form-BASE_WORD_LINK').val());
     var $timer = $(".timer");
     var time = parseInt($timer.text())
     var timeUpdater = window.setInterval(function(){
@@ -38,31 +40,57 @@ $(document).ready(function(){
         }
     };
 
-    var nextWord = function() {
-        console.log("NEXT WORD");
-        var csrftoken = Cookies.get('csrftoken');
-        $.ajax({
-           beforeSend: function(xhr) {
-               xhr.setRequestHeader("X-CSRFToken", csrftoken);
-           },
-            type: "POST",
-            url: '/models/pictures_next_word',
-            data: {},
-            contentType:"application/json",
-            success: function(data) {
-                $('#id_form-BASE_WORD').attr( 'value', data['base_word']);
-                $('#id_form-BASE_WORD_LINK').attr( 'value', data['picture_link']);
-                console.log(data['picture_link']);
-                $('#picture_link_img').attr('src', data['picture_link']);
-                $('#picture_link_img').attr('alt', data['base_word']);
-                $('#id_form-WORD_INDEX').attr( 'value', data['word_index']);
-                $('#update_word').text(data['base_word']);
-            },
-            error: function(data) {
-                console.log("whoops");
-            }
-        });
+    // var nextWord = function() {
+    //     console.log("NEXT WORD");
+    //     console.log($('#id_form-BASE_WORD').val());
+    //     var csrftoken = Cookies.get('csrftoken');
+    //     $.ajax({
+    //        beforeSend: function(xhr) {
+    //            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+    //        },
+    //         type: "POST",
+    //         url: '/models/pictures_next_word',
+    //         data: JSON.stringify({curr_word: $('#id_form-BASE_WORD').val()}),
+    //         contentType:"application/json",
+    //         success: function(data) {
+    //             $('#id_form-BASE_WORD').attr( 'value', data['base_word']);
+    //             $('#id_form-BASE_WORD_LINK').attr( 'value', data['picture_link']);
+    //             console.log(data['picture_link']);
+    //             $('#picture_link_img').attr('src', data['picture_link']);
+    //             $('#picture_link_img').attr('alt', data['base_word']);
+    //             $('#id_form-WORD_INDEX').attr( 'value', data['word_index']);
+    //             $('#update_word').text(data['base_word']);
+    //         },
+    //         error: function(data) {
+    //             console.log("whoops");
+    //         }
+    //     });
+    // };
+
+    var skipWord = function() {
+        if (!submitted){
+            submitted = true;
+            var csrftoken = Cookies.get('csrftoken');
+            $.ajax({
+               beforeSend: function(xhr) {
+                   xhr.setRequestHeader("X-CSRFToken", csrftoken);
+               },
+                type: "POST",
+                url: '/models/',
+                data: {skip: 'true', sem_rel: $('#id_form-SEM_REL').val(), base_word: $('#id_form-BASE_WORD').val(), word_index: $('#id_form-WORD_INDEX').val()},
+                success: function() {
+                    window.location.href='/models';
+                }
+            });
+        }
     };
+
+    var nextLink = function() {
+        var link = window.picture_links[Math.floor(Math.random() * window.picture_links.length)];
+        console.log("link " + link);
+        $('#id_form-BASE_WORD_LINK').attr( 'value', link);
+        $('#picture_link_img').attr('src', link);
+    }
 
     $('#undo-btn').on('click', function(e){
         e.preventDefault();
@@ -74,8 +102,15 @@ $(document).ready(function(){
             $('#id_form-BASE_WORD').attr( 'value', last_obj['word']);
             $('#id_form-WORD_INDEX').attr( 'value', last_obj_ind['index']);
             $('#update_word').text(last_obj['word']);
+            $('#picture_link_img').attr('src', last_obj['link']);
             console.log(results);
         }
+    });
+
+    $('#skip-btn').on('click', function(e){
+        e.preventDefault();
+        console.log("skip");
+        skipWord();
     });
 
     $('#done-btn').on('click', function(){
@@ -86,21 +121,21 @@ $(document).ready(function(){
     $('#yes-btn').on('click', function(e){
         e.preventDefault();
         console.log("yes");
-        results.push({word: $('#id_form-BASE_WORD').val(), answer: 1});
+        results.push({word: $('#id_form-BASE_WORD').val(), link: $('#id_form-BASE_WORD_LINK').val(), answer: 1});
         results_index.push({word: $('#id_form-BASE_WORD').val(), index: $('#id_form-WORD_INDEX').val()});
         counter++;
         console.log(results);
-        nextWord();
+        nextLink();
     });
 
     $('#no-btn').on('click', function(e){
         e.preventDefault();
         console.log("no");
-        results.push({word: $('#id_form-BASE_WORD').val(), answer: 0});
+        results.push({word: $('#id_form-BASE_WORD').val(), link: $('#id_form-BASE_WORD_LINK').val(), answer: 0});
         results_index.push({word: $('#id_form-BASE_WORD').val(), index: $('#id_form-WORD_INDEX').val()});
         counter++;
         console.log(results);
-        nextWord();
+        nextLink();
     });
 
     // TODO: remove the form-0 stuff...
@@ -109,20 +144,20 @@ $(document).ready(function(){
         if(e.which === 89) {
             e.preventDefault();
             console.log("yes button");
-            results.push({word: $('#id_form-BASE_WORD').val(), answer: 1});
-            results_index.push({word: $('#id_form-BASE_WORD').val(), index: $('#id_form-WORD_INDEX').val()});
+            results.push({word: $('#id_form-BASE_WORD').val(), link: $('#id_form-BASE_WORD_LINK').val(), answer: 1});
+            results_index.push({word: $('#id_form-BASE_WORD').val(), link: $('#id_form-BASE_WORD_LINK').val(), index: $('#id_form-WORD_INDEX').val()});
             counter++;
             console.log(results);
-            nextWord();
+            nextLink();
         }
         else if(e.which === 78){
             e.preventDefault();
             console.log("no button");
-            results.push({word: $('#id_form-BASE_WORD').val(), answer: 0});
-            results_index.push({word: $('#id_form-BASE_WORD').val(), index: $('#id_form-WORD_INDEX').val()});
+            results.push({word: $('#id_form-BASE_WORD').val(), link: $('#id_form-BASE_WORD_LINK').val(), answer: 0});
+            results_index.push({word: $('#id_form-BASE_WORD').val(), link: $('#id_form-BASE_WORD_LINK').val(), index: $('#id_form-WORD_INDEX').val()});
             counter++;
             console.log(results);
-            nextWord();
+            nextLink();
         }
         if(e.which == 90){
             console.log("back button");
@@ -131,7 +166,8 @@ $(document).ready(function(){
                 var last_obj = results.pop();
                 $('#id_form-BASE_WORD').attr( 'value', last_obj['word']);
                 $('#id_form-WORD_INDEX').attr( 'value', last_obj_ind['index']);
-                $('#update_word').text(last_obj['word']);       
+                $('#update_word').text(last_obj['word']); 
+                $('#picture_link_img').attr('src', last_obj['link']);      
             }
         }
 
