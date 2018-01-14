@@ -203,7 +203,6 @@ def models(request):
 			"title": "Know Your Nyms?",
 			"formset": word_relationship_formset,
 			"base_word": base_word.split()[0],
-			#"picture_link": base_word.split()[1],
 			"picture_link": picture_link,
 			"all_links": picture_links,
 			"word_index": vocab_index,
@@ -237,30 +236,6 @@ def concrete_next_word(request):
 		data = {
 			"title": "Know Your Nyms?",
 			"base_word": base_word,
-			"word_index": vocab_index,
-			"sem_rel": sem_rel,
-			"question": question,
-			"time": rel_time_map[sem_rel]
-		}
-		return JsonResponse(data)
-
-def pictures_next_word(request):
-	#word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
-	# this has to be pictures
-	print(request.POST.get('curr_word'))
-	sem_rel = "pictures"
-	question = rel_q_map[sem_rel]
-	vocab = vocabs[sem_rel]
-	# randomly selects a word
-	vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
-	base_word = vocab[vocab_index]
-	print(base_word);
-	# if the request is get - get the next word
-	if request.method == 'POST':
-		data = {
-			"title": "Know Your Nyms?",
-			"base_word": base_word.split()[0],
-			"picture_link": base_word.split()[1],
 			"word_index": vocab_index,
 			"sem_rel": sem_rel,
 			"question": question,
@@ -334,7 +309,6 @@ def concreteness_scoring(request):
 			context['results'] = ast.literal_eval(results)
 			# scores has 3 elements here
 			scores = utils.score_concreteness(sem_rel, ast.literal_eval(results), index_obj)
-			print(scores)
 			context['scores'] = [(t[0], t[1], t[2], t[3]) for t in scores]
 			context['total_score'] = sum(t[1] for t in scores)
 			# If the user is authenticated, store their data and the new word data.
@@ -359,10 +333,10 @@ def pictures_scoring(request):
 				index_obj[item['word']] = item['index']
 			context['results'] = ast.literal_eval(results)
 			# scores has 3 elements here
-			scores = utils.score_concreteness(sem_rel, ast.literal_eval(results), index_obj)
+			scores = utils.score_pictures(sem_rel, ast.literal_eval(results), index_obj)
 			print(scores)
 			context['scores'] = [(t[0], t[1], t[2], t[3]) for t in scores]
-			context['total_score'] = sum(t[1] for t in scores)
+			context['total_score'] = sum(t[2] for t in scores)
 			# If the user is authenticated, store their data and the new word data.
 			if request.user.is_authenticated():
 				utils.store_concreteness_round(sem_rel, scores, request)

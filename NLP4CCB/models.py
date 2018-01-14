@@ -58,6 +58,7 @@ class ConcretenessStat(models.Model):
 
 class PicturesStat(models.Model):
 	word = models.CharField(max_length=50)
+	link = models.TextField(max_length=2000, default='www.know-your-nyms.com')
 	index = models.IntegerField(default=0)
 	sem_rel = models.CharField(max_length=50)
 	avg_score = models.FloatField(default=0.0)

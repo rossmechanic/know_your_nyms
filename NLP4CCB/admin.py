@@ -44,7 +44,7 @@ class ConcretenessStatAdmin(admin.ModelAdmin):
 	list_display = ['word', 'index', 'sem_rel', 'avg_score', 'total_score', 'rounds_played']
 
 class PicturesStatAdmin(admin.ModelAdmin):
-	list_display = ['word', 'index', 'sem_rel', 'avg_score', 'total_score', 'rounds_played']
+	list_display = ['word', 'link', 'index', 'sem_rel', 'avg_score', 'total_score', 'rounds_played']
 
 class UserInputAdmin(admin.ModelAdmin):
 	list_display = ['user', 'round_number', 'relation', 'word_score']
