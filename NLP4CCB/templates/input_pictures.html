@@ -7,6 +7,11 @@
 {% endblock %}
 {% block scripts %}
     <script src={% static "javascripts/js-cookie/js.cookie.js" %}></script>
+    <script type="text/javascript">
+        (function () {
+            window.picture_links = {{ all_links|safe }};
+        })();
+    </script>
     <script src="{% static 'javascripts/input_pictures.js' %}?v=0001"></script>
 {% endblock %}
 
@@ -31,6 +36,9 @@
                 </button>
                 <button id="done-btn" class="button btn-primary btn-lg nym-button">
                     Done
+                </button>
+                <button id="skip-btn" class="button btn-primary btn-lg nym-button">
+                    Skip Word
                 </button>
                 <br>
                 <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>

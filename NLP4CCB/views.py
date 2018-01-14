@@ -117,7 +117,7 @@ rel_time_map = {
 	'hyponyms': 15,
 	'meronyms': 20,
 	'concreteness': 20,
-	'pictures': 10
+	'pictures': 20
 }
 
 
@@ -146,6 +146,7 @@ def models(request):
 	if request.method == 'POST':
 		if 'skip' in request.POST:
 			if request.user.is_authenticated():
+				#if request.POST['sem_rel'] != "pictures":
 				utils.skip_word(request, conc_rating)
 			return HttpResponse("Success")
 		else:
@@ -160,7 +161,9 @@ def models(request):
 	vocab = vocabs[sem_rel]
 	# 10% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
 	# TODO: JUST PICK A RANDOM INT INDEX FOR CONCRETENESS
-	if rel == "concreteness" or rel == "pictures":
+	if rel == "concreteness":
+		vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+	elif rel == "pictures":
 		vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
 	else:
 		if request.user.is_authenticated:
@@ -173,6 +176,8 @@ def models(request):
 		request.session['random_vocab'] = True
 		
 	base_word = vocab[vocab_index]
+	print("vocab index "+str(vocab_index))
+	print("base word "+str(base_word))
 
 	# Add the correct determiner to a word
 	question = utils.add_det(question, base_word, sem_rel, determiners)
@@ -189,11 +194,18 @@ def models(request):
 			"time": rel_time_map[sem_rel]
 		}
 	else:
+		print("HERE")
+		original_pictures = base_word.split('\t')[1]
+		picture_links = original_pictures.split(',')
+		picture_link = utils.select_picture_link(picture_links)
+		print("picture link "+picture_link)
 		context = {
 			"title": "Know Your Nyms?",
 			"formset": word_relationship_formset,
 			"base_word": base_word.split()[0],
-			"picture_link": base_word.split()[1],
+			#"picture_link": base_word.split()[1],
+			"picture_link": picture_link,
+			"all_links": picture_links,
 			"word_index": vocab_index,
 			"sem_rel": sem_rel,
 			"question": question,
@@ -235,6 +247,7 @@ def concrete_next_word(request):
 def pictures_next_word(request):
 	#word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
 	# this has to be pictures
+	print(request.POST.get('curr_word'))
 	sem_rel = "pictures"
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
@@ -315,7 +328,7 @@ def concreteness_scoring(request):
 		results_index = request.POST['results_index']
 		index_obj = {}
 		context = {}
-		if ast.literal_eval(results) != list()::
+		if ast.literal_eval(results) != list():
 			for item in ast.literal_eval(results_index):
 				index_obj[item['word']] = item['index']
 			context['results'] = ast.literal_eval(results)

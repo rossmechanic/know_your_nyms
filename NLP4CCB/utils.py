@@ -155,6 +155,10 @@ def anon_store_concreteness_round(sem_rel, scores):
 		round_score += score
 		create_relation(sem_rel, word, word)
 
+
+def select_picture_link(picture_links):
+	return random.choice(picture_links)
+
 def clean_input_words(input_words):
 	input_words = [str(word).lower() for word in input_words]
 	input_words_stemmed = set()
