@@ -55,12 +55,8 @@ $(document).ready(function(){
                 console.log("whoops");
             }
         });
-        //}
     };
 
-    // $('#skip-btn').on('click', function(){
-    //    skipWord();
-    // });
 
     $('#undo-btn').on('click', function(e){
         e.preventDefault();

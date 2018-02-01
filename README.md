@@ -31,3 +31,30 @@ python manage.py runserver
 to run it locally. However, this still uses the development server database. 
 It may be slow as a result, but it's not indicative of slow code.
 
+If you made a changes to models.py, run
+
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+before running
+
+```
+python manage.py runserver
+```
+
+To test, run
+```
+python manage.py test
+```
+
+To pre-populate a database locally, run
+```
+python manage.py loaddata data.json
+```
+where data.json is your json file that you want to upload
+For more information see django docs on fixtures
+code for making such fixtures is under 
+```
+makefixtures.py
+```

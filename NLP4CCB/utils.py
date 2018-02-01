@@ -3,6 +3,7 @@ import math
 import os
 import random
 import sets
+#import requests
 
 from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
@@ -189,6 +190,12 @@ def anon_store_concreteness_round(sem_rel, scores):
 
 
 def select_picture_link(picture_links):
+	# link = random.choice(picture_links)
+	# r = requests.head(link)
+	# if (r.status_code == requests.codes.ok):
+	# 	return link
+	# else:
+	# 	select_picture_link(picture_links)
 	return random.choice(picture_links)
 
 def clean_input_words(input_words):

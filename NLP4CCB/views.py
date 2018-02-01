@@ -152,6 +152,7 @@ def models(request):
 		else:
 			new_rels = request.POST.getlist('checks')
 			request.session['relationships'] = new_rels
+
 	rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms',
 																							 'hyponyms', 'synonyms', 'concreteness']
 	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
