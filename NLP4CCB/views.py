@@ -3,6 +3,7 @@ import random
 import re
 import json, ast
 from datetime import date
+import urllib2
 
 from django.conf import settings
 from django.forms import formset_factory
@@ -133,6 +134,15 @@ def index(request):
 			context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
 	return render(request, 'welcome.html', context)
 
+# check for existence of url
+def file_exists(location):
+    request = urllib2.Request(location)
+    request.get_method = lambda : 'HEAD'
+    try:
+        response = urllib2.urlopen(request, timeout=1)
+        return True
+    except urllib2.HTTPError, e:
+        return False
 
 def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
@@ -195,6 +205,13 @@ def models(request):
 	else:
 		original_pictures = base_word.split('\t')[1]
 		picture_links = original_pictures.split(',')
+		# correct_links = list()
+		# print(len(picture_links))
+		# for link in picture_links:
+		# 	if file_exists(link):
+		# 		correct_links.append(link)
+
+		# print(len(correct_links))
 		picture_link = utils.select_picture_link(picture_links)
 		context = {
 			"title": "Know Your Nyms?",

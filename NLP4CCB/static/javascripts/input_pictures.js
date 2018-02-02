@@ -3,13 +3,33 @@
  */
 var Cookies = window.Cookies;
 
+
 $(document).ready(function(){
     var submitted = false;
     var results = [];
     var results_index = [];
     var counter = 0;
     var $timer = $(".timer");
-    var time = parseInt($timer.text())
+    var time = parseInt($timer.text());
+    var correct_links = [];
+    for (var i = 0; i < window.picture_links.length; i++) {
+        var link = window.picture_links[i];
+
+        function makeSuccessCallback(link) {
+            return function() {
+                correct_links.push(link);
+            }
+        }
+        var args = {
+            url: link,
+            type:'HEAD',
+            error: function(){},
+            success: makeSuccessCallback(link),
+        };
+
+        $.ajax(args);
+    }  
+
     var timeUpdater = window.setInterval(function(){
         time -= 1;
         if (time === 0){
@@ -56,9 +76,9 @@ $(document).ready(function(){
     };
 
     var nextLink = function() {
-        var link = window.picture_links[Math.floor(Math.random() * window.picture_links.length)];
+        var link = correct_links[Math.floor(Math.random() * correct_links.length)];
         $('#id_form-BASE_WORD_LINK').attr( 'value', link);
-        $('#picture_link_img').attr('src', link);
+        $('#picture_link_img').attr('src', link); 
     }
 
     $('#undo-btn').on('click', function(e){

@@ -3,7 +3,6 @@ import math
 import os
 import random
 import sets
-#import requests
 
 from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
@@ -17,6 +16,15 @@ stemmer = PorterStemmer()
 word_net_bonus = 50.0
 challenge_bonus = 0.0
 
+# checks for bad image links for the picture games
+def file_exists(url):
+    request = urllib2.Request(url)
+    request.get_method = lambda : 'HEAD'
+    try:
+        response = urllib2.urlopen(request)
+        return True
+    except:
+        return False
 
 def score_words(base_word, input_words, sem_rel, relations_percentages):
 	input_words = clean_input_words(input_words)
@@ -190,12 +198,6 @@ def anon_store_concreteness_round(sem_rel, scores):
 
 
 def select_picture_link(picture_links):
-	# link = random.choice(picture_links)
-	# r = requests.head(link)
-	# if (r.status_code == requests.codes.ok):
-	# 	return link
-	# else:
-	# 	select_picture_link(picture_links)
 	return random.choice(picture_links)
 
 def clean_input_words(input_words):
