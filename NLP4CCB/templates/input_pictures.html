@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+{% block scripts %}
+    <script src={% static "javascripts/js-cookie/js.cookie.js" %}></script>
+    <script type="text/javascript">
+        (function () {
+            window.picture_links = {{ all_links|safe }};
+        })();
+    </script>
+    <script src="{% static 'javascripts/input_pictures.js' %}?v=0001"></script>
+{% endblock %}
+
+
+{% block content%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7 col-md-offset-1">
+                <h1 class="game-question school-bell" >{{ question }}? <br> <span id="update_word" >{{ base_word }}</span><br><img id="picture_link_img" src={{ picture_link }} alt={{base_word}} height="300" width="300"></h1>
+                <br>
+                <div class="row" style="text-align:center">
+                    <button id="yes-btn" class="btn btn-primary btn-lg nym-button"> Yes </button>
+                    <button id="no-btn" class="btn btn-primary btn-lg nym-button"> No </button>
+                     <br>
+                     <br>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h1 class="roboto-mono">Timer: <span class="timer">{{ time }}</span></h1>
+                <button id="undo-btn" class="button btn-primary btn-lg nym-button">
+                    Undo
+                </button>
+                <button id="done-btn" class="button btn-primary btn-lg nym-button">
+                    Done
+                </button>
+                <button id="skip-btn" class="button btn-primary btn-lg nym-button">
+                    Skip Word
+                </button>
+                <br>
+                <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>
+            </div>
+            <div class="col-md-5 col-md-offset-3">
+                <form id="input-form" method="POST" action="./pictures_scoring/">
+                {% csrf_token %}
+                <input id="id_form-BASE_WORD" name="base_word" type="hidden" value="{{ base_word }}">
+                <input id="id_form-BASE_WORD_LINK" name="base_word_link" type="hidden" value="{{ picture_link }}">
+                <input id="id_form-SEM_REL" name="sem_rel" type="hidden" value={{ sem_rel }}>
+                <input id="id_form-WORD_INDEX" name="word_index" type="hidden" value={{ word_index }}>
+                <input id="id_form-RESULTS" name="results" type="hidden" value="">
+                <input id="id_form-RESULTS_INDEX" name="results_index" type="hidden" value="">
+                </form>   
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

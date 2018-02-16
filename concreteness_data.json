@@ -1,0 +1,26 @@
+[
+  {
+    "model": "NLP4CCB.ConcretenessStat",
+    "pk": 1,
+    "fields": {
+      "word": "tush",
+      "index": 0,
+      "sem_rel": "concreteness",
+      "avg_score": 5.0,
+      "total_score": 5.0,
+      "rounds_played": 1
+    }
+  },
+  {
+    "model": "NLP4CCB.ConcretenessStat",
+    "pk": 2,
+    "fields": {
+      "word": "happy",
+      "index": 1,
+      "sem_rel": "concreteness",
+      "avg_score": 5.0,
+      "total_score": 5.0,
+      "rounds_played": 1
+    }
+  }
+]

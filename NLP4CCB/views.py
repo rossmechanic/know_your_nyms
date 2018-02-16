@@ -1,22 +1,29 @@
 import os
 import random
 import re
+import json, ast
 from datetime import date
+import urllib2
 
 from django.conf import settings
 from django.forms import formset_factory
 from django.shortcuts import *
+from django.http import HttpResponse
+from django.http import JsonResponse
+from django.core import serializers
 
 import utils
 from models import UserInput
 from models import UserStat
 from models import WordRelationshipForm
 from models import WordStat
+from django.forms.models import model_to_dict
+
 
 # Read in the vocabulary to traverse
-relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms']
+relationships = ['synonyms', 'antonyms', 'hyponyms', 'meronyms', 'concreteness', 'pictures']
 vocabs = {}
-for rel in relationships:
+for rel in relationships[:6]:
 	vocab_file = "original_{rel}_vocab.txt".format(rel=rel)
 	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
 		lines = f.readlines()
@@ -40,15 +47,15 @@ for rel in det_rels:
 
 # Map from words to their index.
 ind = dict()
-for rel in relationships:
+for rel in relationships[:6]:
 	for i in range(0, len(vocabs[rel])):
 		ind[vocabs[rel][i], rel] = i
 
 # Map from base words to the top 100 model predictions and their scores
 top_words = dict()
 pat = re.compile(
-	r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
-for rel in relationships:
+	r'(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms|concreteness|pictures))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$')
+for rel in relationships[:6]:
 	pred_file = 'original_{rel}_vocab.txt'.format(rel=rel)
 	for line in open(os.path.join(settings.STATIC_ROOT, pred_file)):
 		res = pat.match(line)
@@ -81,28 +88,37 @@ for line in open(os.path.join(settings.STATIC_ROOT, conc_file)):
 rel_q_map = {'synonyms': 'What is another word for ',
 			 'antonyms': 'What is the opposite of ',
 			 'hyponyms': 'What are kinds of ',
-			 'meronyms': 'What are parts of '
+			 'meronyms': 'What are parts of ',
+			 'concreteness': 'Rate concreteness ',
+			 'pictures': 'Rate whether picture represent word '
 			 }
 
 rel_a_map = {'synonyms': 'Another word for ',
 			 'antonyms': 'The opposite of ',
 			 'hyponyms': 'Kinds of ',
-			 'meronyms': 'Parts of '
+			 'meronyms': 'Parts of ',
+			 'concreteness': 'Is this concrete ',
+			 'pictures': 'Does the picture represent the word '
 			 }
 
 # For the nym or not game
 rel_p_map = {'synonyms': 'Does this mean the same as ',
 			 'antonyms': 'Is this the opposite of ',
 			 'hyponyms': 'Is this a kind of ',
-			 'meronyms': 'Is this a part of '
+			 'meronyms': 'Is this a part of ',
+			 'concreteness': 'Is this concrete ',
+			 'pictures': 'Does the picture represent the word '
 			 }
+
 
 # Dictionary for sem_rel to amount of time on timer:
 rel_time_map = {
 	'synonyms': 10,
 	'antonyms': 10,
 	'hyponyms': 15,
-	'meronyms': 20
+	'meronyms': 20,
+	'concreteness': 20,
+	'pictures': 20
 }
 
 
@@ -118,6 +134,15 @@ def index(request):
 			context['average_score'] = round(user_stat.total_score / user_stat.rounds_played, 2)
 	return render(request, 'welcome.html', context)
 
+# check for existence of url
+def file_exists(location):
+    request = urllib2.Request(location)
+    request.get_method = lambda : 'HEAD'
+    try:
+        response = urllib2.urlopen(request, timeout=1)
+        return True
+    except urllib2.HTTPError, e:
+        return False
 
 def models(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
@@ -131,26 +156,34 @@ def models(request):
 	if request.method == 'POST':
 		if 'skip' in request.POST:
 			if request.user.is_authenticated():
+				#if request.POST['sem_rel'] != "pictures":
 				utils.skip_word(request, conc_rating)
 			return HttpResponse("Success")
 		else:
 			new_rels = request.POST.getlist('checks')
 			request.session['relationships'] = new_rels
+
 	rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms',
-																							 'hyponyms', 'synonyms']
+																							 'hyponyms', 'synonyms', 'concreteness']
 	sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
 
 	# The question and list of base words are specific to the selected relationship type
 	question = rel_q_map[sem_rel]
 	vocab = vocabs[sem_rel]
-	# 5% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
-	if request.user.is_authenticated:
-		vocab_index = utils.rel_index(sem_rel, user_stat)
-		if random.random() >= 0.95 or len(vocab) < vocab_index:
-			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
-			request.session['random_vocab'] = True
-	else:
+	# 10% of the time pick a random unplayed word, otherwise dynamically select one based on user stats.
+	# TODO: JUST PICK A RANDOM INT INDEX FOR CONCRETENESS
+	if rel == "concreteness":
 		vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+	elif rel == "pictures":
+		vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+	else:
+		if request.user.is_authenticated:
+			vocab_index = utils.rel_index(sem_rel, user_stat)
+			if random.random() >= 0.90 or len(vocab) < vocab_index:
+				vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+				request.session['random_vocab'] = True
+		else:
+			vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
 		request.session['random_vocab'] = True
 		
 	base_word = vocab[vocab_index]
@@ -158,17 +191,71 @@ def models(request):
 	# Add the correct determiner to a word
 	question = utils.add_det(question, base_word, sem_rel, determiners)
 
-	context = {
-		"title": "Know Your Nyms?",
-		"formset": word_relationship_formset,
-		"base_word": base_word,
-		"word_index": vocab_index,
-		"sem_rel": sem_rel,
-		"question": question,
-		"time": rel_time_map[sem_rel]
-	}
-	return render(request, 'input_words.html', context)
+	context = {}
+	if (sem_rel != 'pictures'):
+		context = {
+			"title": "Know Your Nyms?",
+			"formset": word_relationship_formset,
+			"base_word": base_word,
+			"word_index": vocab_index,
+			"sem_rel": sem_rel,
+			"question": question,
+			"time": rel_time_map[sem_rel]
+		}
+	else:
+		original_pictures = base_word.split('\t')[1]
+		picture_links = original_pictures.split(',')
+		# correct_links = list()
+		# print(len(picture_links))
+		# for link in picture_links:
+		# 	if file_exists(link):
+		# 		correct_links.append(link)
 
+		# print(len(correct_links))
+		picture_link = utils.select_picture_link(picture_links)
+		context = {
+			"title": "Know Your Nyms?",
+			"formset": word_relationship_formset,
+			"base_word": base_word.split()[0],
+			"picture_link": picture_link,
+			"all_links": picture_links,
+			"word_index": vocab_index,
+			"sem_rel": sem_rel,
+			"question": question,
+			"time": rel_time_map[sem_rel]
+		}
+	
+
+
+	# concreteness use a different html
+	if (sem_rel == 'concreteness'):
+		return render(request, 'input_concreteness.html', context)
+	# picture game
+	elif (sem_rel == 'pictures'):
+		return render(request, 'input_pictures.html', context)
+	else:
+		return render(request, 'input_words.html', context)
+
+def concrete_next_word(request):
+	#word_relationship_formset = formset_factory(WordRelationshipForm, extra=1)
+	# this has to be concreteness
+	sem_rel = "concreteness"
+	question = rel_q_map[sem_rel]
+	vocab = vocabs[sem_rel]
+	# randomly selects a word
+	vocab_index = utils.random_select_unplayed_word(len(vocab), sem_rel)
+	base_word = vocab[vocab_index]
+	# if the request is get - get the next word
+	if request.method == 'POST':
+		data = {
+			"title": "Know Your Nyms?",
+			"base_word": base_word,
+			"word_index": vocab_index,
+			"sem_rel": sem_rel,
+			"question": question,
+			"time": rel_time_map[sem_rel]
+		}
+		return JsonResponse(data)
 
 def scoring(request):
 	# if this is a POST request, we need to process the form data
@@ -223,6 +310,55 @@ def scoring(request):
 	else:
 		return redirect('/models/')
 
+def concreteness_scoring(request):
+	if request.method == 'POST':
+		sem_rel = request.POST['sem_rel']
+		results = request.POST['results']
+		results_index = request.POST['results_index']
+		index_obj = {}
+		context = {}
+		if ast.literal_eval(results) != list():
+			for item in ast.literal_eval(results_index):
+				index_obj[item['word']] = item['index']
+			context['results'] = ast.literal_eval(results)
+			# scores has 3 elements here
+			scores = utils.score_concreteness(sem_rel, ast.literal_eval(results), index_obj)
+			context['scores'] = [(t[0], t[1], t[2], t[3]) for t in scores]
+			context['total_score'] = sum(t[1] for t in scores)
+			# If the user is authenticated, store their data and the new word data.
+			if request.user.is_authenticated():
+				utils.store_concreteness_round(sem_rel, scores, request)
+			# Otherwise just store the word data.
+			else:
+				utils.anon_store_concreteness_round(sem_rel, scores)
+		return render(request, 'concreteness_scoring.html', context)
+	else:
+		return redirect('/models/')
+
+def pictures_scoring(request):
+	if request.method == 'POST':
+		sem_rel = request.POST['sem_rel']
+		results = request.POST['results']
+		results_index = request.POST['results_index']
+		index_obj = {}
+		context = {}
+		if ast.literal_eval(results) != list():
+			for item in ast.literal_eval(results_index):
+				index_obj[item['word']] = item['index']
+			context['results'] = ast.literal_eval(results)
+			# scores has 3 elements here
+			scores = utils.score_pictures(sem_rel, ast.literal_eval(results), index_obj)
+			context['scores'] = [(t[0], t[1], t[2], t[3]) for t in scores]
+			context['total_score'] = sum(t[1] for t in scores)
+			# If the user is authenticated, store their data and the new word data.
+			if request.user.is_authenticated():
+				utils.store_concreteness_round(sem_rel, scores, request)
+			# Otherwise just store the word data.
+			else:
+				utils.anon_store_concreteness_round(sem_rel, scores)
+		return render(request, 'pictures_scoring.html', context)
+	else:
+		return redirect('/models/')
 
 def confirmation(request):
 	word_relationship_formset = formset_factory(WordRelationshipForm)

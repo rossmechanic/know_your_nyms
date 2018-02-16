@@ -59,6 +59,7 @@ $(document).ready(function(){
         submitWords();
     });
 
+    
     $(document).on('keydown','.word-rel-formset', function(event){
         if ((event.which === 9 || event.which === 13) && $(this).is(':last-child')) {
             event.preventDefault();

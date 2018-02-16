@@ -6,6 +6,7 @@
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script type="text/javascript">
         (function () {
+            // lhs: js obj name accessed in js file; rhs is from context in py files
             window.wordData = {{ word_scores|safe }};
             window.percentages = {{ percentages|safe }};
             window.timesPlayed = {{ times_played|safe }};

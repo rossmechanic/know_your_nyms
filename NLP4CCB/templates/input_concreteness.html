@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block stylesheets %}
+    <link rel='stylesheet' href={% static "stylesheets/style.css" %}>
+{% endblock %}
+{% block scripts %}
+    <script src={% static "javascripts/js-cookie/js.cookie.js" %}></script>
+    <script src="{% static 'javascripts/input_concreteness.js' %}?v=0001"></script>
+{% endblock %}
+
+
+{% block content%}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-7 col-md-offset-1">
+                <h1 class="game-question school-bell" >{{ question }}? <br> <span id="update_word" >{{ base_word }}</span></h1>
+                <br>
+                <div class="row" style="text-align:center">
+                    <button id="one-btn" class="btn btn-primary btn-lg nym-button"> 1 </button>
+                    <button id="two-btn" class="btn btn-primary btn-lg nym-button"> 2 </button>
+                    <button id="three-btn" class="btn btn-primary btn-lg nym-button"> 3 </button>
+                    <button id="four-btn" class="btn btn-primary btn-lg nym-button"> 4 </button>
+                    <button id="five-btn" class="btn btn-primary btn-lg nym-button"> 5 </button>
+                     <br>
+                     <br>
+                    <!-- <h1 class="game-question school-bell"><span class="curr_word">{{ curr_word }}</span></h1> -->
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h1 class="roboto-mono">Timer: <span class="timer">{{ time }}</span></h1>
+                <button id="undo-btn" class="button btn-primary btn-lg nym-button">
+                    Undo
+                </button>
+<!--                 <button id="skip-btn" class="button btn-primary btn-lg nym-button">
+                    Skip Word
+                </button> -->
+                <button id="done-btn" class="button btn-primary btn-lg nym-button">
+                    Done
+                </button>
+                <br>
+                <a type="button" class="btn btn-success btn-lg nym-button" href="/">   Home   </a>
+            </div>
+            <div class="col-md-5 col-md-offset-3">
+                <form id="input-form" method="POST" action="./concreteness_scoring/">
+                {% csrf_token %}
+                <!-- {{ formset.management_form }} -->
+                <input id="id_form-BASE_WORD" name="base_word" type="hidden" value="{{ base_word }}">
+                <input id="id_form-SEM_REL" name="sem_rel" type="hidden" value={{ sem_rel }}>
+                <input id="id_form-WORD_INDEX" name="word_index" type="hidden" value={{ word_index }}>
+                <input id="id_form-RESULTS" name="results" type="hidden" value="">
+                <input id="id_form-RESULTS_INDEX" name="results_index" type="hidden" value="">
+                </form>   
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

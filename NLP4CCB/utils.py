@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 
 from NLP4CCB_Django_App import settings
-from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat
+from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat, ConcretenessStat, PicturesStat
 
 stemmer = PorterStemmer()
 
@@ -16,6 +16,15 @@ stemmer = PorterStemmer()
 word_net_bonus = 50.0
 challenge_bonus = 0.0
 
+# checks for bad image links for the picture games
+def file_exists(url):
+    request = urllib2.Request(url)
+    request.get_method = lambda : 'HEAD'
+    try:
+        response = urllib2.urlopen(request)
+        return True
+    except:
+        return False
 
 def score_words(base_word, input_words, sem_rel, relations_percentages):
 	input_words = clean_input_words(input_words)
@@ -55,6 +64,141 @@ def score_conf_words(sem_rel, base_word, word_set, results):
 
 	return sorted(word_scores, key=lambda x: (x[3], x[1], x[0]))
 
+#for now just return score 1
+def score_concreteness(sem_rel, results, index_obj):
+	final_scoring = list()
+	if (len(results) > 0 ):
+		for item in results:
+			stat, new_word = get_or_create_concrete_stat(item['word'], item['answer'], sem_rel, index_obj[item['word']])
+				
+
+			# get one full point for new word
+			# second element is the score, 3rd element is the avg score
+			if new_word:
+				final_scoring.append((item['word'], item['answer'], item['answer'], item['answer']))
+			else:
+				curr_total = stat.total_score
+				curr_rounds = stat.rounds_played
+				curr_avg = stat.avg_score
+
+				stat.rounds_played = curr_rounds + 1
+				stat.total_score = curr_total + item['answer']
+				#update avg score
+				new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
+				stat.avg_score = new_avg
+				stat.save()
+
+				if abs(item['answer']-curr_avg) <= 0.5:
+					final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+				else:
+					final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+		# sort from highest to lowest percentage 
+		return sorted(final_scoring, key = lambda x: int(x[3]))[::-1]
+
+#simple 50/50 rule
+def score_pictures(sem_rel, results, index_obj):
+	final_scoring = list()
+	if (len(results) > 0 ):
+		for item in results:
+			stat, new_word = get_or_create_pictures_stat(item['word'], item['link'], item['answer'], 
+				sem_rel, index_obj[item['word']])
+			if new_word:
+				final_scoring.append((item['word'], 
+					item['answer'], item['answer'], item['answer']))
+			else:
+				curr_total = stat.total_score
+				curr_rounds = stat.rounds_played
+				# >= .50: more yes's, < .50: more nos
+				curr_avg = stat.avg_score
+
+				stat.rounds_played = curr_rounds + 1
+				stat.total_score = curr_total + item['answer']
+				#update avg score
+				new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
+				stat.avg_score = new_avg
+				stat.save()
+
+				if curr_avg >= 0.5:
+					if item["answer"] == 1:
+						final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+					else:
+						final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+				else:
+					if item["answer"] == 0:
+						final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+					else:
+						final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+		return sorted(final_scoring, key = lambda x: int(x[3]))[::-1]
+
+def get_or_create_concrete_stat(word, answer, rel, index):
+	delete_wordstat_duplicates(word, rel)
+	new_word = False
+	try:
+		concrete_stat = ConcretenessStat.objects.get(word=word, sem_rel=rel, index=index)
+	# new word: answer is 1 or 0 for yes and no, rounds played is 1
+	except ObjectDoesNotExist:
+		concrete_stat = ConcretenessStat.objects.create(word=word, sem_rel=rel, index=index, avg_score=answer, total_score=answer, rounds_played=1)
+		concrete_stat.save()
+		new_word = True
+	return (concrete_stat, new_word)
+
+def get_or_create_pictures_stat(word, link, answer, rel, index):
+	delete_wordstat_duplicates(word, rel)
+	new_word = False
+	try:
+		picture_stat = PicturesStat.objects.get(word=word, link=link, sem_rel=rel, index=index)
+	# new word: answer is 1 or 0 for yes and no, rounds played is 1
+	except ObjectDoesNotExist:
+		picture_stat = PicturesStat.objects.create(word=word, link=link, sem_rel=rel, index=index, avg_score=answer, total_score=answer, rounds_played=1)
+		picture_stat.save()
+		new_word = True
+	return (picture_stat, new_word)
+
+# Storing concreteness data on a round from an authenticated player
+# Updates user_stat
+def store_concreteness_round(sem_rel, scores, request):
+	user = request.user
+	round_score = 0
+	user_stat = get_or_create_user_stat(user)
+	try:
+		user_stat = UserStat.objects.get(user=user)
+	except ObjectDoesNotExist:
+		user_stat = UserStat.objects.create(user=user)
+		user_stat.save()
+	user_stat.rounds_played += 1
+
+	nonempty = False
+
+	# Creates a relation to save in the database, and a UserInput object
+	for word, score, answer, avg in scores:
+		nonempty = True
+		round_score += score
+		relation = create_relation(sem_rel, word, word)
+		user_input = UserInput.objects.create(user=user,
+											  round_number=user_stat.rounds_played,
+											  relation=relation,
+											  word_score=score)
+
+		user_input.save()
+		
+	user_stat.total_score += round_score
+	user_stat.save()
+
+
+# Storing data on a round from an unauthenticated player
+def anon_store_concreteness_round(sem_rel, scores):
+	round_score = 0
+
+	# Creates a relation to save in the database
+	# Player is anonymous, so we have no user data to save.
+	# if sem_rel == "concreteness":
+	for word, score, answer, avg in scores:
+		round_score += score
+		create_relation(sem_rel, word, word)
+
+
+def select_picture_link(picture_links):
+	return random.choice(picture_links)
 
 def clean_input_words(input_words):
 	input_words = [str(word).lower() for word in input_words]
@@ -571,6 +715,10 @@ def rel_index(sem_rel, user_stat):
 		return user_stat.hyponyms_index
 	elif sem_rel == 'meronyms':
 		return user_stat.meronyms_index
+	elif sem_rel == 'concreteness':
+		return user_stat.concreteness_index
+	elif sem_rel == 'pictures':
+		return user_stat.pictures_index
 
 
 def inc_index(sem_rel, user_stat):
@@ -582,3 +730,7 @@ def inc_index(sem_rel, user_stat):
 		user_stat.hyponyms_index += 1
 	elif sem_rel == 'meronyms':
 		user_stat.meronyms_index += 1
+	elif sem_rel == 'concreteness':
+		user_stat.concreteness_index += 1
+	elif sem_rel == 'pictures':
+		user_stat.pictures_index += 1
