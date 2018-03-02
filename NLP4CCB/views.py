@@ -27,7 +27,10 @@ for rel in relationships[:6]:
 	vocab_file = "original_{rel}_vocab.txt".format(rel=rel)
 	with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
 		lines = f.readlines()
-	vocabs[rel] = [word.lower().strip() for word in lines]
+	if rel != 'pictures':
+		vocabs[rel] = [word.lower().strip() for word in lines]
+	else:
+		vocabs[rel] = [word.strip() for word in lines]
 
 # Set up a map from words to their determiners, a/an/the/etc
 determiners = dict()
@@ -89,8 +92,13 @@ rel_q_map = {'synonyms': 'What is another word for ',
 			 'antonyms': 'What is the opposite of ',
 			 'hyponyms': 'What are kinds of ',
 			 'meronyms': 'What are parts of ',
-			 'concreteness': 'Rate concreteness ',
-			 'pictures': 'Rate whether picture represent word '
+			 'concreteness': 'We want you to indicate how concrete the meaning of '+ 
+			 			 'each word is for you by using a 5-point rating scale going '+
+			 			 'from abstract to concrete. A concrete word comes with a higher '+
+			 			 'rating and refers to something that exists in reality ; you can have '+
+			 			 'immediate experience of it through your senses (smelling, tasting, touching, '+
+			 			 'hearing, seeing) and the actions you do. ',
+			 'pictures': 'Does the picture represent the word '
 			 }
 
 rel_a_map = {'synonyms': 'Another word for ',
@@ -204,14 +212,10 @@ def models(request):
 		}
 	else:
 		original_pictures = base_word.split('\t')[1]
-		picture_links = original_pictures.split(',')
-		# correct_links = list()
-		# print(len(picture_links))
-		# for link in picture_links:
-		# 	if file_exists(link):
-		# 		correct_links.append(link)
+		picture_links_init = original_pictures.split('~')
+		picture_links_marked = [item.split(' ') for item in picture_links_init]
+		picture_links = [item[0] for item in picture_links_marked if len(item) == 2 and item[1] == 'A']
 
-		# print(len(correct_links))
 		picture_link = utils.select_picture_link(picture_links)
 		context = {
 			"title": "Know Your Nyms?",
@@ -348,11 +352,12 @@ def pictures_scoring(request):
 			context['results'] = ast.literal_eval(results)
 			# scores has 3 elements here
 			scores = utils.score_pictures(sem_rel, ast.literal_eval(results), index_obj)
-			context['scores'] = [(t[0], t[1], t[2], t[3]) for t in scores]
+			context['scores'] = [(t[0], t[1], t[2], t[3], t[4]) for t in scores]
 			context['total_score'] = sum(t[1] for t in scores)
 			# If the user is authenticated, store their data and the new word data.
 			if request.user.is_authenticated():
-				utils.store_concreteness_round(sem_rel, scores, request)
+				print(scores)
+				utils.store_pictures_round(sem_rel, scores, request)
 			# Otherwise just store the word data.
 			else:
 				utils.anon_store_concreteness_round(sem_rel, scores)

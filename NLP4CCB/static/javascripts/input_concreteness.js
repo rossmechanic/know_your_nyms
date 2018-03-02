@@ -25,7 +25,7 @@ $(document).ready(function(){
         }
     },500);
 
-    //$('#id_form-0-word').focus();
+    $('#id_form-0-word').focus();
 
     var submitWords = function() {
         if (!submitted){
@@ -119,6 +119,14 @@ $(document).ready(function(){
         //window.location.href='/models';
     });
 
+    // N is clicked, registered answer as N
+    $('#unknown-btn').on('click', function(e) {
+        results.push({word: $('#id_form-BASE_WORD').val(), answer: 'N'});
+        results_index.push({word: $('#id_form-BASE_WORD').val(), index: $('#id_form-WORD_INDEX').val()});
+        counter++;
+        nextWord();
+    });
+
     // TODO: remove the form-0 stuff...
     // 89 is y, 90 is z, 78 is n
     $(document).keydown(function(e) {
@@ -174,6 +182,15 @@ $(document).ready(function(){
         else if (e.which === 101 || e.which === 53) {
             e.preventDefault();
             results.push({word: $('#id_form-BASE_WORD').val(), answer: 5});
+            results_index.push({word: $('#id_form-BASE_WORD').val(), index: $('#id_form-WORD_INDEX').val()});
+            counter++;
+            nextWord();
+        }
+
+        //N
+        else if (e.which === 78) {
+            e.preventDefault();
+            results.push({word: $('#id_form-BASE_WORD').val(), answer: 'N'});
             results_index.push({word: $('#id_form-BASE_WORD').val(), index: $('#id_form-WORD_INDEX').val()});
             counter++;
             nextWord();

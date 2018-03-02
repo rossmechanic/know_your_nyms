@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import UserStat, Relation, UserInput, Challenge, Pass, CompletedStat, WordStat, ConfirmationStat, ConcretenessStat, PicturesStat
+from models import UserStat, Relation, UserInput, Challenge, Pass, CompletedStat, WordStat, ConfirmationStat, ConcretenessStat, PicturesStat, UserPictureInput
 
 
 def accept_challenge(modeladmin, request, queryset):
@@ -41,13 +41,16 @@ class ConfirmationStatAdmin(admin.ModelAdmin):
 	list_display = ['sem_rel', 'base_word', 'input_word', 'times_confirmed', 'times_rejected']
 
 class ConcretenessStatAdmin(admin.ModelAdmin):
-	list_display = ['word', 'index', 'sem_rel', 'avg_score', 'total_score', 'rounds_played']
+	list_display = ['word', 'index', 'sem_rel', 'avg_score', 'total_score', 'rounds_played', 'unknown_entered']
 
 class PicturesStatAdmin(admin.ModelAdmin):
 	list_display = ['word', 'link', 'index', 'sem_rel', 'avg_score', 'total_score', 'rounds_played']
 
 class UserInputAdmin(admin.ModelAdmin):
 	list_display = ['user', 'round_number', 'relation', 'word_score']
+
+class UserPictureInputAdmin(admin.ModelAdmin):
+	list_display = ['user', 'round_number', 'word', 'link', 'word_score']
 
 
 class ChallengeAdmin(admin.ModelAdmin):
@@ -66,5 +69,6 @@ admin.site.register(ConcretenessStat, ConcretenessStatAdmin)
 admin.site.register(PicturesStat, PicturesStatAdmin)
 admin.site.register(Relation, RelationAdmin)
 admin.site.register(UserInput, UserInputAdmin)
+admin.site.register(UserPictureInput, UserPictureInputAdmin)
 admin.site.register(Challenge, ChallengeAdmin)
 admin.site.register(Pass, PassAdmin)

@@ -15,17 +15,29 @@
     <div class="container">
         <div class="row">
             <div class="col-md-7 col-md-offset-1">
-                <h1 class="game-question school-bell" >{{ question }}? <br> <span id="update_word" >{{ base_word }}</span></h1>
+                <h3 class="game-question school-bell" >{{ question }}? <br> <span id="update_word" class="base-word" >{{ base_word }}</span></h3>
                 <br>
-                <div class="row" style="text-align:center">
-                    <button id="one-btn" class="btn btn-primary btn-lg nym-button"> 1 </button>
-                    <button id="two-btn" class="btn btn-primary btn-lg nym-button"> 2 </button>
-                    <button id="three-btn" class="btn btn-primary btn-lg nym-button"> 3 </button>
-                    <button id="four-btn" class="btn btn-primary btn-lg nym-button"> 4 </button>
-                    <button id="five-btn" class="btn btn-primary btn-lg nym-button"> 5 </button>
+                <div class="row" style="text-align:left">
+                    <div style="float:left">Abstract (language based)</div>
+                    <div style="float:left;margin-left:150px">Concrete (experienced based)</div>
+
+                </div>
+<!--                 <div class="row" style="text-align:right">
+                    <p>Concrete (experienced based)</p>
+                </div> -->
+                <div class="row" style="text-align:left">
+                    <button id="one-btn" class="btn btn-primary btn-lg nym-button" style="margin-right: 50px;"> 1 </button>
+                    <button id="two-btn" class="btn btn-primary btn-lg nym-button" style="margin-right: 50px;"> 2 </button>
+                    <button id="three-btn" class="btn btn-primary btn-lg nym-button" style="margin-right: 50px;"> 3 </button>
+                    <button id="four-btn" class="btn btn-primary btn-lg nym-button" style="margin-right: 50px;"> 4 </button>
+                    <button id="five-btn" class="btn btn-primary btn-lg nym-button" style="margin-right: 50px;"> 5 </button>
                      <br>
                      <br>
                     <!-- <h1 class="game-question school-bell"><span class="curr_word">{{ curr_word }}</span></h1> -->
+                </div>
+                <div class="row" style="text-align:left">
+                    <button id="unknown-btn" class="btn btn-primary btn-lg nym-button" style="float:left"> N </button>
+                    <div style="float:left; margin-left:10px; margin-top:15px"> = I do not know this word well enough to give a rating</div>
                 </div>
             </div>
             <div class="col-md-4">

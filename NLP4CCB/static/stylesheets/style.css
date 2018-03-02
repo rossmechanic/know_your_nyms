@@ -8,6 +8,10 @@ body {
     text-align: center;
 }
 
+.base-word {
+    font-size: 300%;
+}
+
 .score-report-header {
     text-align: center;
 }

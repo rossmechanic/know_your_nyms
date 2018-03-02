@@ -55,10 +55,12 @@ class ConcretenessStat(models.Model):
 	avg_score = models.FloatField(default=0.0)
 	total_score = models.FloatField(default=0.0)
 	rounds_played = models.IntegerField(default=0)
+	# number of times someone entered unknown for this word
+	unknown_entered = models.IntegerField(default=0)
 
 class PicturesStat(models.Model):
 	word = models.CharField(max_length=50)
-	link = models.TextField(max_length=2000, default='www.know-your-nyms.com')
+	link = models.TextField()
 	index = models.IntegerField(default=0)
 	sem_rel = models.CharField(max_length=50)
 	avg_score = models.FloatField(default=0.0)
@@ -80,6 +82,14 @@ class UserInput(models.Model):
 	user = models.ForeignKey(User)
 	round_number = models.IntegerField()
 	relation = models.ForeignKey(Relation)
+	word_score = models.FloatField()
+
+# only used to store pictures
+class UserPictureInput(models.Model):
+	user = models.ForeignKey(User)
+	round_number = models.IntegerField()
+	word = models.CharField(max_length=50)
+	link = models.TextField()
 	word_score = models.FloatField()
 
 class Challenge(models.Model):

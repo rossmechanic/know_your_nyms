@@ -8,7 +8,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 
 from NLP4CCB_Django_App import settings
-from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat, ConcretenessStat, PicturesStat
+from models import UserInput, UserPictureInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat, ConcretenessStat, PicturesStat
 
 stemmer = PorterStemmer()
 
@@ -64,14 +64,12 @@ def score_conf_words(sem_rel, base_word, word_set, results):
 
 	return sorted(word_scores, key=lambda x: (x[3], x[1], x[0]))
 
-#for now just return score 1
 def score_concreteness(sem_rel, results, index_obj):
 	final_scoring = list()
 	if (len(results) > 0 ):
 		for item in results:
 			stat, new_word = get_or_create_concrete_stat(item['word'], item['answer'], sem_rel, index_obj[item['word']])
 				
-
 			# get one full point for new word
 			# second element is the score, 3rd element is the avg score
 			if new_word:
@@ -82,14 +80,26 @@ def score_concreteness(sem_rel, results, index_obj):
 				curr_avg = stat.avg_score
 
 				stat.rounds_played = curr_rounds + 1
-				stat.total_score = curr_total + item['answer']
-				#update avg score
-				new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
-				stat.avg_score = new_avg
+				# stat.total_score = curr_total + item['answer']
+				# #update avg score
+				# new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
+				# stat.avg_score = new_avg
+				if item['answer'] != 'N':
+					stat.total_score = curr_total + item['answer']
+					#update avg score
+					new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
+					stat.avg_score = new_avg
+				else:
+					stat.unknown_entered += 1
 				stat.save()
 
-				if abs(item['answer']-curr_avg) <= 0.5:
-					final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+				# user entered an answer
+				if item['answer'] != 'N':
+					if abs(item['answer']-curr_avg) <= 0.5:
+						final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+					else:
+						final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+				# user entered unknown,received a socre of 0
 				else:
 					final_scoring.append((item['word'], 0, item['answer'], curr_avg))
 		# sort from highest to lowest percentage 
@@ -103,8 +113,9 @@ def score_pictures(sem_rel, results, index_obj):
 			stat, new_word = get_or_create_pictures_stat(item['word'], item['link'], item['answer'], 
 				sem_rel, index_obj[item['word']])
 			if new_word:
-				final_scoring.append((item['word'], 
-					item['answer'], item['answer'], item['answer']))
+				# 1 is score for new word
+				# 0 is curr average
+				final_scoring.append((item['word'], 1, item['answer'], 0, item['link']))
 			else:
 				curr_total = stat.total_score
 				curr_rounds = stat.rounds_played
@@ -112,22 +123,29 @@ def score_pictures(sem_rel, results, index_obj):
 				curr_avg = stat.avg_score
 
 				stat.rounds_played = curr_rounds + 1
+
+
 				stat.total_score = curr_total + item['answer']
 				#update avg score
 				new_avg = (curr_total + item['answer']) / (curr_rounds + 1)
 				stat.avg_score = new_avg
+
+				
 				stat.save()
 
 				if curr_avg >= 0.5:
 					if item["answer"] == 1:
-						final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+						# 1 is score
+						# item['answer'] is answer
+						final_scoring.append((item['word'], 1, item['answer'], curr_avg, item['link']))
 					else:
-						final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+						final_scoring.append((item['word'], 0, item['answer'], curr_avg, item['link']))
 				else:
 					if item["answer"] == 0:
-						final_scoring.append((item['word'], 1, item['answer'], curr_avg))
+						final_scoring.append((item['word'], 1, item['answer'], curr_avg, item['link']))
 					else:
-						final_scoring.append((item['word'], 0, item['answer'], curr_avg))
+						final_scoring.append((item['word'], 0, item['answer'], curr_avg, item['link']))
+
 		return sorted(final_scoring, key = lambda x: int(x[3]))[::-1]
 
 def get_or_create_concrete_stat(word, answer, rel, index):
@@ -137,7 +155,11 @@ def get_or_create_concrete_stat(word, answer, rel, index):
 		concrete_stat = ConcretenessStat.objects.get(word=word, sem_rel=rel, index=index)
 	# new word: answer is 1 or 0 for yes and no, rounds played is 1
 	except ObjectDoesNotExist:
-		concrete_stat = ConcretenessStat.objects.create(word=word, sem_rel=rel, index=index, avg_score=answer, total_score=answer, rounds_played=1)
+		# answer entered not unknowned
+		if answer != 'N':
+			concrete_stat = ConcretenessStat.objects.create(word=word, sem_rel=rel, index=index, avg_score=answer, total_score=answer, rounds_played=1, unknown_entered=0)
+		else:
+			concrete_stat = ConcretenessStat.objects.create(word=word, sem_rel=rel, index=index, avg_score=0.0, total_score=0.0, rounds_played=1, unknown_entered=1)
 		concrete_stat.save()
 		new_word = True
 	return (concrete_stat, new_word)
@@ -170,6 +192,8 @@ def store_concreteness_round(sem_rel, scores, request):
 	nonempty = False
 
 	# Creates a relation to save in the database, and a UserInput object
+	# store the user answer here in word_score
+	# put 20 for N
 	for word, score, answer, avg in scores:
 		nonempty = True
 		round_score += score
@@ -177,7 +201,39 @@ def store_concreteness_round(sem_rel, scores, request):
 		user_input = UserInput.objects.create(user=user,
 											  round_number=user_stat.rounds_played,
 											  relation=relation,
-											  word_score=score)
+											  word_score=answer if answer != "N" else 20)
+
+		user_input.save()
+		
+	user_stat.total_score += round_score
+	user_stat.save()
+
+
+# user, round_number, word, link, word_score
+def store_pictures_round(sem_rel, scores, request):
+	user = request.user
+	round_score = 0
+	user_stat = get_or_create_user_stat(user)
+	try:
+		user_stat = UserStat.objects.get(user=user)
+	except ObjectDoesNotExist:
+		user_stat = UserStat.objects.create(user=user)
+		user_stat.save()
+	user_stat.rounds_played += 1
+
+	nonempty = False
+
+	# Creates a relation to save in the database, and a UserInput object
+	# store the user answer here in word_score
+	# put 20 for N
+	for word, score, answer, avg, link in scores:
+		nonempty = True
+		round_score += score
+		user_input = UserPictureInput.objects.create(user=user,
+											  round_number=user_stat.rounds_played,
+											  word=word,
+											  link=link,
+											  word_score=answer)
 
 		user_input.save()
 		
@@ -195,6 +251,20 @@ def anon_store_concreteness_round(sem_rel, scores):
 	for word, score, answer, avg in scores:
 		round_score += score
 		create_relation(sem_rel, word, word)
+
+	# updates in ConcretenessStat
+
+def anon_store_pictures_round(sem_rel, scores):
+	round_score = 0
+
+	# Creates a relation to save in the database
+	# Player is anonymous, so we have no user data to save.
+	# if sem_rel == "concreteness":
+	for word, score, answer, avg in scores:
+		round_score += score
+		create_relation(sem_rel, word, word)
+
+	# updates in PicturesStat
 
 
 def select_picture_link(picture_links):

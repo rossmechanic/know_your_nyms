@@ -1,0 +1,22 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[dev-packages]
+
+
+
+[packages]
+
+click = "==6.7"
+django = "==1.10.3"
+first = "==2.0.1"
+nltk = "==3.2.2"
+passgen = "==1.0.1"
+pip-tools = "==1.8.2"
+"psycopg2" = "==2.7.1"
+pyparsing = "==2.2.0"
+requests = "*"

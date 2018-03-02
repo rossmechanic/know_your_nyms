@@ -28,13 +28,15 @@
                     <thead>
                         <!-- <th>{{ answer }}</th> -->
                         <th>Word</th>
+                        <th>Link</th>
                         <th>Score</th>
                         <th>Your Answer</th>
                         <th>Averages</th>
                     </thead>
                     <!-- CHECK FOR NON TYPE OBJECT-->
-                    {% for word, score, answer, avg in scores %}
+                    {% for word, score, answer, avg, link in scores %}
                             <td>{{ word }}</td>
+                            <td><img src={{ link }} height="50" width="50"></td>
                             <td>{{ score }}</td>
                             <td>{{ answer }}</td>
                             <td>{{ avg }}</td>
