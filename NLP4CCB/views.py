@@ -356,7 +356,6 @@ def pictures_scoring(request):
 			context['total_score'] = sum(t[1] for t in scores)
 			# If the user is authenticated, store their data and the new word data.
 			if request.user.is_authenticated():
-				print(scores)
 				utils.store_pictures_round(sem_rel, scores, request)
 			# Otherwise just store the word data.
 			else:

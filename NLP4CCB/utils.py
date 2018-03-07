@@ -193,7 +193,7 @@ def store_concreteness_round(sem_rel, scores, request):
 
 	# Creates a relation to save in the database, and a UserInput object
 	# store the user answer here in word_score
-	# put 20 for N
+	# put -1 for N
 	for word, score, answer, avg in scores:
 		nonempty = True
 		round_score += score
@@ -201,7 +201,7 @@ def store_concreteness_round(sem_rel, scores, request):
 		user_input = UserInput.objects.create(user=user,
 											  round_number=user_stat.rounds_played,
 											  relation=relation,
-											  word_score=answer if answer != "N" else 20)
+											  word_score=answer if answer != "N" else -1)
 
 		user_input.save()
 		
@@ -225,7 +225,7 @@ def store_pictures_round(sem_rel, scores, request):
 
 	# Creates a relation to save in the database, and a UserInput object
 	# store the user answer here in word_score
-	# put 20 for N
+	# put -1 for N
 	for word, score, answer, avg, link in scores:
 		nonempty = True
 		round_score += score
@@ -241,7 +241,7 @@ def store_pictures_round(sem_rel, scores, request):
 	user_stat.save()
 
 
-# Storing data on a round from an unauthenticated player
+# Storing data on a round from an unauthenticated player - already store when we enter scores above
 def anon_store_concreteness_round(sem_rel, scores):
 	round_score = 0
 

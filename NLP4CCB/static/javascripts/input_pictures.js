@@ -75,6 +75,7 @@ $(document).ready(function(){
         }
     };
 
+    // randomly shuffle indices then get them in a for loop
     var nextLink = function() {
         var link = correct_links[Math.floor(Math.random() * correct_links.length)];
         $('#id_form-BASE_WORD_LINK').attr( 'value', link);
