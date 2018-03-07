@@ -58,3 +58,5 @@ code for making such fixtures is under
 ```
 makefixtures.py
 ```
+
+Decompress original_pictures_vocab.txt.zip locally to run the pictures game
