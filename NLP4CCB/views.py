@@ -359,7 +359,7 @@ def pictures_scoring(request):
 				utils.store_pictures_round(sem_rel, scores, request)
 			# Otherwise just store the word data.
 			else:
-				utils.anon_store_concreteness_round(sem_rel, scores)
+				utils.anon_store_pictures_round(sem_rel, scores)
 		return render(request, 'pictures_scoring.html', context)
 	else:
 		return redirect('/models/')

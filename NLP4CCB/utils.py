@@ -260,7 +260,7 @@ def anon_store_pictures_round(sem_rel, scores):
 	# Creates a relation to save in the database
 	# Player is anonymous, so we have no user data to save.
 	# if sem_rel == "concreteness":
-	for word, score, answer, avg in scores:
+	for word, score, answer, avg, link in scores:
 		round_score += score
 		create_relation(sem_rel, word, word)
 
