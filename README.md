@@ -19,6 +19,36 @@ Add a source to the list, using *TCP*, *your IP* and *port 5432 (PostgreSQL)*.
 
 You now can access the dev server database from your local copy! 
 
+Follow the instruction here to get access to the AWS database
+
+https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users_create.html
+
+### Installing database locally
+
+```
+brew install postgres
+initdb -D ~/know-your-nyms/
+pg_ctl start -D ~/know-your-nyms/
+createdb know-your-nyms
+
+createuser --superuser --createdb --createrole --login --pwprompt --encrypted know-your-nyms
+
+# Documentation for createuser command (wrapper around psql #= CREATE USER ... )
+# http://www.postgresql.org/docs/8.3/static/app-createuser.html
+```
+
+Quick-reference for useful Postgres commands:
+
+```
+# Start server:
+pg_ctl start -D ~/know-your-nyms
+
+# Stop server:
+pg_ctl stop -D ~/know-your-nyms
+
+# Start server on system start-up (make sure the plist settings match the settings above):
+ln -sfv /usr/local/opt/postgresql/*.plist ~/Library/LaunchAgents
+```
 
 ### Running locally
 
