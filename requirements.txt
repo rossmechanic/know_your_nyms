@@ -1,6 +1,6 @@
 appdirs==1.4.3
 click==6.7
-Django==1.11
+Django==1.11.20
 first==2.0.1
 nltk==3.2.2
 packaging==16.8
