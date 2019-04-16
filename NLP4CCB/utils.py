@@ -7,7 +7,7 @@ import sets
 from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 
-from NLP4CCB_Django_App import settings
+import settings
 from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat
 
 stemmer = PorterStemmer()

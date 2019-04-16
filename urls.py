@@ -13,21 +13,18 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.conf.urls import include, url
 from django.contrib import admin
-from NLP4CCB.views import index
-from NLP4CCB.views import leaderboard
-from NLP4CCB.views import confirmation
-from NLP4CCB.views import confirmation_scoring
-import views
+
+from NLP4CCB.views import confirmation, confirmation_scoring, index, leaderboard, signin, signout, signup
 
 urlpatterns = [
     url(r'^$', index),
     url(r'^models/', include('NLP4CCB.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^signin/', views.signin),
-    url(r'^signout/', views.signout),
-    url(r'^signup/', views.signup),
+    url(r'^signin/', signin),
+    url(r'^signout/', signout),
+    url(r'^signup/', signup),
     url(r'^leaderboard/', leaderboard),
     url(r'^confirmation/', confirmation),
     url(r'^conf_scoring', confirmation_scoring)

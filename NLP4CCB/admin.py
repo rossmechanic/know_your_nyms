@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import UserStat, Relation, UserInput, Challenge, Pass, CompletedStat, WordStat, ConfirmationStat
+from .models import UserStat, Relation, UserInput, Challenge, Pass, CompletedStat, WordStat, ConfirmationStat
 
 
 def accept_challenge(modeladmin, request, queryset):

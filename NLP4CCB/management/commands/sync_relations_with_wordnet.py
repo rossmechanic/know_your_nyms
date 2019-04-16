@@ -1,5 +1,5 @@
-from django.core.management.base import BaseCommand, CommandError
-from NLP4CCB_Django_App import settings
+from django.core.management.base import BaseCommand
+import settings
 import os
 import json
 from NLP4CCB.models import Relation
