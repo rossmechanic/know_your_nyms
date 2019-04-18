@@ -16,16 +16,24 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
-from NLP4CCB.views import confirmation, confirmation_scoring, index, leaderboard, signin, signout, signup
+from NLP4CCB.views import (
+    confirmation,
+    confirmation_scoring,
+    index,
+    leaderboard,
+    signin,
+    signout,
+    signup,
+)
 
 urlpatterns = [
-    url(r'^$', index),
-    url(r'^models/', include('NLP4CCB.urls')),
-    url(r'^admin/', admin.site.urls),
-    url(r'^signin/', signin),
-    url(r'^signout/', signout),
-    url(r'^signup/', signup),
-    url(r'^leaderboard/', leaderboard),
-    url(r'^confirmation/', confirmation),
-    url(r'^conf_scoring', confirmation_scoring)
+    url(r"^$", index),
+    url(r"^models/", include("NLP4CCB.urls")),
+    url(r"^admin/", admin.site.urls),
+    url(r"^signin/", signin),
+    url(r"^signout/", signout),
+    url(r"^signup/", signup),
+    url(r"^leaderboard/", leaderboard),
+    url(r"^confirmation/", confirmation),
+    url(r"^conf_scoring", confirmation_scoring),
 ]

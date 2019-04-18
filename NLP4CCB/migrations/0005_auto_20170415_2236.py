@@ -7,29 +7,25 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('NLP4CCB', '0004_auto_20170330_0255'),
-    ]
+    dependencies = [("NLP4CCB", "0004_auto_20170330_0255")]
 
     operations = [
         migrations.RenameField(
-            model_name='userstat',
-            old_name='index',
-            new_name='meronyms_index',
+            model_name="userstat", old_name="index", new_name="meronyms_index"
         ),
         migrations.AddField(
-            model_name='userstat',
-            name='antonyms_index',
+            model_name="userstat",
+            name="antonyms_index",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='userstat',
-            name='hyponyms_index',
+            model_name="userstat",
+            name="hyponyms_index",
             field=models.IntegerField(default=0),
         ),
         migrations.AddField(
-            model_name='userstat',
-            name='synonyms_index',
+            model_name="userstat",
+            name="synonyms_index",
             field=models.IntegerField(default=0),
         ),
     ]

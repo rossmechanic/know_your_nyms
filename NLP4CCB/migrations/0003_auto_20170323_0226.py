@@ -7,13 +7,6 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('NLP4CCB', '0002_auto_20170323_0213'),
-    ]
+    dependencies = [("NLP4CCB", "0002_auto_20170323_0213")]
 
-    operations = [
-        migrations.RenameModel(
-            old_name='UserStats',
-            new_name='UserStat',
-        ),
-    ]
+    operations = [migrations.RenameModel(old_name="UserStats", new_name="UserStat")]
