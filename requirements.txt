@@ -3,10 +3,13 @@ click==6.7
 Django==1.11.20
 first==2.0.1
 nltk==3.2.2
+numpy==1.16.2
 packaging==16.8
+pandas==0.24.2
 passgen==1.0.1
 pip-tools==1.8.2
 psycopg2==2.7.1
 pyparsing==2.2.0
+python-dateutil==2.8.0
 pytz==2019.1
 six==1.10.0
