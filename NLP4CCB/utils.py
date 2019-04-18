@@ -2,13 +2,12 @@ import json
 import math
 import os
 import random
-import sets
 
 from django.core.exceptions import ObjectDoesNotExist
 from nltk.stem.porter import PorterStemmer
 
 import settings
-from models import UserInput, UserStat, Relation, Pass, CompletedStat, WordStat, ConfirmationStat
+from .models import CompletedStat, ConfirmationStat, Pass, Relation, UserInput, UserStat, WordStat
 
 stemmer = PorterStemmer()
 
@@ -26,7 +25,7 @@ def score_words(base_word, input_words, sem_rel, relations_percentages):
 	words_to_total_scores = {word: words_to_esp_scores[word] + words_to_wn_bonuses[word] + words_to_ch_bonuses[word]
 							 for word in input_words}
 
-	input_words_scores = words_to_total_scores.items()
+	input_words_scores = list(words_to_total_scores.items())
 	input_words_scores.sort(key=lambda x: x[1], reverse=True)
 	input_words = [a for (a, b) in input_words_scores]
 	return [(word, {'esp_score': words_to_esp_scores[word],
@@ -77,7 +76,7 @@ def word_net(base_word, input_words, sem_rel):
 	base_word_pairs = [stemmer.stem(str(word).lower()) for word in base_word_pairs]
 	# Don't return the stemmed word
 	words_to_word_net = {word: True if stemmer.stem(word) in base_word_pairs else False for word in input_words}
-	words_to_wn_bonuses = {k: word_net_bonus if v else 0.0 for k, v in words_to_word_net.items()}
+	words_to_wn_bonuses = {k: word_net_bonus if v else 0.0 for k, v in list(words_to_word_net.items())}
 	return words_to_wn_bonuses
 
 
@@ -120,7 +119,7 @@ def get_relations_percentages(sem_rel, base_word):
 
 def get_esp_scores(input_words, relations_percentages):
 	# Maps word stems to their words in the relations_percentages
-	stem_dict = {stemmer.stem(word): word for word in relations_percentages.keys()}
+	stem_dict = {stemmer.stem(word): word for word in list(relations_percentages.keys())}
 	# For each input_word, if its stem appears in the stems of the words seen, map the word
 	# to the percentage of the word already seen with that stem
 	return {
@@ -130,12 +129,12 @@ def get_esp_scores(input_words, relations_percentages):
 
 # Average score per round over all players. Each weighted equally, regardless of rounds played.
 def get_overall_player_avg():
-	lst = list(map(lambda x: div(x.total_score, x.rounds_played), list(UserStat.objects.all())))
+	lst = list([div(x.total_score, x.rounds_played) for x in list(UserStat.objects.all())])
 	return div(sum(lst), float(len(lst)))
 
 
 def get_overall_player_std_dev(avg):
-	lst = list(map(lambda x: div(x.total_score, x.rounds_played), list(UserStat.objects.all())))
+	lst = list([div(x.total_score, x.rounds_played) for x in list(UserStat.objects.all())])
 	sqsum = 0.0
 	for a in lst:
 		sqsum += (a - avg) ** 2.0
@@ -374,7 +373,7 @@ def div(a, b):
 
 
 def random_select_unplayed_word(vocab_size, sem_rel):
-	played = sets.Set()
+	played = set()
 	# Randomly selects a word and retries if this word has been played by someone already.
 	# Caps at 20 tries. Selects an unplayed word with high probability.
 
@@ -399,7 +398,7 @@ def get_det(base_word, determiners):
 def dynamic_select_word(user, vocab_size, sem_rel, ind):
 	# We create a set of indices of words that this player could play, and narrow it down as we go
 	# Initially all words in this relationship are prospective choices
-	word_choices = sets.Set()
+	word_choices = set()
 	for stat in WordStat.objects.filter(sem_rel=sem_rel).distinct('word'):
 		word_choices.add(stat.index)
 
@@ -427,11 +426,10 @@ def dynamic_select_word(user, vocab_size, sem_rel, ind):
 
 		# Remove questions too far from the goal score, calculated above
 		# Also remove questions that are retired.
-		unviable = list(filter(lambda x: (abs(
-			x.avg_score - goal_question_avg) > .3 * question_std_dev and x.rounds_played >= 5) or x.retired,
-							   list(WordStat.objects.filter(sem_rel=sem_rel).distinct('word'))))
+		unviable = list([x for x in list(WordStat.objects.filter(sem_rel=sem_rel).distinct('word')) if (abs(
+			x.avg_score - goal_question_avg) > .3 * question_std_dev and x.rounds_played >= 5) or x.retired])
 
-		unviable_ind = list(map(lambda x: x.index, unviable))
+		unviable_ind = list([x.index for x in unviable])
 		for i in unviable_ind:
 			if i in word_choices:
 				word_choices.remove(i)

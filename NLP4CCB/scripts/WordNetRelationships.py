@@ -16,7 +16,7 @@ def get_synonyms(n=10000000):
         for original_lemma in original_lemmas:
             all_synonyms[original_lemma] = all_synonyms[original_lemma].union(set(original_lemmas))
     # Make the sets lists, so it can be turned into JSON
-    all_synonyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in all_synonyms.items() if list(v)}
+    all_synonyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in list(all_synonyms.items()) if list(v)}
     return all_synonyms
 
 def get_antonyms(n=10000000):
@@ -31,7 +31,7 @@ def get_antonyms(n=10000000):
             antonym_words = [str(lemma.name()).replace('_',' ') for lemma in antonym_lemmas]
             all_antonyms[original_word] = all_antonyms[original_word].union(set(antonym_words))
     # Make the sets lists, so it can be turned into JSON
-    all_antonyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in all_antonyms.items() if list(v)}
+    all_antonyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in list(all_antonyms.items()) if list(v)}
     return all_antonyms
     
 # Returns a dictionary that maps all words to a list of their meronyms.
@@ -55,7 +55,7 @@ def get_meronyms(n=10000000, holonyms=False):
                     # Add them to the meronym set for the lemma
                     all_meronyms[original_lemma] = all_meronyms[original_lemma].union(set(meronym_lemmas))   
     # Make the sets lists, so it can be turned into JSON
-    all_meronyms = {str(k).lower():list([str(m).lower() for m in v]) for k,v in all_meronyms.items() if list(v)}
+    all_meronyms = {str(k).lower():list([str(m).lower() for m in v]) for k,v in list(all_meronyms.items()) if list(v)}
     return all_meronyms
 
 def get_hyponyms(n=10000000, hypernyms=False):
@@ -78,7 +78,7 @@ def get_hyponyms(n=10000000, hypernyms=False):
                     # Add them to the meronym set for the lemma
                     all_hyponyms[original_lemma] = all_hyponyms[original_lemma].union(set(hyponym_lemmas))
     # Make the sets lists, so it can be turned into JSON
-    all_hyponyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in all_hyponyms.items() if list(v)}
+    all_hyponyms = {str(k).lower(): list([str(m).lower() for m in v]) for k, v in list(all_hyponyms.items()) if list(v)}
     return all_hyponyms
 
 # Returns only the pairs that appear in WordNet (that are confirmed meronyms)  
