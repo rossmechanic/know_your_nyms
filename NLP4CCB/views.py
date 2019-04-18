@@ -8,8 +8,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.forms import formset_factory
 from django.shortcuts import *
 
-from forms import UserForm
 from . import utils
+from .forms import UserForm
 from .models import UserInput, UserStat, WordRelationshipForm, WordStat
 
 # Read in the vocabulary to traverse
@@ -137,7 +137,7 @@ def models(request):
             request.session['relationships'] = new_rels
     rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms',
                                                                                              'hyponyms', 'synonyms']
-    sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
+    sem_rel = random.choice(list([str(x) for x in rel_options]))
 
     # The question and list of base words are specific to the selected relationship type
     question = rel_q_map[sem_rel]
@@ -233,7 +233,7 @@ def confirmation(request):
     # just choose randomly for all
     rel_options = request.session['relationships'] if request.session['relationships'] else ['meronyms', 'antonyms',
                                                                                              'hyponyms', 'synonyms']
-    sem_rel = random.choice(list(map(lambda x: str(x), rel_options)))
+    sem_rel = random.choice(list([str(x) for x in rel_options]))
 
     vocab = vocabs[sem_rel]
     # Select a base word to play the word game on. Picks from words with at least 5 relations created by the normal word game.
@@ -295,13 +295,13 @@ def leaderboard(request):
     total_score_set = UserStat.objects.order_by('-total_score')
     word_score_set = WordStat.objects.order_by('avg_score')
     # Only words played 10+ times are allowed on the leaderboard
-    word_score_list = list(filter(lambda x: x.rounds_played >= 10, word_score_set))
+    word_score_list = list([x for x in word_score_set if x.rounds_played >= 10])
 
     average_score_list = list(UserStat.objects.all())
     # Only players who have played 10+ rounds are allowed on the leaderboard
     # Furthermore players who have not played in a month are not ranked for avg score.
-    average_score_list = filter(lambda x: x.rounds_played >= 10, average_score_list)
-    average_score_list = filter(lambda x: abs((date.today() - x.last_login).days) <= 30, average_score_list)
+    average_score_list = [x for x in average_score_list if x.rounds_played >= 10]
+    average_score_list = [x for x in average_score_list if abs((date.today() - x.last_login).days) <= 30]
     average_score_list.sort(key=lambda x: utils.div(x.total_score, x.rounds_played), reverse=True)
 
     # If the user is authenticated, gather data on them in addition to just top players
