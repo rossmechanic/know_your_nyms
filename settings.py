@@ -30,7 +30,8 @@ else:
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'www.know-your-nyms.com',
                  'know-your-nyms-dev.us-west-2.elasticbeanstalk.com',
-                 'know-your-nyms-prod.us-west-2.elasticbeanstalk.com']
+                 'know-your-nyms-prod.us-west-2.elasticbeanstalk.com',
+                 'know-your-nyms-dev-python3.ivjpwhfetd.us-west-2.elasticbeanstalk.com']
 
 # Application definition
 
