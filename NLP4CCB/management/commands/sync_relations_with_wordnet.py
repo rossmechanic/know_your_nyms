@@ -9,7 +9,9 @@ class Command(BaseCommand):
     help = "Syncs current relations in the database such that the in_wordnet column is accurate"
 
     def handle(self, *args, **options):
-        json_path = os.path.join(settings.STATIC_ROOT, "data/wordnet_meronyms.json")
+        json_path = os.path.join(
+            settings.BASE_DIR, "NLP4CCB/static/wordnet_meronyms.json"
+        )
         wordnet = json.load(open(json_path, "r"))
 
         for relation in Relation.objects.all():

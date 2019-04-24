@@ -1,83 +1,31 @@
+import json
 import os
 import random
-import re
 from datetime import date
 
-from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.forms import formset_factory
 from django.shortcuts import *
 
+import settings
 from . import utils
 from .forms import UserForm
 from .models import UserInput, UserStat, WordRelationshipForm, WordStat
 
-# Read in the vocabulary to traverse
-relationships = ["synonyms", "antonyms", "hyponyms", "meronyms"]
-vocabs = {}
-for rel in relationships:
-    vocab_file = "original_{rel}_vocab.txt".format(rel=rel)
-    with open(os.path.join(settings.STATIC_ROOT, vocab_file)) as f:
-        lines = f.readlines()
-    vocabs[rel] = [word.lower().strip() for word in lines]
+with open(
+    os.path.join(settings.BASE_DIR, "NLP4CCB/static/rel_to_vocab_map.json"), "r"
+) as f:
+    vocabs = json.load(f)
 
-# Set up a map from words to their determiners, a/an/the/etc
-determiners = dict()
-pat = re.compile(r"(?P<word>[0-9a-zA-Z ]+)=(?P<det>\S*)$")
-det_rels = ["meronyms", "hyponyms"]
-for rel in det_rels:
-    det_file = rel + "_determiners.txt"
-    for line in open(os.path.join(settings.STATIC_ROOT, det_file)):
-        res = pat.match(line)
-        if res:
-            p = res.group("det")
-            word = res.group("word")
-            if p == "":
-                determiners[word] = p
-            else:
-                determiners[word] = p + " "
+with open(
+    os.path.join(settings.BASE_DIR, "NLP4CCB/static/determiner_map.json"), "r"
+) as f:
+    determiners = json.load(f)
 
-# Map from words to their index.
-ind = dict()
-for rel in relationships:
-    for i in range(0, len(vocabs[rel])):
-        ind[vocabs[rel][i], rel] = i
-
-# Map from base words to the top 100 model predictions and their scores
-top_words = dict()
-pat = re.compile(
-    r"(?P<base_word>[0-9a-zA-Z ]+)\t(?P<sem_rel>(meronyms|hyponyms|synonyms|antonyms))\t(?P<word>[0-9a-zA-Z ]+)\t(?P<score>0.[0-9]+)$"
-)
-for rel in relationships:
-    pred_file = "original_{rel}_vocab.txt".format(rel=rel)
-    for line in open(os.path.join(settings.STATIC_ROOT, pred_file)):
-        res = pat.match(line)
-        if res:
-            sem_rel = res.group("sem_rel")
-            base_word = res.group("base_word")
-            if (sem_rel, base_word) not in top_words:
-                top_words[(sem_rel, base_word)] = list()
-            top_words[(sem_rel, base_word)].append(
-                (res.group("word"), float(res.group("score")))
-            )
-
-# Find the top 100 words predicted by the model for each base word in the concreteness data set.
-conc_rating = dict()
-conc_file = "concreteness_ratings.txt"
-ignorefirst = True
-for line in open(os.path.join(settings.STATIC_ROOT, conc_file)):
-    if not ignorefirst:
-        words = line.split("\t")
-        base_word = words[0]
-        conc_mean = float(words[2])
-        percent_known = float(words[6])
-        in_base_words = False
-        for rel in relationships:
-            if (base_word, rel) in ind and not in_base_words:
-                conc_rating[base_word] = (conc_mean, percent_known)
-                in_base_words = True
-    else:
-        ignorefirst = False
+with open(
+    os.path.join(settings.BASE_DIR, "NLP4CCB/static/concreteness_rating.json"), "r"
+) as f:
+    conc_rating = json.load(f)
 
 # Dictionary for sem_rel to question
 rel_q_map = {
@@ -269,7 +217,7 @@ def confirmation(request):
     phrase = utils.add_det(phrase, base_word, sem_rel, determiners)
 
     # Find words to compare against base word. Mixture of relations and top words from the model.
-    word_set = utils.find_word_pairs(base_word, sem_rel, top_words, vocabs)
+    word_set = utils.find_word_pairs(base_word, sem_rel, {}, vocabs)
     context = {
         "title": "Know Your Nyms?",
         "formset": word_relationship_formset,

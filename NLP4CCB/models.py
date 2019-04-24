@@ -5,9 +5,6 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-# Create your models here.
-
-
 class WordRelationshipForm(forms.Form):
     word = forms.CharField(max_length=100, widget=forms.TextInput())
     submittime = forms.IntegerField()

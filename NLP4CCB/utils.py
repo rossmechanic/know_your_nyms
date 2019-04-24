@@ -101,7 +101,8 @@ def clean_input_words(input_words):
 def word_net(base_word, input_words, sem_rel):
     json_f = "wordnet_" + sem_rel + ".json"
     # Now will get json data of known meronym pairs.
-    known_pairs = json.load(open(os.path.join(settings.STATIC_ROOT, json_f)))
+    with open(os.path.join(settings.BASE_DIR, "NLP4CCB/static", json_f), "r") as f:
+        known_pairs = json.load(f)
     # Accesses word pairs in WordNet. If none exist, gives an empty list.
     base_word_pairs = known_pairs.get(base_word, [])
     base_word_pairs = [stemmer.stem(str(word).lower()) for word in base_word_pairs]
